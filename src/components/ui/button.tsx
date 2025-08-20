@@ -5,19 +5,23 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 transition-smooth",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft hover:shadow-elegant rounded-lg",
+        hero: "gradient-primary text-primary-foreground hover:shadow-glow transform hover:scale-[1.02] rounded-xl font-medium",
+        elegant: "bg-accent text-accent-foreground hover:bg-accent/90 shadow-soft hover:shadow-elegant rounded-lg",
+        soft: "bg-primary-soft text-primary hover:bg-primary-soft/80 rounded-lg",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-soft rounded-lg",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-border bg-background hover:bg-secondary/50 hover:text-secondary-foreground rounded-lg",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg",
+        ghost: "hover:bg-secondary/50 hover:text-secondary-foreground rounded-lg",
         link: "text-primary underline-offset-4 hover:underline",
+        whatsapp: "bg-green-500 text-white hover:bg-green-600 shadow-soft hover:shadow-elegant rounded-lg",
       },
       size: {
         default: "h-10 px-4 py-2",
