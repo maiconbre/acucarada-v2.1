@@ -1,25 +1,6 @@
-import React, { useState } from 'react';
-import {
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, LineChart as LineChartIcon, PieChart as PieChartIcon, TrendingUp } from 'lucide-react';
+import { TrendingUp, Eye, Heart, MousePointer, Users, Package } from 'lucide-react';
 
 interface ProductAnalytics {
   id: string;
@@ -48,392 +29,152 @@ interface AnalyticsChartProps {
   overallStats: OverallStats | null;
 }
 
-type ChartType = 'bar' | 'line' | 'area' | 'pie';
-type MetricType = 'views' | 'likes' | 'clicks' | 'all';
-
-const COLORS = {
-  primary: '#8B5CF6',
-  secondary: '#06B6D4',
-  accent: '#F59E0B',
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-};
-
-const CHART_COLORS = [COLORS.primary, COLORS.secondary, COLORS.accent, COLORS.success, COLORS.warning, COLORS.error];
-
 const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ analytics, overallStats }) => {
-  const [chartType, setChartType] = useState<ChartType>('bar');
-  const [selectedMetric, setSelectedMetric] = useState<MetricType>('views');
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
-  // Prepare data for charts
-  const prepareChartData = () => {
-    if (!analytics.length) return [];
-
-    // Get top 10 products for better visualization
-    const topProducts = analytics.slice(0, 10);
-
-    return topProducts.map((item, index) => ({
-      name: item.product_name.length > 15 
-        ? `${item.product_name.substring(0, 15)}...` 
-        : item.product_name,
-      fullName: item.product_name,
-      category: item.product_category,
-      views: item.total_views,
-      likes: item.total_likes,
-      clicks: item.total_clicks,
-      unique: item.unique_viewers,
-      color: CHART_COLORS[index % CHART_COLORS.length],
-    }));
-  };
-
-  // Prepare pie chart data
-  const preparePieData = () => {
-    if (!overallStats) return [];
-
-    return [
-      { name: 'Visualizações', value: overallStats.total_views, color: COLORS.primary },
-      { name: 'Curtidas', value: overallStats.total_likes, color: COLORS.secondary },
-      { name: 'Cliques', value: overallStats.total_clicks, color: COLORS.accent },
-    ];
-  };
-
-  // Prepare category data
-  const prepareCategoryData = () => {
-    const categoryStats = analytics.reduce((acc, item) => {
-      const category = item.product_category;
-      if (!acc[category]) {
-        acc[category] = {
-          name: category,
-          views: 0,
-          likes: 0,
-          clicks: 0,
-          products: 0,
-        };
-      }
-      acc[category].views += item.total_views;
-      acc[category].likes += item.total_likes;
-      acc[category].clicks += item.total_clicks;
-      acc[category].products += 1;
-      return acc;
-    }, {} as Record<string, any>);
-
-    return Object.values(categoryStats);
-  };
-
-  const chartData = prepareChartData();
-  const pieData = preparePieData();
-  const categoryData = prepareCategoryData();
-
-  // Handle smooth transitions
-  const handleChartTypeChange = (newType: ChartType) => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setChartType(newType);
-      setIsTransitioning(false);
-    }, 150);
-  };
-
-  const handleMetricChange = (newMetric: MetricType) => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setSelectedMetric(newMetric);
-      setIsTransitioning(false);
-    }, 150);
-  };
-
-  const getMetricKey = () => {
-    switch (selectedMetric) {
-      case 'views': return 'views';
-      case 'likes': return 'likes';
-      case 'clicks': return 'clicks';
-      default: return 'views';
-    }
-  };
-
-  const getMetricColor = () => {
-    switch (selectedMetric) {
-      case 'views': return COLORS.primary;
-      case 'likes': return COLORS.secondary;
-      case 'clicks': return COLORS.accent;
-      default: return COLORS.primary;
-    }
-  };
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-900">{data.fullName || label}</p>
-          <p className="text-sm text-gray-600 mb-2">{data.category}</p>
-          <div className="space-y-1">
-            <p className="text-sm">
-              <span className="text-purple-600">Visualizações:</span> {data.views}
-            </p>
-            <p className="text-sm">
-              <span className="text-cyan-600">Curtidas:</span> {data.likes}
-            </p>
-            <p className="text-sm">
-              <span className="text-amber-600">Cliques:</span> {data.clicks}
-            </p>
+  if (!overallStats) {
+    return (
+      <Card className="transition-all duration-300 hover:shadow-lg border-0 shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Métricas de Analytics
+          </CardTitle>
+          <CardDescription>
+            Carregando dados de analytics...
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
-        </div>
-      );
-    }
-    return null;
-  };
+        </CardContent>
+      </Card>
+    );
+  }
 
-  const renderChart = () => {
-    if (!chartData.length) {
-      return (
-        <div className="flex items-center justify-center h-64 text-gray-500">
-          <div className="text-center">
-            <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhum dado disponível</p>
-          </div>
-        </div>
-      );
-    }
+  const topProducts = analytics
+    .sort((a, b) => b.total_views - a.total_views)
+    .slice(0, 5);
 
-    const dataToUse = chartType === 'pie' ? categoryData : chartData;
-    const metricKey = getMetricKey();
-    const metricColor = getMetricColor();
-
-    switch (chartType) {
-      case 'bar':
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={dataToUse} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="name" 
-                angle={-45}
-                textAnchor="end"
-                height={80}
-                fontSize={12}
-                stroke="#666"
-              />
-              <YAxis stroke="#666" fontSize={12} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              {selectedMetric === 'all' ? (
-                <>
-                  <Bar dataKey="views" fill={COLORS.primary} name="Visualizações" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="likes" fill={COLORS.secondary} name="Curtidas" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="clicks" fill={COLORS.accent} name="Cliques" radius={[4, 4, 0, 0]} />
-                </>
-              ) : (
-                <Bar 
-                  dataKey={metricKey} 
-                  fill={metricColor} 
-                  name={selectedMetric === 'views' ? 'Visualizações' : selectedMetric === 'likes' ? 'Curtidas' : 'Cliques'}
-                  radius={[4, 4, 0, 0]}
-                />
-              )}
-            </BarChart>
-          </ResponsiveContainer>
-        );
-
-      case 'line':
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={dataToUse} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="name" 
-                angle={-45}
-                textAnchor="end"
-                height={80}
-                fontSize={12}
-                stroke="#666"
-              />
-              <YAxis stroke="#666" fontSize={12} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              {selectedMetric === 'all' ? (
-                <>
-                  <Line type="monotone" dataKey="views" stroke={COLORS.primary} strokeWidth={3} name="Visualizações" />
-                  <Line type="monotone" dataKey="likes" stroke={COLORS.secondary} strokeWidth={3} name="Curtidas" />
-                  <Line type="monotone" dataKey="clicks" stroke={COLORS.accent} strokeWidth={3} name="Cliques" />
-                </>
-              ) : (
-                <Line 
-                  type="monotone" 
-                  dataKey={metricKey} 
-                  stroke={metricColor} 
-                  strokeWidth={3}
-                  name={selectedMetric === 'views' ? 'Visualizações' : selectedMetric === 'likes' ? 'Curtidas' : 'Cliques'}
-                />
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        );
-
-      case 'area':
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <AreaChart data={dataToUse} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="name" 
-                angle={-45}
-                textAnchor="end"
-                height={80}
-                fontSize={12}
-                stroke="#666"
-              />
-              <YAxis stroke="#666" fontSize={12} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              {selectedMetric === 'all' ? (
-                <>
-                  <Area type="monotone" dataKey="views" stackId="1" stroke={COLORS.primary} fill={COLORS.primary} fillOpacity={0.6} name="Visualizações" />
-                  <Area type="monotone" dataKey="likes" stackId="1" stroke={COLORS.secondary} fill={COLORS.secondary} fillOpacity={0.6} name="Curtidas" />
-                  <Area type="monotone" dataKey="clicks" stackId="1" stroke={COLORS.accent} fill={COLORS.accent} fillOpacity={0.6} name="Cliques" />
-                </>
-              ) : (
-                <Area 
-                  type="monotone" 
-                  dataKey={metricKey} 
-                  stroke={metricColor} 
-                  fill={metricColor}
-                  fillOpacity={0.6}
-                  name={selectedMetric === 'views' ? 'Visualizações' : selectedMetric === 'likes' ? 'Curtidas' : 'Cliques'}
-                />
-              )}
-            </AreaChart>
-          </ResponsiveContainer>
-        );
-
-      case 'pie':
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                outerRadius={120}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip 
-                formatter={(value: number, name: string) => [
-                  value.toLocaleString(), 
-                  name
-                ]}
-              />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        );
-
-      default:
-        return null;
-    }
-  };
+  const mostEngagedProducts = analytics
+    .sort((a, b) => (b.total_likes + b.total_clicks) - (a.total_likes + a.total_clicks))
+    .slice(0, 3);
 
   return (
-    <Card className="w-full transition-all duration-300 hover:shadow-lg border-0 shadow-md">
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
+    <div className="space-y-6">
+      {/* Grid Principal - Top 5 Produtos e Maior Engajamento lado a lado */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Produtos Mais Visualizados */}
+        <Card className="transition-all duration-300 hover:shadow-lg border-0 shadow-md">
+          <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Análise Visual de Dados
+              <TrendingUp className="h-5 w-5 text-blue-500" />
+              Top 5 Produtos Mais Visualizados
             </CardTitle>
             <CardDescription>
-              Visualização interativa das métricas de engajamento dos produtos
+              Produtos com maior número de visualizações
             </CardDescription>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Select value={chartType} onValueChange={handleChartTypeChange}>
-              <SelectTrigger className="w-full sm:w-40 transition-all duration-200 hover:border-primary">
-                <SelectValue placeholder="Tipo de gráfico" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bar" className="transition-colors duration-150 hover:bg-primary/10">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" />
-                    Barras
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topProducts.map((product, index) => (
+                <div key={product.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-semibold text-sm">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{product.product_name}</p>
+                      <p className="text-xs text-muted-foreground">{product.product_category}</p>
+                    </div>
                   </div>
-                </SelectItem>
-                <SelectItem value="line" className="transition-colors duration-150 hover:bg-primary/10">
-                  <div className="flex items-center gap-2">
-                    <LineChartIcon className="h-4 w-4" />
-                    Linha
+                  <div className="text-right">
+                    <p className="font-semibold text-blue-600">{product.total_views.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">visualizações</p>
                   </div>
-                </SelectItem>
-                <SelectItem value="area" className="transition-colors duration-150 hover:bg-primary/10">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4" />
-                    Área
-                  </div>
-                </SelectItem>
-                <SelectItem value="pie" className="transition-colors duration-150 hover:bg-primary/10">
-                  <div className="flex items-center gap-2">
-                    <PieChartIcon className="h-4 w-4" />
-                    Pizza
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            
-            {chartType !== 'pie' && (
-              <Select value={selectedMetric} onValueChange={handleMetricChange}>
-                <SelectTrigger className="w-full sm:w-40 transition-all duration-200 hover:border-primary">
-                  <SelectValue placeholder="Métrica" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="views" className="transition-colors duration-150 hover:bg-primary/10">Visualizações</SelectItem>
-                  <SelectItem value="likes" className="transition-colors duration-150 hover:bg-primary/10">Curtidas</SelectItem>
-                  <SelectItem value="clicks" className="transition-colors duration-150 hover:bg-primary/10">Cliques</SelectItem>
-                  <SelectItem value="all" className="transition-colors duration-150 hover:bg-primary/10">Todas</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        <div className={`w-full transition-all duration-300 ${isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
-          {renderChart()}
-        </div>
-        
-        {chartData.length > 0 && (
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg transition-all duration-300 hover:bg-gray-100 hover:shadow-sm">
-            <h4 className="font-semibold text-sm text-gray-700 mb-2">Insights:</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-gray-600">
-              <div className="transition-all duration-200 hover:text-gray-800">
-                <span className="font-medium">Produto mais visualizado:</span>
-                <br />
-                <span className="text-primary font-medium">{overallStats?.most_viewed_product || 'N/A'}</span>
-              </div>
-              <div className="transition-all duration-200 hover:text-gray-800">
-                <span className="font-medium">Produto mais curtido:</span>
-                <br />
-                <span className="text-secondary font-medium">{overallStats?.most_liked_product || 'N/A'}</span>
-              </div>
-              <div className="transition-all duration-200 hover:text-gray-800">
-                <span className="font-medium">Total de produtos:</span>
-                <br />
-                <span className="text-accent font-medium">{overallStats?.total_products || 0} produtos analisados</span>
-              </div>
+                </div>
+              ))}
             </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+
+        {/* Produtos com Maior Engajamento */}
+        <Card className="transition-all duration-300 hover:shadow-lg border-0 shadow-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Heart className="h-5 w-5 text-red-500" />
+              Produtos com Maior Engajamento
+            </CardTitle>
+            <CardDescription>
+              Produtos com mais curtidas e cliques combinados
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {mostEngagedProducts.map((product, index) => {
+                const totalEngagement = product.total_likes + product.total_clicks;
+                return (
+                  <div key={product.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-600 font-semibold text-sm">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{product.product_name}</p>
+                        <p className="text-xs text-muted-foreground">{product.product_category}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-red-600">{totalEngagement.toLocaleString()}</p>
+                      <div className="flex gap-2 text-xs text-muted-foreground">
+                        <span>{product.total_likes} ❤️</span>
+                        <span>{product.total_clicks} 👆</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Insights Rápidos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="transition-all duration-300 hover:shadow-lg border-0 shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Package className="h-5 w-5 text-green-500" />
+              Produto Mais Curtido
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xl font-semibold text-green-600">
+              {overallStats.most_liked_product || 'N/A'}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Produto com maior número de curtidas
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="transition-all duration-300 hover:shadow-lg border-0 shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-500" />
+              Produto Mais Visto
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xl font-semibold text-blue-600">
+              {overallStats.most_viewed_product || 'N/A'}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Produto com maior número de visualizações
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

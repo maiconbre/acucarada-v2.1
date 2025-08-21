@@ -5,12 +5,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DatePickerWithRange } from '@/components/ui/date-picker';
-import { Heart, Eye, MousePointer, TrendingUp, Users, Activity } from 'lucide-react';
+import { Heart, Eye, MousePointer, Users, Activity, RefreshCw } from 'lucide-react';
 import AnalyticsChart from './AnalyticsChart';
 import { useToast } from '@/hooks/use-toast';
-import { DateRange } from 'react-day-picker';
-import { addDays, format } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface ProductAnalytics {
@@ -48,10 +46,6 @@ const AnalyticsPanel = () => {
   const [clickStats, setClickStats] = useState<ClickTypeStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'likes' | 'views' | 'clicks'>('views');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: addDays(new Date(), -30),
-    to: new Date(),
-  });
 
   useEffect(() => {
     fetchAnalytics();
@@ -128,7 +122,7 @@ const AnalyticsPanel = () => {
       viewsSubscription.unsubscribe();
       clicksSubscription.unsubscribe();
     };
-  }, [sortBy, dateRange]);
+  }, [sortBy]);
 
   const fetchAnalytics = async () => {
     try {
@@ -219,9 +213,7 @@ const AnalyticsPanel = () => {
     try {
       const { data: clickData, error: clickError } = await supabase
         .from('product_clicks')
-        .select('click_type')
-        .gte('created_at', dateRange?.from?.toISOString())
-        .lte('created_at', dateRange?.to?.toISOString());
+        .select('click_type');
 
       if (clickError) throw clickError;
 
@@ -307,8 +299,8 @@ const AnalyticsPanel = () => {
         </div>
         
         <div className="flex gap-2 w-full sm:w-auto">
-          <Button onClick={fetchAnalytics} variant="outline" size="sm" className="flex-1 sm:flex-none">
-            <Activity className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+          <Button onClick={fetchAnalytics} variant="outline" size="sm" className="flex-1 sm:flex-none transition-all duration-200 hover:scale-105">
+            <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             <span className="text-xs sm:text-sm">Atualizar</span>
           </Button>
         </div>
