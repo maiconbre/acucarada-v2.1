@@ -1,57 +1,59 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "./ProductCard";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image_url: string;
+  category: string;
+  is_featured: boolean;
+}
 
 const ProductGrid = () => {
-  // Sample products - in a real app, this would come from Supabase
-  const products = [
-    {
-      id: 1,
-      name: "Brigadeiro Gourmet",
-      description: "Brigadeiros artesanais com chocolate belga e coberturas especiais",
-      price: "R$ 3,50",
-      image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&h=300&fit=crop",
-      category: "Brigadeiros"
-    },
-    {
-      id: 2,
-      name: "Trufa de Chocolate",
-      description: "Trufas cremosas com recheios variados e chocolate premium",
-      price: "R$ 4,00",
-      image: "https://images.unsplash.com/photo-1547043928-6adb67ae1a4f?w=500&h=300&fit=crop",
-      category: "Trufas"
-    },
-    {
-      id: 3,
-      name: "Bem Casado",
-      description: "Tradicional doce de casamento com massa fofinha e doce de leite",
-      price: "R$ 5,50",
-      image: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=500&h=300&fit=crop",
-      category: "Especiais"
-    },
-    {
-      id: 4,
-      name: "Beijinho Premium",
-      description: "Beijinhos com coco fresco e toque especial da casa",
-      price: "R$ 3,00",
-      image: "https://images.unsplash.com/photo-1605681398213-d901a8e55b78?w=500&h=300&fit=crop",
-      category: "Tradicionais"
-    },
-    {
-      id: 5,
-      name: "Alfajor Artesanal",
-      description: "Delicioso alfajor com doce de leite caseiro e coco",
-      price: "R$ 6,00",
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&h=300&fit=crop",
-      category: "Especiais"
-    },
-    {
-      id: 6,
-      name: "Petit Four",
-      description: "Mini bolos decorados perfeitos para ocasiões especiais",
-      price: "R$ 7,50",
-      image: "https://images.unsplash.com/photo-1535141919479-077b4ac741fc?w=500&h=300&fit=crop",
-      category: "Bolos"
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchFeaturedProducts();
+  }, []);
+
+  const fetchFeaturedProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_active", true)
+        .eq("is_featured", true)
+        .limit(6);
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  if (loading) {
+    return (
+      <section id="produtos" className="py-20 gradient-soft">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Carregando nossos deliciosos doces...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="produtos" className="py-20 gradient-soft">
@@ -73,19 +75,26 @@ const ProductGrid = () => {
             <ProductCard
               key={product.id}
               name={product.name}
-              description={product.description}
-              price={product.price}
-              image={product.image}
+              description={product.description || ""}
+              price={`R$ ${product.price.toFixed(2).replace(".", ",")}`}
+              image={product.image_url || ""}
               category={product.category}
             />
           ))}
         </div>
 
-        {/* CTA Section */}
+        {/* View All Products Button */}
         <div className="text-center mt-16">
-          <p className="text-muted-foreground mb-6">
-            Não encontrou o que procurava? Entre em contato conosco!
-          </p>
+          <Button 
+            variant="hero" 
+            size="lg"
+            onClick={() => navigate("/catalog")}
+            className="mb-8"
+          >
+            Ver Catálogo Completo
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+          
           <div className="inline-flex items-center gap-4 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-6 shadow-soft">
             <span className="text-sm font-medium">📱 Pedidos personalizados via WhatsApp</span>
           </div>

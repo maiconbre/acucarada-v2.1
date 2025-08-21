@@ -21,14 +21,20 @@ const Header = () => {
           </div>
           
           <nav className="hidden md:flex items-center space-x-6">
-            <a href="#produtos" className="text-muted-foreground hover:text-primary transition-smooth">
-              Produtos
+            <a href="/" className="text-muted-foreground hover:text-primary transition-smooth">
+              Início
+            </a>
+            <a href="/catalog" className="text-muted-foreground hover:text-primary transition-smooth">
+              Catálogo
             </a>
             <a href="#sobre" className="text-muted-foreground hover:text-primary transition-smooth">
               Sobre
             </a>
             <a href="#contato" className="text-muted-foreground hover:text-primary transition-smooth">
               Contato
+            </a>
+            <a href="/auth" className="text-xs text-muted-foreground hover:text-primary transition-smooth">
+              Admin
             </a>
           </nav>
 

@@ -18,11 +18,11 @@
     --popover: 24 100% 99%;
     --popover-foreground: 340 15% 15%;
 
-    /* Primary - Elegant rose gold */
-    --primary: 340 75% 55%;
+    /* Primary - Vibrant pink inspired by donut design */
+    --primary: 322 84% 55%;
     --primary-foreground: 24 100% 98%;
-    --primary-glow: 340 85% 70%;
-    --primary-soft: 340 45% 85%;
+    --primary-glow: 322 84% 70%;
+    --primary-soft: 322 45% 85%;
 
     /* Secondary - Warm cream */
     --secondary: 24 50% 92%;
@@ -32,10 +32,10 @@
     --muted: 24 30% 94%;
     --muted-foreground: 340 10% 50%;
 
-    /* Accent - Golden honey */
-    --accent: 35 85% 65%;
-    --accent-foreground: 340 25% 15%;
-    --accent-soft: 35 65% 85%;
+    /* Accent - Vibrant purple from design */
+    --accent: 280 65% 60%;
+    --accent-foreground: 24 100% 98%;
+    --accent-soft: 280 45% 85%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 24 100% 98%;
@@ -49,10 +49,11 @@
     --radius-lg: 16px;
     --radius-xl: 24px;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    /* Gradients - Vibrant like the donut design */
+    --gradient-primary: linear-gradient(135deg, hsl(322 84% 55%), hsl(280 65% 60%));
     --gradient-warm: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%);
-    --gradient-soft: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--secondary)) 100%);
+    --gradient-soft: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(322 84% 55% / 5%) 100%);
+    --gradient-vibrant: linear-gradient(45deg, hsl(322 84% 55%), hsl(280 65% 60%), hsl(200 85% 65%));
     
     /* Shadows */
     --shadow-soft: 0 4px 20px -4px hsl(var(--primary) / 0.1);
