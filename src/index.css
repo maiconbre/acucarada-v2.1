@@ -1,59 +1,60 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Açucarada Design System - Elegant colors for artisanal sweets */
+/* Import Tailwind base styles */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Doce Conecta Digital - Paleta de cores elegante para doces artesanais */
 
 @layer base {
   :root {
-    /* Brand Colors - Warm and inviting palette */
-    --background: 24 100% 98%;
-    --foreground: 340 15% 15%;
+    /* Cores da marca - Paleta acolhedora e elegante */
+    --background: 30 40% 96%; /* Cream suave */
+    --foreground: 210 15% 20%; /* Gray escuro para texto */
 
-    --card: 24 100% 99%;
-    --card-foreground: 340 15% 15%;
+    --card: 30 50% 98%; /* Cream mais claro */
+    --card-foreground: 210 15% 20%;
 
-    --popover: 24 100% 99%;
-    --popover-foreground: 340 15% 15%;
+    --popover: 30 50% 98%;
+    --popover-foreground: 210 15% 20%;
 
-    /* Primary - Vibrant pink inspired by donut design */
-    --primary: 322 84% 55%;
-    --primary-foreground: 24 100% 98%;
-    --primary-glow: 322 84% 70%;
-    --primary-soft: 322 45% 85%;
+    /* Primária - Tons de Rosa para identidade da marca */
+    --primary: 330 70% 60%; /* Rose vibrante */
+    --primary-foreground: 30 40% 96%;
+    --primary-glow: 330 70% 75%; /* Rose mais claro */
+    --primary-soft: 330 40% 88%; /* Rose suave */
 
-    /* Secondary - Warm cream */
-    --secondary: 24 50% 92%;
-    --secondary-foreground: 340 25% 25%;
+    /* Secundária - Tons terrosos (Brown) para elegância */
+    --secondary: 25 35% 75%; /* Brown claro/bege */
+    --secondary-foreground: 25 60% 25%; /* Brown escuro */
 
-    /* Muted tones */
-    --muted: 24 30% 94%;
-    --muted-foreground: 340 10% 50%;
+    /* Tons neutros - Gray para textos e fundos */
+    --muted: 210 10% 92%; /* Gray claro */
+    --muted-foreground: 210 15% 45%; /* Gray médio */
 
-    /* Accent - Vibrant purple from design */
-    --accent: 280 65% 60%;
-    --accent-foreground: 24 100% 98%;
-    --accent-soft: 280 45% 85%;
+    /* Accent - Brown mais escuro para destaques */
+    --accent: 25 50% 50%; /* Brown médio */
+    --accent-foreground: 30 40% 96%;
+    --accent-soft: 25 30% 80%; /* Brown suave */
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 24 100% 98%;
+    --destructive-foreground: 30 40% 96%;
 
-    --border: 24 25% 88%;
-    --input: 24 25% 90%;
-    --ring: 340 75% 55%;
+    --border: 210 15% 85%; /* Gray claro para bordas */
+    --input: 210 10% 88%; /* Gray muito claro para inputs */
+    --ring: 330 70% 60%; /* Rose para focus ring */
 
     /* Design tokens */
     --radius: 12px;
     --radius-lg: 16px;
     --radius-xl: 24px;
 
-    /* Gradients - Vibrant like the donut design */
-    --gradient-primary: linear-gradient(135deg, hsl(322 84% 55%), hsl(280 65% 60%));
-    --gradient-warm: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%);
-    --gradient-soft: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(322 84% 55% / 5%) 100%);
-    --gradient-vibrant: linear-gradient(45deg, hsl(322 84% 55%), hsl(280 65% 60%), hsl(200 85% 65%));
+    /* Gradientes - Elegantes com a nova paleta */
+    --gradient-primary: linear-gradient(135deg, hsl(330 70% 60%), hsl(25 50% 50%)); /* Rose para Brown */
+    --gradient-warm: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%); /* Brown para Rose */
+    --gradient-soft: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(330 70% 60% / 5%) 100%); /* Cream com Rose suave */
+    --gradient-vibrant: linear-gradient(45deg, hsl(330 70% 60%), hsl(25 50% 50%), hsl(330 40% 75%)); /* Rose, Brown, Rose claro */
     
     /* Shadows */
     --shadow-soft: 0 4px 20px -4px hsl(var(--primary) / 0.1);
@@ -86,33 +87,33 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 25 15% 8%; /* Brown muito escuro */
+    --foreground: 30 20% 92%; /* Cream claro */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 25 20% 10%; /* Brown escuro */
+    --card-foreground: 30 20% 92%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 25 20% 10%;
+    --popover-foreground: 30 20% 92%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 330 60% 65%; /* Rose mais claro no escuro */
+    --primary-foreground: 25 15% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 25 25% 20%; /* Brown médio escuro */
+    --secondary-foreground: 30 20% 92%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 210 10% 15%; /* Gray escuro */
+    --muted-foreground: 210 15% 65%; /* Gray médio */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 25 40% 35%; /* Brown médio */
+    --accent-foreground: 30 20% 92%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 30 20% 92%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 210 10% 20%; /* Gray escuro para bordas */
+    --input: 210 10% 18%; /* Gray escuro para inputs */
+    --ring: 330 60% 65%; /* Rose para focus ring */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -173,5 +174,135 @@
 
   .transition-bounce {
     transition: var(--transition-bounce);
+  }
+
+  /* Hero Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-bounce {
+    animation: bounce 1s infinite;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+      transform: translate3d(0, -8px, 0);
+    }
+    70% {
+      transform: translate3d(0, -4px, 0);
+    }
+    90% {
+      transform: translate3d(0, -2px, 0);
+    }
+  }
+
+  /* Performance optimizations */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Hardware acceleration for smooth animations */
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-float,
+  .hover\:scale-105:hover,
+  .hover\:scale-110:hover {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Optimize images */
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+
+  /* Responsive improvements */
+  @media (max-width: 640px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    /* Reduce motion for users who prefer it */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-fade-in,
+      .animate-slide-up,
+      .animate-float,
+      .animate-pulse,
+      .animate-bounce {
+        animation: none;
+      }
+      
+      .hover\:scale-105:hover,
+      .hover\:scale-110:hover {
+        transform: none;
+      }
+    }
   }
 }

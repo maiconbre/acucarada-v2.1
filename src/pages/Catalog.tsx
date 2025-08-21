@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "@/components/ProductCard";
+import { Header } from "@/components/Header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Filter } from "lucide-react";
@@ -84,8 +85,9 @@ const Catalog = () => {
 
   return (
     <div className="min-h-screen gradient-soft">
+      <Header />
       {/* Header */}
-      <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-40">
+      <div className="bg-card/80 backdrop-blur-sm border-b border-border/50">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">

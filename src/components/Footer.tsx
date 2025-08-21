@@ -1,6 +1,7 @@
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 
-const Footer = () => {
+export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -52,19 +53,27 @@ const Footer = () => {
           </p>
           <div className="flex items-center gap-4">
             <span className="text-background/60 text-sm">Conecte-se conosco:</span>
-            <a 
-              href="https://wa.me/5511999999999" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-background/70 hover:text-primary transition-colors"
-            >
-              <MessageCircle className="h-5 w-5" />
-            </a>
+            <div className="flex items-center gap-3">
+              <a 
+                href="https://wa.me/5511999999999" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-background/70 hover:text-primary transition-colors"
+              >
+                <MessageCircle className="h-5 w-5" />
+              </a>
+              {/* Botão Admin Discreto */}
+              <Link 
+                to="/admin" 
+                className="text-background/40 hover:text-background/70 transition-colors opacity-50 hover:opacity-100"
+                title="Área Administrativa"
+              >
+                <Settings className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
     </footer>
   );
 };
-
-export default Footer;

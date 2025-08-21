@@ -1,94 +1,106 @@
 import { Button } from "@/components/ui/button";
-import { Heart, Star } from "lucide-react";
+import { Heart, Star, Sparkles, ChefHat } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-sweets.jpg";
 
-const Hero = () => {
+export const Hero = () => {
+  const navigate = useNavigate();
+  
   const handleOrderClick = () => {
     const whatsappNumber = "5511999999999";
     const message = encodeURIComponent("Olá! Gostaria de fazer um pedido dos doces da Açucarada 🍫✨");
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
   };
+  
+  const handleCatalogClick = () => {
+    navigate('/catalog');
+  };
 
   return (
-    <section className="relative min-h-[80vh] flex items-center overflow-hidden">
-      {/* Background Image */}
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Background Image with improved mobile optimization */}
       <div className="absolute inset-0 z-0">
         <img 
           src={heroImage}
           alt="Doces artesanais da Açucarada"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center"
+          loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
+        <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/85 to-background/60 md:bg-gradient-to-r md:from-background/95 md:via-background/80 md:to-background/40" />
+      </div>
+
+      {/* Floating elements for visual appeal */}
+      <div className="absolute inset-0 z-5 pointer-events-none">
+        <div className="absolute top-20 right-10 w-4 h-4 bg-primary/20 rounded-full animate-pulse" />
+        <div className="absolute top-40 right-32 w-2 h-2 bg-rose-300/30 rounded-full animate-bounce" style={{animationDelay: '1s'}} />
+        <div className="absolute bottom-32 right-20 w-3 h-3 bg-cream-200/40 rounded-full animate-pulse" style={{animationDelay: '2s'}} />
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-16 relative z-10">
-        <div className="max-w-2xl">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-primary-soft/80 backdrop-blur-sm text-primary px-4 py-2 rounded-full mb-6">
-            <Star className="h-4 w-4 fill-current" />
-            <span className="text-sm font-medium">Doces Artesanais Premium</span>
+      <div className="container mx-auto px-4 py-8 md:py-16 relative z-10">
+        <div className="max-w-4xl mx-auto text-center md:text-left md:mx-0 md:max-w-2xl">
+          {/* Badge with animation */}
+          <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm text-primary px-4 py-2 rounded-full mb-6 border border-primary/20 animate-fade-in">
+            <Sparkles className="h-4 w-4 animate-pulse" />
+            <span className="text-xs sm:text-sm font-medium">Doces Artesanais Premium</span>
           </div>
 
-          {/* Main Title */}
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold mb-6 leading-tight">
-            <span className="gradient-primary bg-clip-text text-transparent">
+          {/* Main Title with improved mobile hierarchy */}
+          <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-display font-bold mb-6 leading-tight animate-slide-up pb-2">
+            <span className="gradient-primary bg-clip-text text-transparent block">
               Açucarada
-            </span>
-            <br />
-            <span className="text-foreground">
-              Doces que
-            </span>
-            <br />
-            <span className="text-primary">
-              Encantam
             </span>
           </h1>
 
-          {/* Description */}
-          <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+          {/* Description with better mobile readability */}
+          <p className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto md:mx-0 animate-fade-in" style={{animationDelay: '0.3s'}}>
             Criamos doces artesanais únicos, feitos com ingredientes selecionados e muito amor. 
             Cada doce é uma pequena obra de arte que desperta os sentidos.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          {/* CTA Buttons with improved mobile design */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-8 animate-fade-in" style={{animationDelay: '0.6s'}}>
             <Button
               variant="hero"
-              size="lg"
+              size="sm"
               onClick={handleOrderClick}
-              className="text-lg px-8 py-6 h-auto"
+              className="text-sm sm:text-base px-4 py-3 sm:px-6 sm:py-4 h-auto group hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              <Heart className="h-5 w-5 fill-current" />
+              <Heart className="h-4 w-4 sm:h-5 sm:w-5 fill-current group-hover:animate-pulse" />
               Fazer Pedido
             </Button>
             <Button
               variant="elegant"
-              size="lg"
-              onClick={() => document.getElementById('produtos')?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-lg px-8 py-6 h-auto"
+              size="sm"
+              onClick={handleCatalogClick}
+              className="text-sm sm:text-base px-4 py-3 sm:px-6 sm:py-4 h-auto hover:scale-105 transition-all duration-300"
             >
+              <ChefHat className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               Ver Catálogo
             </Button>
           </div>
 
-          {/* Trust indicators */}
-          <div className="flex items-center gap-6 mt-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
+          {/* Enhanced trust indicators */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8 animate-fade-in" style={{animationDelay: '0.9s'}}>
+            <div className="flex items-center gap-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/70 transition-colors">
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="h-4 w-4 fill-primary text-primary" />
                 ))}
               </div>
-              <span>500+ clientes satisfeitos</span>
+              <span className="text-xs sm:text-sm font-medium">500+ clientes satisfeitos</span>
             </div>
-            <div className="hidden sm:block w-px h-4 bg-border" />
-            <span className="hidden sm:inline">Entrega em toda região</span>
+            <div className="flex items-center gap-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/70 transition-colors">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-xs sm:text-sm font-medium">Entrega em toda região</span>
+            </div>
+            <div className="flex items-center gap-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/70 transition-colors sm:col-span-2 lg:col-span-1">
+              <ChefHat className="h-4 w-4 text-primary" />
+              <span className="text-xs sm:text-sm font-medium">Feito no dia da entrega</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
   );
 };
-
-export default Hero;

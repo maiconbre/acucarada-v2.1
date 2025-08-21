@@ -28,6 +28,45 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				// Paleta personalizada - Rose (Primária)
+				rose: {
+					50: 'hsl(330 40% 95%)',
+					100: 'hsl(330 40% 88%)',
+					200: 'hsl(330 50% 80%)',
+					300: 'hsl(330 60% 70%)',
+					400: 'hsl(330 65% 65%)',
+					500: 'hsl(330 70% 60%)', // Cor principal
+					600: 'hsl(330 75% 55%)',
+					700: 'hsl(330 80% 45%)',
+					800: 'hsl(330 85% 35%)',
+					900: 'hsl(330 90% 25%)'
+				},
+				// Paleta personalizada - Brown (Secundária)
+				brown: {
+					50: 'hsl(25 30% 92%)',
+					100: 'hsl(25 30% 80%)',
+					200: 'hsl(25 35% 75%)',
+					300: 'hsl(25 40% 65%)',
+					400: 'hsl(25 45% 55%)',
+					500: 'hsl(25 50% 50%)', // Cor principal
+					600: 'hsl(25 55% 40%)',
+					700: 'hsl(25 60% 30%)',
+					800: 'hsl(25 65% 25%)',
+					900: 'hsl(25 70% 15%)'
+				},
+				// Paleta personalizada - Cream (Especiais)
+				cream: {
+					50: 'hsl(30 50% 98%)',
+					100: 'hsl(30 45% 96%)',
+					200: 'hsl(30 40% 94%)',
+					300: 'hsl(30 35% 90%)',
+					400: 'hsl(30 30% 85%)',
+					500: 'hsl(30 25% 80%)',
+					600: 'hsl(30 20% 75%)',
+					700: 'hsl(30 15% 65%)',
+					800: 'hsl(30 10% 55%)',
+					900: 'hsl(30 5% 45%)'
+				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
