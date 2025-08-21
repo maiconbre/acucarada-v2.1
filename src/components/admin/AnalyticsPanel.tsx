@@ -282,7 +282,7 @@ const AnalyticsPanel = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20 sm:pb-6">
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between">
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center w-full sm:w-auto">
@@ -308,60 +308,84 @@ const AnalyticsPanel = () => {
 
       {/* Cards de Estatísticas Gerais */}
       {overallStats && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <Card className="transition-all duration-200 hover:shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-700 truncate pr-2">Total de Produtos</CardTitle>
-              <Activity className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-              <div className="text-xl sm:text-2xl font-bold text-gray-900">{overallStats.total_products}</div>
-              <p className="text-xs text-muted-foreground mt-1 truncate">Com dados de análise</p>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-2 rounded-lg bg-gray-50">
+                  <Activity className="h-4 w-4 text-gray-600" />
+                </div>
+                <div className="text-right">
+                  <div className="text-lg sm:text-2xl font-bold text-gray-900">{overallStats.total_products}</div>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold text-foreground">Produtos</h3>
+                <p className="text-xs text-muted-foreground">Com dados de análise</p>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="transition-all duration-200 hover:shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-700 truncate pr-2">Total de Curtidas</CardTitle>
-              <Heart className="h-3 w-3 sm:h-4 sm:w-4 text-red-400 flex-shrink-0" />
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-              <div className="text-xl sm:text-2xl font-bold text-red-500">{overallStats.total_likes}</div>
-              <p className="text-xs text-muted-foreground mt-1 truncate" title={`Produto mais curtido: ${overallStats.most_liked_product}`}>
-                <span className="hidden sm:inline">Produto mais curtido: </span>
-                <span className="sm:hidden">Mais curtido: </span>
-                {overallStats.most_liked_product}
-              </p>
+          <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-2 rounded-lg bg-red-50">
+                  <Heart className="h-4 w-4 text-red-600" />
+                </div>
+                <div className="text-right">
+                  <div className="text-lg sm:text-2xl font-bold text-red-500">{overallStats.total_likes}</div>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold text-foreground">Curtidas</h3>
+                <p className="text-xs text-muted-foreground truncate" title={`Produto mais curtido: ${overallStats.most_liked_product}`}>
+                  <span className="hidden sm:inline">Mais curtido: </span>
+                  <span className="sm:hidden">Top: </span>
+                  {overallStats.most_liked_product}
+                </p>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="transition-all duration-200 hover:shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-700 truncate pr-2">Total de Visualizações</CardTitle>
-              <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400 flex-shrink-0" />
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-              <div className="text-xl sm:text-2xl font-bold text-blue-500">{overallStats.total_views}</div>
-              <p className="text-xs text-muted-foreground mt-1 truncate" title={`Produto mais visto: ${overallStats.most_viewed_product}`}>
-                <span className="hidden sm:inline">Produto mais visto: </span>
-                <span className="sm:hidden">Mais visto: </span>
-                {overallStats.most_viewed_product}
-              </p>
+          <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-2 rounded-lg bg-blue-50">
+                  <Eye className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="text-right">
+                  <div className="text-lg sm:text-2xl font-bold text-blue-500">{overallStats.total_views}</div>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold text-foreground">Visualizações</h3>
+                <p className="text-xs text-muted-foreground truncate" title={`Produto mais visto: ${overallStats.most_viewed_product}`}>
+                  <span className="hidden sm:inline">Mais visto: </span>
+                  <span className="sm:hidden">Top: </span>
+                  {overallStats.most_viewed_product}
+                </p>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="transition-all duration-200 hover:shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-700 truncate pr-2">Visitantes Únicos</CardTitle>
-              <Users className="h-3 w-3 sm:h-4 sm:w-4 text-green-400 flex-shrink-0" />
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-              <div className="text-xl sm:text-2xl font-bold text-green-500">{overallStats.total_unique_viewers}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="hidden sm:inline">Total de cliques: </span>
-                <span className="sm:hidden">Cliques: </span>
-                {overallStats.total_clicks}
-              </p>
+          <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-2 rounded-lg bg-green-50">
+                  <Users className="h-4 w-4 text-green-600" />
+                </div>
+                <div className="text-right">
+                  <div className="text-lg sm:text-2xl font-bold text-green-500">{overallStats.total_unique_viewers}</div>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold text-foreground">Visitantes</h3>
+                <p className="text-xs text-muted-foreground">
+                  <span className="hidden sm:inline">Cliques: </span>
+                  <span className="sm:hidden">Cliques: </span>
+                  {overallStats.total_clicks}
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>

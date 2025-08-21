@@ -232,7 +232,7 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 pb-20 sm:pb-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div className="flex-1">
           <h2 className="text-xl sm:text-2xl font-bold">Gerenciar Categorias</h2>

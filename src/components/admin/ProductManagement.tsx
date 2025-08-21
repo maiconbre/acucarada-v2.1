@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Grid3X3, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Product {
@@ -40,6 +40,12 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
   const [categories, setCategories] = useState<Category[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    type: 'toggle' | 'delete';
+    product: Product | null;
+  }>({ isOpen: false, type: 'toggle', product: null });
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -153,8 +159,6 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este produto?")) return;
-
     try {
       const { error } = await supabase
         .from("products")
@@ -202,8 +206,24 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     }
   };
 
+  const openConfirmDialog = (type: 'toggle' | 'delete', product: Product) => {
+    setConfirmDialog({ isOpen: true, type, product });
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmDialog.product) return;
+    
+    if (confirmDialog.type === 'toggle') {
+      await toggleActive(confirmDialog.product);
+    } else if (confirmDialog.type === 'delete') {
+      await handleDelete(confirmDialog.product.id);
+    }
+    
+    setConfirmDialog({ isOpen: false, type: 'toggle', product: null });
+  };
+
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 pb-20 sm:pb-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div className="flex-1">
           <h2 className="text-xl sm:text-2xl font-bold">Gerenciar Produtos</h2>
@@ -335,78 +355,174 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
 
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Produtos</CardTitle>
-          <CardDescription>
-            {products.length} produtos cadastrados
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Lista de Produtos</CardTitle>
+              <CardDescription>
+                {products.length} produtos cadastrados
+              </CardDescription>
+            </div>
+            {/* Botão toggle para modo de visualização - apenas mobile */}
+            <div className="flex sm:hidden items-center gap-2">
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="h-8 w-8 p-0"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="h-8 w-8 p-0"
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="p-0 sm:p-6">
-          {/* Mobile Card Layout */}
-          <div className="block sm:hidden space-y-4 p-4">
-            {products.map((product) => (
-              <Card key={product.id} className="p-4">
-                <div className="flex items-start space-x-3">
-                  {product.image_url && (
-                    <img 
-                      src={product.image_url} 
-                      alt={product.name}
-                      className="h-12 w-12 rounded object-cover flex-shrink-0"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-sm truncate">{product.name}</h3>
-                        <p className="text-xs text-muted-foreground">{product.category}</p>
-                        <p className="text-sm font-semibold">R$ {product.price.toFixed(2).replace(".", ",")}</p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <div className="flex gap-1">
+          {/* Mobile Layout */}
+          <div className="block sm:hidden">
+            {viewMode === 'list' ? (
+              /* Mobile List Layout */
+              <div className="space-y-3 p-4">
+                {products.map((product) => (
+                  <Card key={product.id} className="p-3 mobile-card-hover mobile-ripple">
+                    <div className="flex items-center space-x-3">
+                      {product.image_url && (
+                        <img 
+                          src={product.image_url} 
+                          alt={product.name}
+                          className="h-20 w-20 rounded-lg object-cover flex-shrink-0"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1 pr-2">
+                            <h3 className="font-medium text-sm leading-tight mb-1">{product.name}</h3>
+                            <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
+                            <p className="text-sm font-semibold text-primary">R$ {product.price.toFixed(2).replace(".", ",")}</p>
+                          </div>
+                        </div>
+                        
+                        {/* Badges */}
+                        <div className="flex flex-wrap gap-1 mb-3">
                           {product.is_featured && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-xs px-2 py-0.5">
                               Destaque
                             </Badge>
                           )}
-                          <Badge variant={product.is_active ? "default" : "secondary"} className="text-xs">
+                          <Badge variant={product.is_active ? "default" : "secondary"} className="text-xs px-2 py-0.5">
                             {product.is_active ? "Ativo" : "Inativo"}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-1">
+                        
+                        {/* Action Buttons */}
+                        <div className="flex items-center justify-end gap-2">
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            onClick={() => toggleActive(product)}
-                            className="h-8 w-8 p-0"
+                            onClick={() => openConfirmDialog('toggle', product)}
+                            className="h-8 w-8 p-0 mobile-touch-target"
                           >
                             {product.is_active ? (
-                              <EyeOff className="h-3 w-3" />
+                              <EyeOff className="h-4 w-4" />
                             ) : (
-                              <Eye className="h-3 w-3" />
+                              <Eye className="h-4 w-4" />
                             )}
                           </Button>
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             onClick={() => handleEdit(product)}
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 mobile-touch-target"
                           >
-                            <Edit className="h-3 w-3" />
+                            <Edit className="h-4 w-4" />
                           </Button>
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            onClick={() => handleDelete(product.id)}
-                            className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                            onClick={() => openConfirmDialog('delete', product)}
+                            className="text-destructive hover:text-destructive h-8 w-8 p-0 mobile-touch-target"
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              /* Mobile Grid Layout */
+              <div className="grid grid-cols-2 gap-3 p-4">
+                {products.map((product) => (
+                  <Card key={product.id} className="p-3 mobile-card-hover mobile-ripple">
+                    <div className="space-y-2">
+                      {product.image_url && (
+                        <img 
+                          src={product.image_url} 
+                          alt={product.name}
+                          className="w-full h-24 rounded-lg object-cover"
+                        />
+                      )}
+                      <div className="space-y-1">
+                        <h3 className="font-medium text-xs leading-tight line-clamp-2">{product.name}</h3>
+                        <p className="text-xs text-muted-foreground truncate">{product.category}</p>
+                        <p className="text-sm font-semibold text-primary">R$ {product.price.toFixed(2).replace(".", ",")}</p>
+                      </div>
+                      
+                      {/* Badges */}
+                      <div className="flex flex-wrap gap-1">
+                        {product.is_featured && (
+                          <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                            Destaque
+                          </Badge>
+                        )}
+                        <Badge variant={product.is_active ? "default" : "secondary"} className="text-xs px-1.5 py-0.5">
+                          {product.is_active ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </div>
+                      
+                      {/* Compact Action Buttons */}
+                      <div className="flex items-center justify-between gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openConfirmDialog('toggle', product)}
+                          className="h-7 w-7 p-0 mobile-touch-target"
+                        >
+                          {product.is_active ? (
+                            <EyeOff className="h-3 w-3" />
+                          ) : (
+                            <Eye className="h-3 w-3" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(product)}
+                          className="h-7 w-7 p-0 mobile-touch-target"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openConfirmDialog('delete', product)}
+                          className="text-destructive hover:text-destructive h-7 w-7 p-0 mobile-touch-target"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
           
           {/* Desktop Table Layout */}
@@ -455,7 +571,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => toggleActive(product)}
+                          onClick={() => openConfirmDialog('toggle', product)}
                         >
                           {product.is_active ? (
                             <EyeOff className="h-4 w-4" />
@@ -473,7 +589,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => openConfirmDialog('delete', product)}
                           className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -487,6 +603,86 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de Confirmação */}
+      <Dialog open={confirmDialog.isOpen} onOpenChange={(open) => !open && setConfirmDialog({ isOpen: false, type: 'toggle', product: null })}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {confirmDialog.type === 'delete' ? (
+                <>
+                  <Trash2 className="h-5 w-5 text-destructive" />
+                  Excluir Produto
+                </>
+              ) : (
+                <>
+                  {confirmDialog.product?.is_active ? (
+                    <>
+                      <EyeOff className="h-5 w-5 text-orange-500" />
+                      Ocultar Produto
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-5 w-5 text-green-500" />
+                      Mostrar Produto
+                    </>
+                  )}
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {confirmDialog.product && (
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <img
+                  src={confirmDialog.product.image_url || "/placeholder.svg"}
+                  alt={confirmDialog.product.name}
+                  className="h-12 w-12 rounded-md object-cover"
+                />
+                <div>
+                  <p className="font-medium">{confirmDialog.product.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {confirmDialog.product.category}
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            <p className="text-sm text-muted-foreground">
+              {confirmDialog.type === 'delete' ? (
+                "Esta ação não pode ser desfeita. O produto será permanentemente removido do catálogo."
+              ) : confirmDialog.product?.is_active ? (
+                "O produto será removido do catálogo público e não ficará visível para os clientes."
+              ) : (
+                "O produto será adicionado ao catálogo público e ficará visível para os clientes."
+              )}
+            </p>
+          </div>
+          
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialog({ isOpen: false, type: 'toggle', product: null })}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant={confirmDialog.type === 'delete' ? 'destructive' : 'default'}
+              onClick={handleConfirmAction}
+              className={confirmDialog.type === 'toggle' && !confirmDialog.product?.is_active ? 'bg-green-600 hover:bg-green-700' : ''}
+            >
+              {confirmDialog.type === 'delete' ? (
+                'Excluir'
+              ) : confirmDialog.product?.is_active ? (
+                'Ocultar'
+              ) : (
+                'Mostrar'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
