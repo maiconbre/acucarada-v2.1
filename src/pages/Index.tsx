@@ -7,6 +7,7 @@ import { ChefHat } from "lucide-react";
 // Lazy load components for better performance
 const ProductGrid = lazy(() => import("@/components/ProductGrid").then(module => ({ default: module.ProductGrid })));
 const About = lazy(() => import("@/components/About").then(module => ({ default: module.About })));
+const Testimonials = lazy(() => import("@/components/Testimonials").then(module => ({ default: module.Testimonials })));
 const Contact = lazy(() => import("@/components/Contact").then(module => ({ default: module.Contact })));
 
 // Loading component for lazy-loaded sections
@@ -31,6 +32,10 @@ export default function Index() {
       
       <Suspense fallback={<SectionLoader title="sobre nós" />}>
         <About />
+      </Suspense>
+      
+      <Suspense fallback={<SectionLoader title="depoimentos" />}>
+        <Testimonials />
       </Suspense>
       
       <Suspense fallback={<SectionLoader title="contato" />}>

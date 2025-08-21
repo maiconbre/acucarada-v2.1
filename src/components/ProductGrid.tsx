@@ -103,9 +103,10 @@ export const ProductGrid = () => {
               style={{animationDelay: `${index * 0.1}s`}}
             >
               <ProductCard
+                id={product.id}
                 name={product.name}
                 description={product.description || ""}
-                price={`R$ ${product.price.toFixed(2).replace(".", ",")}`}
+                price={`R$ ${product.price.toFixed(2)}`}
                 image={product.image_url || ""}
                 category={product.category}
               />
@@ -128,13 +129,14 @@ export const ProductGrid = () => {
             </Button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto animate-fade-in" style={{animationDelay: '1s'}}>
-            <div className="flex items-center gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/80 transition-colors">
-              <span className="text-2xl">📱</span>
+          <div className="flex items-center justify-center gap-6 max-w-lg mx-auto animate-fade-in bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/80 transition-colors" style={{animationDelay: '1s'}}>
+            <div className="flex items-center gap-2">
+              <span className="text-xl">📱</span>
               <span className="text-sm font-medium">Pedidos via WhatsApp</span>
             </div>
-            <div className="flex items-center gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/80 transition-colors">
-              <span className="text-2xl">🚚</span>
+            <div className="w-px h-6 bg-border/50"></div>
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🚚</span>
               <span className="text-sm font-medium">Entrega rápida</span>
             </div>
           </div>

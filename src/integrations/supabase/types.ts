@@ -14,6 +14,191 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      product_analytics: {
+        Row: {
+          id: string
+          product_id: string
+          total_likes: number
+          total_views: number
+          total_clicks: number
+          unique_viewers: number
+          last_updated: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          total_likes?: number
+          total_views?: number
+          total_clicks?: number
+          unique_viewers?: number
+          last_updated?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          total_likes?: number
+          total_views?: number
+          total_clicks?: number
+          unique_viewers?: number
+          last_updated?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_analytics_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      product_clicks: {
+        Row: {
+          id: string
+          product_id: string
+          user_id: string | null
+          session_id: string | null
+          ip_address: string | null
+          click_type: string
+          page_source: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          user_id?: string | null
+          session_id?: string | null
+          ip_address?: string | null
+          click_type: string
+          page_source?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          user_id?: string | null
+          session_id?: string | null
+          ip_address?: string | null
+          click_type?: string
+          page_source?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_clicks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      product_likes: {
+        Row: {
+          id: string
+          product_id: string
+          user_id: string | null
+          session_id: string | null
+          ip_address: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          user_id?: string | null
+          session_id?: string | null
+          ip_address?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          user_id?: string | null
+          session_id?: string | null
+          ip_address?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_likes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      product_views: {
+        Row: {
+          id: string
+          product_id: string
+          user_id: string | null
+          session_id: string | null
+          ip_address: string | null
+          user_agent: string | null
+          referrer: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          user_id?: string | null
+          session_id?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          referrer?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          user_id?: string | null
+          session_id?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          referrer?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_views_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       products: {
         Row: {
           category: string
@@ -85,7 +270,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      toggle_product_like: {
+        Args: {
+          p_product_id: string
+          p_user_id: string | null
+          p_session_id: string | null
+          p_ip_address: string | null
+        }
+        Returns: boolean
+      }
+      track_product_view: {
+        Args: {
+          p_product_id: string
+          p_user_id: string | null
+          p_session_id: string | null
+          p_ip_address: string | null
+          p_user_agent: string | null
+          p_referrer: string | null
+        }
+        Returns: void
+      }
+      track_product_click: {
+        Args: {
+          p_product_id: string
+          p_click_type: string
+          p_page_source: string | null
+          p_user_id: string | null
+          p_session_id: string | null
+          p_ip_address: string | null
+          p_user_agent: string | null
+        }
+        Returns: void
+      }
     }
     Enums: {
       [_ in never]: never

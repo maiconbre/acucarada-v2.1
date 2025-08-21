@@ -40,7 +40,7 @@ export const Hero = () => {
       <div className="container mx-auto px-4 py-8 md:py-16 relative z-10">
         <div className="max-w-4xl mx-auto text-center md:text-left md:mx-0 md:max-w-2xl">
           {/* Badge with animation */}
-          <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm text-primary px-4 py-2 rounded-full mb-6 border border-primary/20 animate-fade-in">
+          <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm text-primary px-4 py-2 rounded-full mb-4 border border-primary/20 animate-fade-in">
             <Sparkles className="h-4 w-4 animate-pulse" />
             <span className="text-xs sm:text-sm font-medium">Doces Artesanais Premium</span>
           </div>
@@ -80,23 +80,23 @@ export const Hero = () => {
             </Button>
           </div>
 
-          {/* Enhanced trust indicators */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8 animate-fade-in" style={{animationDelay: '0.9s'}}>
-            <div className="flex items-center gap-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/70 transition-colors">
-              <div className="flex">
+          {/* Enhanced trust indicators - Mobile optimized */}
+          <div className="space-y-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4 sm:space-y-0 mt-8 animate-fade-in" style={{animationDelay: '0.9s'}}>
+            <div className="flex items-center justify-center sm:justify-start gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:bg-card/80 transition-colors">
+              <div className="flex shrink-0">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                  <Star key={i} className="h-3 w-3 sm:h-4 sm:w-4 fill-primary text-primary" />
                 ))}
               </div>
-              <span className="text-xs sm:text-sm font-medium">500+ clientes satisfeitos</span>
+              <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left">500+ clientes satisfeitos</span>
             </div>
-            <div className="flex items-center gap-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/70 transition-colors">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-xs sm:text-sm font-medium">Entrega em toda região</span>
+            <div className="flex items-center justify-center sm:justify-start gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:bg-card/80 transition-colors">
+              <Sparkles className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left">Entrega em toda região</span>
             </div>
-            <div className="flex items-center gap-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/70 transition-colors sm:col-span-2 lg:col-span-1">
-              <ChefHat className="h-4 w-4 text-primary" />
-              <span className="text-xs sm:text-sm font-medium">Feito no dia da entrega</span>
+            <div className="flex items-center justify-center sm:justify-start gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:bg-card/80 transition-colors sm:col-span-2 lg:col-span-1">
+              <ChefHat className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left">Feito no dia da entrega</span>
             </div>
           </div>
         </div>

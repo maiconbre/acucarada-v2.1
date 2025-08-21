@@ -1,8 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useProductAnalytics } from "@/hooks/useProductAnalytics";
+import { useEffect } from "react";
 
 interface ProductCardProps {
+  id: string;
   name: string;
   description: string;
   price: string;
@@ -10,15 +14,31 @@ interface ProductCardProps {
   category: string;
 }
 
-const ProductCard = ({ name, description, price, image, category }: ProductCardProps) => {
-  const handleOrderClick = () => {
-    const whatsappNumber = "5511999999999";
-    const message = encodeURIComponent(`Olá! Gostaria de encomendar: ${name} - ${price} 🍫`);
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+const ProductCard = ({ id, name, description, price, image, category }: ProductCardProps) => {
+  const navigate = useNavigate();
+  const { analytics, toggleLike, trackView, trackClick } = useProductAnalytics(id);
+
+  // Track view when component mounts
+  useEffect(() => {
+    trackView();
+  }, []);
+
+  const handleCardClick = () => {
+    trackClick('view_details', 'catalog');
+    navigate(`/produto/${id}`);
+  };
+
+  const handleLikeClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await toggleLike();
+    trackClick('like', 'catalog');
   };
 
   return (
-    <Card className="group overflow-hidden border-0 shadow-soft hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 bg-card/80 backdrop-blur-sm">
+    <Card 
+      className="group overflow-hidden border-0 shadow-soft hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 bg-card/80 backdrop-blur-sm cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="relative overflow-hidden">
         <img
           src={image}
@@ -34,9 +54,12 @@ const ProductCard = ({ name, description, price, image, category }: ProductCardP
           <Button
             variant="soft"
             size="icon"
-            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+            className={`h-8 w-8 opacity-0 group-hover:opacity-100 transition-all ${
+              analytics.is_liked ? 'text-red-500 opacity-100' : ''
+            }`}
+            onClick={handleLikeClick}
           >
-            <Heart className="h-4 w-4" />
+            <Heart className={`h-4 w-4 ${analytics.is_liked ? 'fill-current' : ''}`} />
           </Button>
         </div>
       </div>
@@ -53,15 +76,15 @@ const ProductCard = ({ name, description, price, image, category }: ProductCardP
           <span className="text-2xl font-bold text-primary">
             {price}
           </span>
-          <Button
-            variant="hero"
-            size="sm"
-            onClick={handleOrderClick}
-            className="px-6"
-          >
-            <ShoppingCart className="h-4 w-4" />
-            Pedir
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <Heart className="h-4 w-4" />
+              <span>{analytics.total_likes}</span>
+            </div>
+            <span className="text-sm text-muted-foreground font-medium">
+              Ver detalhes
+            </span>
+          </div>
         </div>
       </CardContent>
     </Card>

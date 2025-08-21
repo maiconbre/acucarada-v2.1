@@ -1,4 +1,4 @@
-import { Heart, Award, Clock, Sparkles, Users, Star } from "lucide-react";
+import { Heart, Award, Clock, Sparkles, Users, Star, ChefHat, Gift } from "lucide-react";
 
 export function About() {
   return (
@@ -55,6 +55,87 @@ export function About() {
               Nossos doces são preparados diariamente para garantir 
               frescor e sabor incomparáveis.
             </p>
+          </div>
+        </div>
+
+        {/* Story Section */}
+        <div className="mb-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Story Content - Left */}
+            <div className="space-y-6 animate-fade-in" style={{animationDelay: '1s'}}>
+              <div className="inline-flex items-center gap-2 bg-accent/10 backdrop-blur-sm text-accent px-4 py-2 rounded-full border border-accent/20">
+                <ChefHat className="h-4 w-4" />
+                <span className="text-sm font-medium">Nossa Jornada</span>
+              </div>
+              
+              <h3 className="text-3xl md:text-4xl font-display font-bold text-foreground">
+                Como tudo <span className="gradient-primary bg-clip-text text-transparent">começou</span>
+              </h3>
+              
+              <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <p className="text-lg">
+                  Em 2020, durante um período desafiador para todos, <strong className="text-foreground">Maria Clara</strong> descobriu sua paixão pela confeitaria em sua própria cozinha. O que começou como uma forma de trazer alegria para a família rapidamente se transformou em algo muito maior.
+                </p>
+                
+                <p>
+                  Inspirada pelas receitas da avó e movida pelo desejo de criar momentos especiais, Maria começou a experimentar combinações únicas de sabores. Cada doce era uma pequena obra de arte, feita com ingredientes cuidadosamente selecionados e muito amor.
+                </p>
+                
+                <p>
+                  O primeiro pedido veio de uma vizinha que provou um brigadeiro gourmet de pistache com chocolate belga. A partir dali, o boca a boca fez a magia acontecer. Amigos, familiares e conhecidos começaram a encomendar para suas celebrações especiais.
+                </p>
+                
+                <p>
+                  <strong className="text-foreground">"Açucarada"</strong> nasceu da união entre tradição e inovação, onde cada receita conta uma história e cada doce carrega o carinho de quem o fez. Hoje, nossa missão continua a mesma: adoçar momentos especiais e criar memórias que durem para sempre.
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-4 pt-4">
+                <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
+                  <Gift className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-primary">Desde 2020</span>
+                </div>
+                <div className="flex items-center gap-2 bg-accent/10 px-4 py-2 rounded-full">
+                  <Heart className="h-4 w-4 text-accent fill-accent" />
+                  <span className="text-sm font-medium text-accent">Feito com amor</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Story Image - Right */}
+            <div className="relative animate-fade-in" style={{animationDelay: '1.2s'}}>
+              <div className="relative overflow-hidden rounded-2xl shadow-elegant">
+                {/* Story image */}
+                <div className="aspect-[4/5] relative">
+                  <img 
+                    src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                    alt="Confeiteira preparando doces artesanais" 
+                    className="w-full h-full object-cover"
+                  />
+                  
+                  {/* Overlay with founder info */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <div className="text-center space-y-2">
+                      <p className="text-lg font-display font-semibold">Maria Clara</p>
+                      <p className="text-sm opacity-90">Fundadora & Chef Confeiteira</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Decorative elements */}
+                <div className="absolute -top-4 -right-4 w-8 h-8 bg-primary/20 rounded-full animate-pulse" />
+                <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-accent/30 rounded-full animate-bounce" />
+              </div>
+              
+              {/* Quote overlay */}
+              <div className="absolute -bottom-6 left-6 right-6 bg-card/95 backdrop-blur-sm border border-border/50 rounded-xl p-4 shadow-lg">
+                <p className="text-sm italic text-muted-foreground text-center">
+                  "Cada doce que faço carrega um pedacinho do meu coração e a tradição da minha família."
+                </p>
+                <p className="text-xs text-primary text-center mt-2 font-medium">- Maria Clara, Fundadora</p>
+              </div>
+            </div>
           </div>
         </div>
 

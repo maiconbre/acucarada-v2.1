@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useNavigate } from "react-router-dom";
 
 interface Product {
   id: string;
@@ -18,6 +19,7 @@ interface Product {
 }
 
 const Catalog = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -141,6 +143,7 @@ const Catalog = () => {
             {filteredProducts.map((product) => (
               <ProductCard
                 key={product.id}
+                id={product.id}
                 name={product.name}
                 description={product.description || ""}
                 price={`R$ ${product.price.toFixed(2).replace(".", ",")}`}
@@ -158,7 +161,7 @@ const Catalog = () => {
           <Button 
             variant="outline" 
             size="lg"
-            onClick={() => window.location.href = "/"}
+            onClick={() => navigate("/")}
           >
             Voltar ao Início
           </Button>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,16 +29,15 @@ interface ProductManagementProps {
   onProductsChange: () => void;
 }
 
-const categories = [
-  "Brigadeiros",
-  "Trufas", 
-  "Especiais",
-  "Tradicionais",
-  "Bolos",
-  "Outros"
-];
+interface Category {
+  id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+}
 
 export const ProductManagement = ({ products, onProductsChange }: ProductManagementProps) => {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
@@ -52,6 +51,25 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
   });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories' as 'products')
+        .select("*")
+        .eq("is_active", true)
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -185,27 +203,28 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Gerenciar Produtos</h2>
-          <p className="text-muted-foreground">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="flex-1">
+          <h2 className="text-xl sm:text-2xl font-bold">Gerenciar Produtos</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Crie, edite e gerencie os produtos do catálogo
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="hero" onClick={resetForm}>
+            <Button variant="hero" onClick={resetForm} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
-              Novo Produto
+              <span className="hidden xs:inline">Novo Produto</span>
+              <span className="xs:hidden">Novo</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-lg sm:text-xl">
                 {editingProduct ? "Editar Produto" : "Novo Produto"}
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-sm">
                 {editingProduct 
                   ? "Atualize as informações do produto"
                   : "Preencha os dados para criar um novo produto"
@@ -214,7 +233,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
             </DialogHeader>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome *</Label>
                   <Input
@@ -269,8 +288,8 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
+                      <SelectItem key={category.id} value={category.name}>
+                        {category.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -321,80 +340,151 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
             {products.length} produtos cadastrados
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Produto</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Preço</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="flex items-center space-x-3">
-                      {product.image_url && (
-                        <img 
-                          src={product.image_url} 
-                          alt={product.name}
-                          className="h-10 w-10 rounded object-cover"
-                        />
-                      )}
-                      <div>
-                        <div className="font-medium">{product.name}</div>
-                        {product.is_featured && (
-                          <Badge variant="secondary" className="text-xs">
-                            Destaque
+        <CardContent className="p-0 sm:p-6">
+          {/* Mobile Card Layout */}
+          <div className="block sm:hidden space-y-4 p-4">
+            {products.map((product) => (
+              <Card key={product.id} className="p-4">
+                <div className="flex items-start space-x-3">
+                  {product.image_url && (
+                    <img 
+                      src={product.image_url} 
+                      alt={product.name}
+                      className="h-12 w-12 rounded object-cover flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-sm truncate">{product.name}</h3>
+                        <p className="text-xs text-muted-foreground">{product.category}</p>
+                        <p className="text-sm font-semibold">R$ {product.price.toFixed(2).replace(".", ",")}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="flex gap-1">
+                          {product.is_featured && (
+                            <Badge variant="secondary" className="text-xs">
+                              Destaque
+                            </Badge>
+                          )}
+                          <Badge variant={product.is_active ? "default" : "secondary"} className="text-xs">
+                            {product.is_active ? "Ativo" : "Inativo"}
                           </Badge>
-                        )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleActive(product)}
+                            className="h-8 w-8 p-0"
+                          >
+                            {product.is_active ? (
+                              <EyeOff className="h-3 w-3" />
+                            ) : (
+                              <Eye className="h-3 w-3" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(product)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(product.id)}
+                            className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>R$ {product.price.toFixed(2).replace(".", ",")}</TableCell>
-                  <TableCell>
-                    <Badge variant={product.is_active ? "default" : "secondary"}>
-                      {product.is_active ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleActive(product)}
-                      >
-                        {product.is_active ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(product)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(product.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+          
+          {/* Desktop Table Layout */}
+          <div className="hidden sm:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Produto</TableHead>
+                  <TableHead>Categoria</TableHead>
+                  <TableHead>Preço</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <div className="flex items-center space-x-3">
+                        {product.image_url && (
+                          <img 
+                            src={product.image_url} 
+                            alt={product.name}
+                            className="h-10 w-10 rounded object-cover"
+                          />
+                        )}
+                        <div>
+                          <div className="font-medium">{product.name}</div>
+                          {product.is_featured && (
+                            <Badge variant="secondary" className="text-xs">
+                              Destaque
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{product.category}</TableCell>
+                    <TableCell>R$ {product.price.toFixed(2).replace(".", ",")}</TableCell>
+                    <TableCell>
+                      <Badge variant={product.is_active ? "default" : "secondary"}>
+                        {product.is_active ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleActive(product)}
+                        >
+                          {product.is_active ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(product)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(product.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
