@@ -2,6 +2,13 @@ import { Package, Star, Tag, BarChart3, TrendingUp, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
+interface Product {
+  id: string;
+  is_active: boolean;
+  is_featured: boolean;
+  category: string;
+}
+
 interface StatsCardData {
   id: string;
   title: string;
@@ -14,7 +21,7 @@ interface StatsCardData {
 }
 
 interface MobileStatsCardsProps {
-  products: any[];
+  products: Product[];
   onNavigate: (section: string) => void;
 }
 

@@ -3,6 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+interface Product {
+  id: string;
+  is_active: boolean;
+  is_featured: boolean;
+  category: string;
+}
+
 interface QuickActionButton {
   id: string;
   title: string;
@@ -14,7 +21,7 @@ interface QuickActionButton {
 }
 
 interface MobileDashboardProps {
-  products: any[];
+  products: Product[];
   onNavigate: (section: string) => void;
   onQuickAction?: (action: string) => void;
 }

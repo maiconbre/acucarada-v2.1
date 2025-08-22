@@ -147,11 +147,12 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       setIsDialogOpen(false);
       resetForm();
       onProductsChange();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message,
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -173,11 +174,12 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       });
       
       onProductsChange();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message,
+        description: errorMessage,
       });
     }
   };
@@ -197,11 +199,12 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       });
       
       onProductsChange();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message,
+        description: errorMessage,
       });
     }
   };

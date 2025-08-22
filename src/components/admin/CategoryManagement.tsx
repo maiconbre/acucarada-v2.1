@@ -135,11 +135,12 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
       resetForm();
       fetchCategories();
       onCategoriesChange?.();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving category:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
       toast({
         title: "Erro",
-        description: error.message?.includes("duplicate") 
+        description: errorMessage.includes("duplicate") 
           ? "Já existe uma categoria com este nome"
           : "Erro ao salvar categoria",
         variant: "destructive",
