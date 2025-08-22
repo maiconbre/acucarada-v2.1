@@ -39,6 +39,23 @@ interface ClickTypeStats {
   percentage: number;
 }
 
+interface AnalyticsDataItem {
+  id: string;
+  product_id: string;
+  total_likes: number;
+  total_views: number;
+  total_clicks: number;
+  unique_viewers: number;
+  products: {
+    name: string;
+    category: string;
+  };
+}
+
+interface ClickDataItem {
+  click_type: string;
+}
+
 const AnalyticsPanel = () => {
   const { toast } = useToast();
   const [analytics, setAnalytics] = useState<ProductAnalytics[]>([]);
@@ -142,7 +159,7 @@ const AnalyticsPanel = () => {
       if (analyticsError) throw analyticsError;
 
       // Transform data to include product details
-      const transformedData: ProductAnalytics[] = analyticsData?.map((item: any) => ({
+      const transformedData: ProductAnalytics[] = analyticsData?.map((item: AnalyticsDataItem) => ({
         id: item.id,
         product_id: item.product_id,
         product_name: item.products.name,
@@ -151,7 +168,7 @@ const AnalyticsPanel = () => {
         total_views: item.total_views || 0,
         total_clicks: item.total_clicks || 0,
         unique_viewers: item.unique_viewers || 0,
-        last_updated: item.last_updated,
+        last_updated: new Date().toISOString(), // Default to current timestamp since last_updated is missing from AnalyticsDataItem
       })) || [];
 
       // Sort data
@@ -219,7 +236,7 @@ const AnalyticsPanel = () => {
 
       // Count click types
       const clickCounts: { [key: string]: number } = {};
-      clickData?.forEach((click: any) => {
+      clickData?.forEach((click: ClickDataItem) => {
         clickCounts[click.click_type] = (clickCounts[click.click_type] || 0) + 1;
       });
 

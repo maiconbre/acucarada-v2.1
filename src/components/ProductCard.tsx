@@ -12,9 +12,10 @@ interface ProductCardProps {
   price: string;
   image: string;
   category: string;
+  is_featured: boolean;
 }
 
-const ProductCard = ({ id, name, description, price, image, category }: ProductCardProps) => {
+const ProductCard = ({ id, name, description, price, image, category, is_featured }: ProductCardProps) => {
   const navigate = useNavigate();
   const { analytics, toggleLike, trackView, trackClick } = useProductAnalytics(id);
 
@@ -43,11 +44,11 @@ const ProductCard = ({ id, name, description, price, image, category }: ProductC
         <img
           src={image}
           alt={name}
-          className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-48 md:h-64 object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute top-3 left-3">
           <span className="bg-primary-soft/90 backdrop-blur-sm text-primary text-xs px-3 py-1 rounded-full font-medium">
-            {category}
+            {is_featured ? 'Pronta entrega' : 'Encomenda'}
           </span>
         </div>
         <div className="absolute top-3 right-3">
@@ -64,24 +65,24 @@ const ProductCard = ({ id, name, description, price, image, category }: ProductC
         </div>
       </div>
       
-      <CardContent className="p-6">
-        <h3 className="font-display font-semibold text-xl mb-2 text-foreground group-hover:text-primary transition-colors">
+      <CardContent className="p-3 md:p-6">
+        <h3 className="font-display font-semibold text-sm md:text-xl mb-1 md:mb-2 text-foreground group-hover:text-primary transition-colors line-clamp-2">
           {name}
         </h3>
-        <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
+        <p className="text-muted-foreground text-xs md:text-sm mb-2 md:mb-4 leading-relaxed line-clamp-2 md:line-clamp-3">
           {description}
         </p>
         
         <div className="flex items-center justify-between">
-          <span className="text-2xl font-bold text-primary">
+          <span className="text-lg md:text-2xl font-bold text-primary">
             {price}
           </span>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Heart className="h-4 w-4" />
-              <span>{analytics.total_likes}</span>
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-1 text-xs md:text-sm text-muted-foreground">
+              <Heart className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden md:inline">{analytics.total_likes}</span>
             </div>
-            <span className="text-sm text-muted-foreground font-medium">
+            <span className="text-xs md:text-sm text-muted-foreground font-medium hidden md:inline">
               Ver detalhes
             </span>
           </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "./ProductCard";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, ChefHat, Grid3X3, List } from "lucide-react";
+import { ArrowRight, Clock, Package, Grid3X3, List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface Product {
@@ -15,23 +15,23 @@ interface Product {
   is_featured: boolean;
 }
 
-export const ProductGrid = () => {
+export const ProductGridEncomenda = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchFeaturedProducts();
+    fetchEncomendaProducts();
   }, []);
 
-  const fetchFeaturedProducts = async () => {
+  const fetchEncomendaProducts = async () => {
     try {
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("is_active", true)
-        .eq("is_featured", true)
+        .eq("is_featured", false)
         .limit(6);
 
       if (error) throw error;
@@ -45,7 +45,7 @@ export const ProductGrid = () => {
 
   if (loading) {
     return (
-      <section id="produtos" className="py-20 gradient-soft">
+      <section id="produtos-encomenda" className="py-20 bg-background">
         <div className="container mx-auto px-4">
           {/* Section Header Skeleton */}
           <div className="text-center mb-16">
@@ -68,7 +68,7 @@ export const ProductGrid = () => {
 
           <div className="text-center mt-16">
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
-              <ChefHat className="h-5 w-5 animate-pulse" />
+              <Package className="h-5 w-5 animate-pulse" />
               <span>Preparando nossos deliciosos doces...</span>
             </div>
           </div>
@@ -78,20 +78,20 @@ export const ProductGrid = () => {
   }
 
   return (
-    <section id="produtos" className="py-12 md:py-20 bg-background">
+    <section id="produtos-encomenda" className="py-12 md:py-20 bg-background">
       <div className="container mx-auto px-4">
         {/* Section Header with animation */}
         <div className="text-center mb-8 md:mb-16 animate-fade-in">
-          <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm text-primary px-4 py-2 rounded-full mb-6 border border-primary/20">
-            <Sparkles className="h-4 w-4" />
-            <span className="text-sm font-medium">Produtos Pronta Entrega</span>
+          <div className="inline-flex items-center gap-2 bg-amber-500/10 backdrop-blur-sm text-amber-600 px-4 py-2 rounded-full mb-6 border border-amber-500/20">
+            <Clock className="h-4 w-4" />
+            <span className="text-sm font-medium">Produtos Encomenda</span>
           </div>
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-display font-bold mb-4 md:mb-6">
-            Nossos <span className="gradient-primary bg-clip-text text-transparent">Doces</span>
+            Doces <span className="gradient-primary bg-clip-text text-transparent">Especiais</span>
           </h2>
           <p className="text-sm md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4 md:px-0">
-            Cada doce é cuidadosamente preparado com ingredientes selecionados e muito carinho. 
-            Descubra sabores únicos que vão despertar seus sentidos.
+            Criações exclusivas feitas sob encomenda com todo carinho e dedicação. 
+            Perfeitos para ocasiões especiais e momentos únicos.
           </p>
           
           {/* View Mode Toggle */}
@@ -153,21 +153,21 @@ export const ProductGrid = () => {
               onClick={() => navigate("/catalog")}
               className="group hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              <ChefHat className="mr-2 h-5 w-5 group-hover:animate-pulse" />
-              Ver Catálogo Completo
+              <Clock className="mr-2 h-5 w-5 group-hover:animate-pulse" />
+              Ver Todos os Produtos
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
           
           <div className="flex items-center justify-center gap-6 max-w-lg mx-auto animate-fade-in bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/80 transition-colors" style={{animationDelay: '1s'}}>
             <div className="flex items-center gap-2">
-              <span className="text-xl">📱</span>
-              <span className="text-sm font-medium">Pedidos via WhatsApp</span>
+              <span className="text-xl">⏰</span>
+              <span className="text-sm font-medium">Prazo de 2-3 dias</span>
             </div>
             <div className="w-px h-6 bg-border/50"></div>
             <div className="flex items-center gap-2">
-              <span className="text-xl">🚚</span>
-              <span className="text-sm font-medium">Entrega rápida</span>
+              <span className="text-xl">🎂</span>
+              <span className="text-sm font-medium">Feito especialmente</span>
             </div>
           </div>
         </div>

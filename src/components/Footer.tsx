@@ -1,5 +1,6 @@
 import { Heart, MessageCircle, Settings, Sparkles, Star, ChefHat } from "lucide-react";
 import { Link } from "react-router-dom";
+import footerLogoImage from "@/assets/Fundo Transparente PNGPrancheta 3.png";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -25,13 +26,15 @@ export const Footer = () => {
           {/* Brand */}
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
-              <div className="relative">
-                <Heart className="h-8 w-8 fill-rose-primary text-rose-primary animate-pulse" />
-                <Sparkles className="h-3 w-3 text-rose-primary/60 absolute -top-1 -right-1 animate-bounce" />
+              
+              <div className="w-48 sm:w-56 md:w-64 lg:w-72 h-auto">
+                <img 
+                  src={footerLogoImage} 
+                  alt="Açucarada" 
+                  className="w-full h-auto object-contain"
+                  loading="lazy"
+                />
               </div>
-              <span className="text-2xl font-title font-bold text-rose-primary">
-                Açucarada
-              </span>
             </div>
             <p className="text-muted-foreground text-base leading-relaxed mb-6 max-w-sm mx-auto md:mx-0 font-text">
               Doces artesanais que despertam sorrisos e criam memórias especiais desde 2020. ✨

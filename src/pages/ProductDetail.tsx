@@ -124,7 +124,7 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 pt-24 md:pt-28">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
             <div className="grid md:grid-cols-2 gap-8">
@@ -151,7 +151,7 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-24 md:pt-28">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 mb-8 text-sm text-muted-foreground">
           <Button
@@ -187,13 +187,11 @@ const ProductDetail = () => {
                   onLoad={() => setImageLoading(false)}
                   onError={() => setImageLoading(false)}
                 />
-                {product.is_featured && (
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-rose-primary text-white">
-                       Destaque
-                     </Badge>
-                  </div>
-                )}
+                <div className="absolute top-4 left-4">
+                  <Badge className="bg-rose-primary text-white">
+                    {product.is_featured ? 'Pronta entrega' : 'Encomenda'}
+                  </Badge>
+                </div>
               </div>
             </Card>
           </div>

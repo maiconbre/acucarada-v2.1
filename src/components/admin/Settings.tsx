@@ -183,11 +183,12 @@ const Settings = () => {
         title: "Sucesso",
         description: "Senha alterada com sucesso"
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Erro ao alterar senha";
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message || "Erro ao alterar senha"
+        description: errorMessage
       });
     } finally {
       setLoading(false);
@@ -242,11 +243,12 @@ const Settings = () => {
         title: "Sucesso",
         description: "Perfil atualizado com sucesso"
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Erro ao atualizar perfil";
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message || "Erro ao atualizar perfil"
+        description: errorMessage
       });
     } finally {
       setLoading(false);

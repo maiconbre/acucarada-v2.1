@@ -147,11 +147,12 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       setIsDialogOpen(false);
       resetForm();
       onProductsChange();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message,
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -173,11 +174,12 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       });
       
       onProductsChange();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message,
+        description: errorMessage,
       });
     }
   };
@@ -197,11 +199,12 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       });
       
       onProductsChange();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message,
+        description: errorMessage,
       });
     }
   };
@@ -320,10 +323,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="is_featured"
-                    checked={formData.is_featured}
-                    onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
-                  />
-                  <Label htmlFor="is_featured">Produto em destaque</Label>
+                  checked={formData.is_featured}
+                  onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                />
+                <Label htmlFor="is_featured">Pronta entrega</Label>
                 </div>
                 
                 <div className="flex items-center space-x-2">
@@ -412,7 +415,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                         <div className="flex flex-wrap gap-1 mb-3">
                           {product.is_featured && (
                             <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                              Destaque
+                              Pronta entrega
                             </Badge>
                           )}
                           <Badge variant={product.is_active ? "default" : "secondary"} className="text-xs px-2 py-0.5">
@@ -479,7 +482,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                       <div className="flex flex-wrap gap-1">
                         {product.is_featured && (
                           <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                            Destaque
+                            Pronta entrega
                           </Badge>
                         )}
                         <Badge variant={product.is_active ? "default" : "secondary"} className="text-xs px-1.5 py-0.5">
@@ -553,7 +556,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                           <div className="font-medium">{product.name}</div>
                           {product.is_featured && (
                             <Badge variant="secondary" className="text-xs">
-                              Destaque
+                              Pronta entrega
                             </Badge>
                           )}
                         </div>
