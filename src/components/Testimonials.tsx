@@ -89,13 +89,13 @@ export function Testimonials() {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-b from-background to-muted/20">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-title">
             O que nossos clientes dizem
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-text">
             Depoimentos reais de quem já provou nossos doces artesanais
           </p>
         </div>
@@ -129,10 +129,10 @@ export function Testimonials() {
                         </div>
                       </div>
                       <div className="ml-4 flex-1">
-                        <h3 className="font-semibold text-foreground text-lg">
+                        <h3 className="font-semibold text-foreground text-lg font-title">
                           {testimonial.name}
                         </h3>
-                        <p className="text-sm text-muted-foreground mb-2">
+                        <p className="text-sm text-muted-foreground mb-2 font-text">
                           {testimonial.location}
                         </p>
                         <div className="flex">
@@ -140,7 +140,7 @@ export function Testimonials() {
                         </div>
                       </div>
                     </div>
-                    <blockquote className="text-muted-foreground italic leading-relaxed flex-1 flex items-center">
+                    <blockquote className="text-muted-foreground italic leading-relaxed flex-1 flex items-center font-text">
                       "{testimonial.comment}"
                     </blockquote>
                   </CardContent>

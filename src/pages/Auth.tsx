@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import logoImage from "@/assets/logo.png";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -68,9 +69,16 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center gradient-soft px-4">
       <Card className="w-full max-w-md shadow-elegant border-border/50">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-display gradient-primary bg-clip-text text-transparent">
-            Açucarada Admin
-          </CardTitle>
+          <div className="flex flex-col items-center gap-3 mb-2">
+            <img 
+              src={logoImage} 
+              alt="Açucarada Logo" 
+              className="h-12 w-12 object-contain transition-transform hover:scale-105"
+            />
+            <CardTitle className="text-2xl font-display gradient-primary bg-clip-text text-transparent">
+              Açucarada Admin
+            </CardTitle>
+          </div>
           <CardDescription>
             Acesse a área administrativa
           </CardDescription>

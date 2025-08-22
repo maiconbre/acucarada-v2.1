@@ -14,7 +14,7 @@ const Contact = lazy(() => import("@/components/Contact").then(module => ({ defa
 const SectionLoader = ({ title }: { title: string }) => (
   <div className="py-20 flex items-center justify-center">
     <div className="text-center">
-      <ChefHat className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
+      <ChefHat className="h-12 w-12 text-rose-primary mx-auto mb-4 animate-pulse" />
       <p className="text-muted-foreground">Carregando {title}...</p>
     </div>
   </div>

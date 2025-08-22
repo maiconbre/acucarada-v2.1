@@ -145,7 +145,7 @@ const Catalog = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-rose-primary"></div>
       </div>
     );
   }
@@ -157,10 +157,10 @@ const Catalog = () => {
       <div className="bg-card/80 backdrop-blur-sm border-b border-border/50">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
+            <h1 className="text-4xl md:text-5xl font-title font-bold mb-4">
               Nosso <span className="gradient-primary bg-clip-text text-transparent">Catálogo</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-text">
               Explore nossa deliciosa seleção de doces artesanais
             </p>
           </div>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductManagement } from "@/components/admin/ProductManagement";
 import { CategoryManagement } from "@/components/admin/CategoryManagement";
@@ -14,6 +14,7 @@ import MobileDashboard from "@/components/admin/MobileDashboard";
 import { LogOut, Package, BarChart, Tag, TrendingUp, Settings as SettingsIcon, Menu, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import logoImage from "@/assets/logo.png";
 
 interface Product {
   id: string;
@@ -131,7 +132,7 @@ const Admin = () => {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-rose-primary"></div>
       </div>
     );
   }
@@ -147,13 +148,20 @@ const Admin = () => {
       <header className="bg-card/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h1 className="text-lg md:text-2xl font-display font-bold gradient-primary bg-clip-text text-transparent">
-                Açucarada Admin
-              </h1>
-              <p className="text-xs md:text-sm text-muted-foreground truncate">
-                Bem-vindo, {user.email}
-              </p>
+            <div className="flex-1 flex items-center gap-3">
+              <img 
+                src={logoImage} 
+                alt="Açucarada Logo" 
+                className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform hover:scale-105"
+              />
+              <div>
+                <h1 className="text-lg md:text-2xl font-display font-bold gradient-primary bg-clip-text text-transparent">
+                  Açucarada Admin
+                </h1>
+                <p className="text-xs md:text-sm text-muted-foreground truncate">
+                  Bem-vindo, {user.email}
+                </p>
+              </div>
             </div>
             
             {/* Desktop Actions */}
@@ -221,7 +229,7 @@ const Admin = () => {
             <Card className="transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer border-0 shadow-md">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
-                <Package className="h-4 w-4 text-muted-foreground transition-colors duration-200 group-hover:text-primary" />
+                <Package className="h-4 w-4 text-muted-foreground transition-colors duration-200 group-hover:text-rose-primary" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold transition-colors duration-200">{products.length}</div>
@@ -233,7 +241,7 @@ const Admin = () => {
             <Card className="transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer border-0 shadow-md">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Produtos em Destaque</CardTitle>
-                <BarChart className="h-4 w-4 text-muted-foreground transition-colors duration-200 group-hover:text-primary" />
+                <BarChart className="h-4 w-4 text-muted-foreground transition-colors duration-200 group-hover:text-rose-primary" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold transition-colors duration-200">{featuredProducts}</div>
@@ -245,7 +253,7 @@ const Admin = () => {
             <Card className="transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer border-0 shadow-md">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Categorias</CardTitle>
-                <Package className="h-4 w-4 text-muted-foreground transition-colors duration-200 group-hover:text-primary" />
+                <Package className="h-4 w-4 text-muted-foreground transition-colors duration-200 group-hover:text-rose-primary" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold transition-colors duration-200">

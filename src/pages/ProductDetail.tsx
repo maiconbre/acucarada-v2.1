@@ -122,7 +122,7 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="animate-pulse">
@@ -148,7 +148,7 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
@@ -158,7 +158,7 @@ const ProductDetail = () => {
             variant="ghost"
             size="sm"
             onClick={() => navigate(-1)}
-            className="p-0 h-auto font-normal hover:text-primary"
+            className="p-0 h-auto font-normal hover:text-rose-primary"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Voltar
@@ -166,7 +166,7 @@ const ProductDetail = () => {
           <span>/</span>
           <span>Catálogo</span>
           <span>/</span>
-          <span className="text-foreground font-medium">{product.name}</span>
+          <span className="text-foreground font-medium font-text">{product.name}</span>
         </div>
 
         {/* Conteúdo Principal */}
@@ -189,9 +189,9 @@ const ProductDetail = () => {
                 />
                 {product.is_featured && (
                   <div className="absolute top-4 left-4">
-                    <Badge className="bg-primary text-primary-foreground">
-                      Destaque
-                    </Badge>
+                    <Badge className="bg-rose-primary text-white">
+                       Destaque
+                     </Badge>
                   </div>
                 )}
               </div>
@@ -204,10 +204,10 @@ const ProductDetail = () => {
               <Badge variant="secondary" className="mb-3">
                 {product.category}
               </Badge>
-              <h1 className="font-display text-4xl font-bold text-foreground mb-4">
+              <h1 className="font-title text-4xl font-bold text-foreground mb-4">
                 {product.name}
               </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-lg text-muted-foreground leading-relaxed font-text">
                 {product.description}
               </p>
             </div>
@@ -215,10 +215,10 @@ const ProductDetail = () => {
             <div className="border-t pt-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <span className="text-sm text-muted-foreground block mb-1">
+                  <span className="text-sm text-muted-foreground block mb-1 font-text">
                     Preço
                   </span>
-                  <span className="text-4xl font-bold text-primary">
+                  <span className="text-4xl font-bold text-rose-primary font-title">
                     {formatPrice(product.price)}
                   </span>
                 </div>
@@ -257,21 +257,21 @@ const ProductDetail = () => {
             {/* Estatísticas do Produto */}
             <Card className="border-0 bg-muted/50 mb-6">
               <CardContent className="p-6">
-                <h3 className="font-semibold mb-3">Estatísticas</h3>
+                <h3 className="font-semibold mb-3 font-title">Estatísticas</h3>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="flex items-center justify-center gap-1 text-lg font-bold text-red-500">
                       <Heart className="h-4 w-4" />
                       {analytics.total_likes}
                     </div>
-                    <span className="text-xs text-muted-foreground">Curtidas</span>
+                    <span className="text-xs text-muted-foreground font-text">Curtidas</span>
                   </div>
                   <div>
                     <div className="flex items-center justify-center gap-1 text-lg font-bold text-blue-500">
                       <Eye className="h-4 w-4" />
                       {analytics.total_views}
                     </div>
-                    <span className="text-xs text-muted-foreground">Visualizações</span>
+                    <span className="text-xs text-muted-foreground font-text">Visualizações</span>
                   </div>
 
                 </div>

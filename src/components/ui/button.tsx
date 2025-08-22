@@ -10,8 +10,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft hover:shadow-elegant rounded-lg",
-        hero: "gradient-primary text-primary-foreground hover:shadow-glow transform hover:scale-[1.02] rounded-xl font-medium",
-        elegant: "bg-accent text-accent-foreground hover:bg-accent/90 shadow-soft hover:shadow-elegant rounded-lg",
+        hero: "bg-rose-primary text-white hover:bg-rose-primary/90 hover:shadow-glow transform hover:scale-[1.02] rounded-xl font-medium",
+        elegant: "bg-brown-primary text-white hover:bg-brown-primary/90 shadow-soft hover:shadow-elegant rounded-lg",
         soft: "bg-primary-soft text-primary hover:bg-primary-soft/80 rounded-lg",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-soft rounded-lg",

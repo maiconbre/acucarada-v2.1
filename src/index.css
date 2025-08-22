@@ -1,9 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
-
 /* Import Tailwind base styles */
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+
+/* Fontes locais do projeto */
+@font-face {
+  font-family: 'Atteron';
+  src: url('/fonts/titulo/Atteron Personal Use Only.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('/fonts/text/Quicksand_Book.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('/fonts/text/Quicksand_Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('/fonts/text/Quicksand_Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* Mobile Admin Optimizations */
 @layer utilities {
@@ -129,11 +160,11 @@
     --radius-lg: 16px;
     --radius-xl: 24px;
 
-    /* Gradientes - Elegantes com a nova paleta */
-    --gradient-primary: linear-gradient(135deg, hsl(330 70% 60%), hsl(25 50% 50%)); /* Rose para Brown */
-    --gradient-warm: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%); /* Brown para Rose */
-    --gradient-soft: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(330 70% 60% / 5%) 100%); /* Cream com Rose suave */
-    --gradient-vibrant: linear-gradient(45deg, hsl(330 70% 60%), hsl(25 50% 50%), hsl(330 40% 75%)); /* Rose, Brown, Rose claro */
+    /* Cores sólidas - Substituindo gradientes */
+    --solid-primary: hsl(330 70% 60%); /* Rose */
+    --solid-warm: hsl(25 50% 50%); /* Brown */
+    --solid-soft: hsl(var(--background)); /* Background sólido */
+    --solid-vibrant: hsl(330 70% 60%); /* Rose */
     
     /* Shadows */
     --shadow-soft: 0 4px 20px -4px hsl(var(--primary) / 0.1);
@@ -141,8 +172,8 @@
     --shadow-glow: 0 0 30px hsl(var(--primary-glow) / 0.3);
 
     /* Typography */
-    --font-display: 'Playfair Display', serif;
-    --font-body: 'Inter', sans-serif;
+    --font-display: 'Atteron', serif;
+    --font-body: 'Quicksand', sans-serif;
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -214,25 +245,33 @@
   }
 
   .font-display {
-    font-family: var(--font-display);
+    font-family: 'Atteron', serif;
   }
 
   .font-body {
-    font-family: var(--font-body);
+    font-family: 'Quicksand', sans-serif;
+  }
+
+  .font-title {
+    font-family: 'Atteron', serif;
+  }
+
+  .font-text {
+    font-family: 'Quicksand', sans-serif;
   }
 }
 
 @layer components {
   .gradient-primary {
-    background: var(--gradient-primary);
+    background: var(--solid-primary);
   }
 
   .gradient-warm {
-    background: var(--gradient-warm);
+    background: var(--solid-warm);
   }
 
   .gradient-soft {
-    background: var(--gradient-soft);
+    background: var(--solid-soft);
   }
 
   .shadow-soft {

@@ -19,8 +19,10 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				display: ['var(--font-display)', 'serif'],
-				body: ['var(--font-body)', 'sans-serif'],
+				display: ['Atteron', 'serif'],
+				body: ['Quicksand', 'sans-serif'],
+				title: ['Atteron', 'serif'],
+				text: ['Quicksand', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -28,44 +30,50 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
-				// Paleta personalizada - Rose (Primária)
+				// Nova Paleta de Cores do Projeto
+				// #EABFB9 - Rosa claro (backgrounds e elementos suaves)
+				'rose-light': '#EABFB9',
+				// #AD7843 - Marrom (elementos secundários)
+				'brown-primary': '#AD7843',
+				// #C75B7A - Rosa escuro (acentos e elementos principais)
+				'rose-primary': '#C75B7A',
+				
+				// Variações para melhor usabilidade
 				rose: {
-					50: 'hsl(330 40% 95%)',
-					100: 'hsl(330 40% 88%)',
-					200: 'hsl(330 50% 80%)',
-					300: 'hsl(330 60% 70%)',
-					400: 'hsl(330 65% 65%)',
-					500: 'hsl(330 70% 60%)', // Cor principal
-					600: 'hsl(330 75% 55%)',
-					700: 'hsl(330 80% 45%)',
-					800: 'hsl(330 85% 35%)',
-					900: 'hsl(330 90% 25%)'
+					50: '#fdf2f8',
+					100: '#fce7f3',
+					200: '#fbcfe8',
+					300: '#f9a8d4',
+					400: '#f472b6',
+					500: '#C75B7A', // Cor principal
+					600: '#be185d',
+					700: '#9d174d',
+					800: '#831843',
+					900: '#701a75'
 				},
-				// Paleta personalizada - Brown (Secundária)
 				brown: {
-					50: 'hsl(25 30% 92%)',
-					100: 'hsl(25 30% 80%)',
-					200: 'hsl(25 35% 75%)',
-					300: 'hsl(25 40% 65%)',
-					400: 'hsl(25 45% 55%)',
-					500: 'hsl(25 50% 50%)', // Cor principal
-					600: 'hsl(25 55% 40%)',
-					700: 'hsl(25 60% 30%)',
-					800: 'hsl(25 65% 25%)',
-					900: 'hsl(25 70% 15%)'
+					50: '#fdf8f6',
+					100: '#f2e8e5',
+					200: '#eaddd7',
+					300: '#e0cfc7',
+					400: '#d2bab0',
+					500: '#AD7843', // Cor principal
+					600: '#a16207',
+					700: '#854d0e',
+					800: '#713f12',
+					900: '#633a16'
 				},
-				// Paleta personalizada - Cream (Especiais)
 				cream: {
-					50: 'hsl(30 50% 98%)',
-					100: 'hsl(30 45% 96%)',
-					200: 'hsl(30 40% 94%)',
-					300: 'hsl(30 35% 90%)',
-					400: 'hsl(30 30% 85%)',
-					500: 'hsl(30 25% 80%)',
-					600: 'hsl(30 20% 75%)',
-					700: 'hsl(30 15% 65%)',
-					800: 'hsl(30 10% 55%)',
-					900: 'hsl(30 5% 45%)'
+					50: '#fefdfb',
+					100: '#fef7ed',
+					200: '#fef3e2',
+					300: '#fdedd3',
+					400: '#fce1b6',
+					500: '#EABFB9', // Cor principal
+					600: '#dc2626',
+					700: '#b91c1c',
+					800: '#991b1b',
+					900: '#7f1d1d'
 				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',

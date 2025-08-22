@@ -3,6 +3,7 @@ import { Heart, Star, Sparkles, ChefHat } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-sweets.jpg";
 
+
 export const Hero = () => {
   const navigate = useNavigate();
   
@@ -26,34 +27,36 @@ export const Hero = () => {
           className="w-full h-full object-cover object-center"
           loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/85 to-background/60 md:bg-gradient-to-r md:from-background/95 md:via-background/80 md:to-background/40" />
+        <div className="absolute inset-0 bg-background/85" />
       </div>
 
       {/* Floating elements for visual appeal */}
       <div className="absolute inset-0 z-5 pointer-events-none">
-        <div className="absolute top-20 right-10 w-4 h-4 bg-primary/20 rounded-full animate-pulse" />
-        <div className="absolute top-40 right-32 w-2 h-2 bg-rose-300/30 rounded-full animate-bounce" style={{animationDelay: '1s'}} />
-        <div className="absolute bottom-32 right-20 w-3 h-3 bg-cream-200/40 rounded-full animate-pulse" style={{animationDelay: '2s'}} />
+        <div className="absolute top-20 right-10 w-4 h-4 bg-rose-primary/20 rounded-full animate-pulse" />
+        <div className="absolute top-40 right-32 w-2 h-2 bg-rose-light/50 rounded-full animate-bounce" style={{animationDelay: '1s'}} />
+        <div className="absolute bottom-32 right-20 w-3 h-3 bg-brown-primary/30 rounded-full animate-pulse" style={{animationDelay: '2s'}} />
       </div>
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8 md:py-16 relative z-10">
         <div className="max-w-4xl mx-auto text-center md:text-left md:mx-0 md:max-w-2xl">
           {/* Badge with animation */}
-          <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm text-primary px-4 py-2 rounded-full mb-4 border border-primary/20 animate-fade-in">
+          <div className="inline-flex items-center gap-2 bg-rose-primary/10 backdrop-blur-sm text-rose-primary px-4 py-2 rounded-full mb-4 border border-rose-primary/20 animate-fade-in">
             <Sparkles className="h-4 w-4 animate-pulse" />
-            <span className="text-xs sm:text-sm font-medium">Doces Artesanais Premium</span>
+            <span className="text-xs sm:text-sm font-medium font-text">Doces Artesanais</span>
           </div>
 
           {/* Main Title with improved mobile hierarchy */}
-          <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-display font-bold mb-6 leading-tight animate-slide-up pb-2">
-            <span className="gradient-primary bg-clip-text text-transparent block">
-              Açucarada
-            </span>
-          </h1>
+          <div className="flex flex-col items-center md:items-start mb-6 animate-slide-up">
+            <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-title font-bold leading-tight pb-2">
+              <span className="text-rose-primary block">
+                Açucarada
+              </span>
+            </h1>
+          </div>
 
           {/* Description with better mobile readability */}
-          <p className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto md:mx-0 animate-fade-in" style={{animationDelay: '0.3s'}}>
+          <p className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto md:mx-0 animate-fade-in font-text" style={{animationDelay: '0.3s'}}>
             Criamos doces artesanais únicos, feitos com ingredientes selecionados e muito amor. 
             Cada doce é uma pequena obra de arte que desperta os sentidos.
           </p>
@@ -85,18 +88,18 @@ export const Hero = () => {
             <div className="flex items-center justify-center sm:justify-start gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:bg-card/80 transition-colors">
               <div className="flex shrink-0">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-3 w-3 sm:h-4 sm:w-4 fill-primary text-primary" />
+                  <Star key={i} className="h-3 w-3 sm:h-4 sm:w-4 fill-rose-primary text-rose-primary" />
                 ))}
               </div>
-              <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left">500+ clientes satisfeitos</span>
+              <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left font-text">500+ clientes satisfeitos</span>
             </div>
             <div className="flex items-center justify-center sm:justify-start gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:bg-card/80 transition-colors">
-              <Sparkles className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left">Entrega em toda região</span>
+              <Sparkles className="h-4 w-4 text-rose-primary shrink-0" />
+              <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left font-text">Entrega em toda região</span>
             </div>
             <div className="flex items-center justify-center sm:justify-start gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:bg-card/80 transition-colors sm:col-span-2 lg:col-span-1">
-              <ChefHat className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left">Feito no dia da entrega</span>
+              <ChefHat className="h-4 w-4 text-rose-primary shrink-0" />
+              <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left font-text">Feito no dia da entrega</span>
             </div>
           </div>
         </div>

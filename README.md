@@ -1,73 +1,240 @@
-# Welcome to your Lovable project
+# Doce Conecta Digital - Açucarada
 
-## Project info
+## 🍫 Visão Geral do Projeto
 
-**URL**: https://lovable.dev/projects/b43ebcb6-21a4-42de-b6a5-9fdc22ce6298
+### Objetivos Principais
 
-## How can I edit this code?
+O **Doce Conecta Digital** é uma plataforma web moderna desenvolvida para a confeitaria artesanal "Açucarada", com os seguintes objetivos:
 
-There are several ways of editing your application.
+- **Digitalização do Negócio**: Criar presença digital profissional para a confeitaria
+- **Catálogo Online**: Apresentar produtos de forma atrativa e organizada
+- **Gestão Administrativa**: Fornecer ferramentas completas para gerenciamento de produtos e análise de desempenho
+- **Experiência do Cliente**: Proporcionar navegação intuitiva e facilitar o processo de pedidos
+- **Analytics Avançado**: Implementar sistema de métricas para tomada de decisões baseada em dados
 
-**Use Lovable**
+### Contexto e Propósito
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b43ebcb6-21a4-42de-b6a5-9fdc22ce6298) and start prompting.
+Este projeto surge da necessidade de modernizar o modelo de negócio de confeitarias artesanais, oferecendo uma solução completa que combina:
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Vitrine Digital**: Showcase profissional dos produtos artesanais
+- **Sistema de Gestão**: Painel administrativo completo para controle do negócio
+- **Integração WhatsApp**: Conexão direta com clientes para facilitar pedidos
+- **Responsividade**: Experiência otimizada para todos os dispositivos
 
-**Use your preferred IDE**
+### Público-Alvo
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Clientes Finais**: Consumidores interessados em doces artesanais premium
+- **Administradores**: Proprietários e funcionários da confeitaria
+- **Visitantes**: Potenciais clientes explorando o catálogo
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🏗️ Arquitetura do Sistema
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Componentes Principais
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+**Frontend (React + TypeScript)**
+- **Páginas Públicas**: Home, Catálogo, Detalhes do Produto
+- **Sistema de Autenticação**: Login/Registro seguro
+- **Painel Administrativo**: Gestão completa de produtos, categorias e analytics
+- **Interface Responsiva**: Design adaptativo para mobile e desktop
 
-# Step 3: Install the necessary dependencies.
-npm i
+**Backend (Supabase)**
+- **Banco de Dados PostgreSQL**: Armazenamento estruturado de dados
+- **Autenticação**: Sistema seguro de usuários e permissões
+- **APIs RESTful**: Endpoints para todas as operações CRUD
+- **Row Level Security**: Políticas de segurança granulares
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+**Sistema de Analytics**
+- **Tracking de Interações**: Visualizações, curtidas e cliques
+- **Métricas Agregadas**: Estatísticas de desempenho em tempo real
+- **Relatórios Visuais**: Gráficos e dashboards informativos
+
+### Fluxo de Dados e Interações
+
+1. **Visitante acessa o site** → Visualiza produtos → Sistema registra analytics
+2. **Cliente interessado** → Clica em produto → Redireciona para WhatsApp
+3. **Administrador** → Acessa painel → Gerencia produtos → Visualiza métricas
+4. **Sistema** → Coleta dados → Processa analytics → Apresenta insights
+
+### Tecnologias Utilizadas
+
+**Frontend**
+- **React 18**: Biblioteca principal para interface de usuário
+- **TypeScript**: Tipagem estática para maior robustez
+- **Vite**: Build tool moderno e performático
+- **Tailwind CSS**: Framework CSS utilitário
+- **shadcn/ui**: Componentes UI modernos e acessíveis
+- **React Router**: Navegação entre páginas
+- **React Query**: Gerenciamento de estado servidor
+
+**Backend & Infraestrutura**
+- **Supabase**: Backend-as-a-Service completo
+- **PostgreSQL**: Banco de dados relacional
+- **Row Level Security**: Segurança a nível de linha
+- **Real-time subscriptions**: Atualizações em tempo real
+
+**Ferramentas de Desenvolvimento**
+- **ESLint**: Linting e qualidade de código
+- **PostCSS**: Processamento de CSS
+- **Git**: Controle de versão
+
+---
+
+## 📋 Planejamento
+
+### Fases de Desenvolvimento
+
+**Fase 1: Fundação (Semanas 1-2)**
+- Configuração do ambiente de desenvolvimento
+- Estruturação do projeto e arquitetura base
+- Implementação do sistema de autenticação
+- Criação do banco de dados e migrações
+
+**Fase 2: Interface Pública (Semanas 3-4)**
+- Desenvolvimento da página inicial (Hero, About, Contact)
+- Implementação do catálogo de produtos
+- Criação da página de detalhes do produto
+- Integração com WhatsApp para pedidos
+
+**Fase 3: Painel Administrativo (Semanas 5-6)**
+- Sistema de gestão de produtos (CRUD completo)
+- Gerenciamento de categorias
+- Interface de configurações e perfil
+- Sistema de upload de imagens
+
+**Fase 4: Analytics e Otimização (Semanas 7-8)**
+- Implementação do sistema de tracking
+- Dashboard de analytics com métricas
+- Otimização de performance (lazy loading, caching)
+- Testes e refinamentos finais
+
+### Cronograma Resumido
+
+- **Duração Total**: 8 semanas
+- **Entrega MVP**: Semana 6
+- **Versão Completa**: Semana 8
+- **Testes e Deploy**: Semana 8
+
+### Metodologia Adotada
+
+**Desenvolvimento Ágil**
+- Iterações semanais com entregas incrementais
+- Feedback contínuo e ajustes baseados em necessidades
+- Priorização de funcionalidades por valor de negócio
+
+**Boas Práticas**
+- Código limpo e bem documentado
+- Testes de componentes críticos
+- Versionamento semântico
+- Code review e padrões de qualidade
+
+---
+
+## ⚙️ Execução
+
+### Processo de Implementação
+
+**1. Configuração Inicial**
+```bash
+# Clonagem e configuração do projeto
+git clone <repository-url>
+cd doce-conecta-digital
+npm install
 ```
 
-**Edit a file directly in GitHub**
+**2. Configuração do Banco de Dados**
+- Setup do Supabase com PostgreSQL
+- Execução das migrações para criação das tabelas
+- Configuração das políticas de segurança (RLS)
+- População inicial com dados de exemplo
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+**3. Desenvolvimento por Módulos**
+- Implementação incremental de funcionalidades
+- Testes contínuos durante o desenvolvimento
+- Integração progressiva entre frontend e backend
 
-**Use GitHub Codespaces**
+### Dependências e Requisitos
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+**Requisitos do Sistema**
+- Node.js 18+ e npm/yarn
+- Conta Supabase para backend
+- Navegador moderno com suporte a ES2020+
 
-## What technologies are used for this project?
+**Dependências Principais**
+- React ecosystem (React, React Router, React Query)
+- UI Components (Radix UI, shadcn/ui)
+- Styling (Tailwind CSS, PostCSS)
+- Development tools (Vite, TypeScript, ESLint)
 
-This project is built with:
+### Orientações para Uso
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+**Para Desenvolvedores**
+```bash
+# Desenvolvimento local
+npm run dev          # Inicia servidor de desenvolvimento
+npm run build        # Build para produção
+npm run lint         # Verificação de código
+```
 
-## How can I deploy this project?
+**Para Administradores**
+1. Acesse `/auth` para fazer login
+2. Navegue para `/admin` após autenticação
+3. Use as abas para gerenciar produtos, categorias e visualizar analytics
+4. Configure preferências em "Configurações"
 
-Simply open [Lovable](https://lovable.dev/projects/b43ebcb6-21a4-42de-b6a5-9fdc22ce6298) and click on Share -> Publish.
+**Para Clientes**
+1. Navegue pelo catálogo na página inicial ou `/catalog`
+2. Clique em produtos para ver detalhes
+3. Use o botão "Fazer Pedido" para contato via WhatsApp
+4. Curta produtos para demonstrar interesse
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
+## 🚀 Deploy e Configuração
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Variáveis de Ambiente
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Configure as seguintes variáveis no arquivo `.env`:
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### Deploy
+
+O projeto pode ser facilmente deployado em:
+- **Vercel**: Deploy automático via Git
+- **Netlify**: Integração contínua
+- **Supabase Hosting**: Hospedagem integrada
+
+---
+
+## 📊 Funcionalidades Implementadas
+
+### Sistema Público
+- ✅ Página inicial com hero section atrativo
+- ✅ Catálogo completo com filtros e busca
+- ✅ Páginas de detalhes de produtos
+- ✅ Integração WhatsApp para pedidos
+- ✅ Sistema de curtidas e visualizações
+- ✅ Design responsivo e otimizado
+
+### Painel Administrativo
+- ✅ Gestão completa de produtos (CRUD)
+- ✅ Gerenciamento de categorias
+- ✅ Dashboard de analytics avançado
+- ✅ Sistema de configurações
+- ✅ Perfil de usuário personalizável
+- ✅ Interface mobile-friendly
+
+### Sistema de Analytics
+- ✅ Tracking de visualizações por produto
+- ✅ Sistema de curtidas e engajamento
+- ✅ Métricas agregadas em tempo real
+- ✅ Relatórios visuais e estatísticas
+- ✅ Análise de produtos mais populares
+
+---
+
+*Desenvolvido com ❤️ para modernizar confeitarias artesanais*
