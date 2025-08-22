@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, Star, Sparkles, ChefHat } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-sweets.jpg";
+import logoImage from "@/assets/Fundo Transparente PNGPrancheta 1.png";
 
 
 export const Hero = () => {
@@ -38,21 +39,22 @@ export const Hero = () => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8 md:py-16 relative z-10">
+      <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center md:text-left md:mx-0 md:max-w-2xl">
           {/* Badge with animation */}
-          <div className="inline-flex items-center gap-2 bg-rose-primary/10 backdrop-blur-sm text-rose-primary px-4 py-2 rounded-full mb-4 border border-rose-primary/20 animate-fade-in">
-            <Sparkles className="h-4 w-4 animate-pulse" />
-            <span className="text-xs sm:text-sm font-medium font-text">Doces Artesanais</span>
+          <div className="inline-flex items-center gap-2 sm:gap-2 bg-rose-primary/10 backdrop-blur-sm text-rose-primary px-2 sm:px-4 py-1 sm:py-2 rounded-full mb-4 mt-4 sm:mt-0 border border-rose-primary/20 animate-fade-in">
+            <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 animate-pulse" />
+            <span className="text-xs font-medium font-text">Doces Artesanais</span>
           </div>
 
           {/* Main Title with improved mobile hierarchy */}
-          <div className="flex flex-col items-center md:items-start mb-6 animate-slide-up">
-            <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-title font-bold leading-tight pb-2">
-              <span className="text-rose-primary block">
-                Açucarada
-              </span>
-            </h1>
+          <div className="flex flex-col items-center md:items-start animate-slide-up">
+            <img
+          src={logoImage}
+          alt="Açucarada"
+          className="h-auto object-contain m-0 p-0 w-[150%] max-w-none"
+          loading="eager"
+        />
           </div>
 
           {/* Description with better mobile readability */}

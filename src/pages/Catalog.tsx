@@ -35,7 +35,7 @@ const Catalog = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState("all");
-  const [showFeatured, setShowFeatured] = useState(false);
+  const [showReadyDelivery, setShowReadyDelivery] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
@@ -47,7 +47,7 @@ const Catalog = () => {
 
   useEffect(() => {
     filterProducts();
-  }, [products, searchTerm, selectedCategory, priceRange, showFeatured, sortBy]);
+  }, [products, searchTerm, selectedCategory, priceRange, showReadyDelivery, sortBy]);
 
   const fetchProducts = async () => {
     try {
@@ -118,8 +118,8 @@ const Catalog = () => {
       }
     }
 
-    // Filter by featured
-    if (showFeatured) {
+    // Filter by ready delivery
+    if (showReadyDelivery) {
       filtered = filtered.filter((product) => product.is_featured);
     }
 
@@ -154,13 +154,13 @@ const Catalog = () => {
     <div className="min-h-screen gradient-soft">
       <Header />
       {/* Header */}
-      <div className="bg-card/80 backdrop-blur-sm border-b border-border/50">
+      <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 pt-16 md:pt-20">
         <div className="container mx-auto px-4 py-6">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-title font-bold mb-4">
+          <div className="text-center mb-6 md:mb-8">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-title font-bold mb-2 md:mb-4 px-4">
               Nosso <span className="gradient-primary bg-clip-text text-transparent">Catálogo</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-text">
+            <p className="text-sm md:text-xl text-muted-foreground max-w-2xl mx-auto font-text px-4">
               Explore nossa deliciosa seleção de doces artesanais
             </p>
           </div>
@@ -244,12 +244,12 @@ const Catalog = () => {
                 </Select>
 
                 <Button
-                  variant={showFeatured ? "default" : "outline"}
-                  onClick={() => setShowFeatured(!showFeatured)}
+                  variant={showReadyDelivery ? "default" : "outline"}
+                  onClick={() => setShowReadyDelivery(!showReadyDelivery)}
                   className="w-full sm:w-auto"
                 >
-                  <Star className={`h-4 w-4 mr-2 ${showFeatured ? 'fill-current' : ''}`} />
-                  Destaques
+                  <Star className={`h-4 w-4 mr-2 ${showReadyDelivery ? 'fill-current' : ''}`} />
+                  Pronta entrega
                 </Button>
               </div>
 
@@ -289,7 +289,7 @@ const Catalog = () => {
         ) : (
           <div className={`${
             viewMode === 'grid' 
-              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' 
+              ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6' 
               : 'flex flex-col gap-4'
           }`}>
             {filteredProducts.map((product) => (
@@ -301,6 +301,7 @@ const Catalog = () => {
                   price={`R$ ${product.price.toFixed(2).replace(".", ",")}`}
                   image={product.image_url || ""}
                   category={product.category}
+                  is_featured={product.is_featured}
                 />
               </div>
             ))}

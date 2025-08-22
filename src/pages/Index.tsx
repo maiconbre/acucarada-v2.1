@@ -6,9 +6,8 @@ import { ChefHat } from "lucide-react";
 
 // Lazy load components for better performance
 const ProductGrid = lazy(() => import("@/components/ProductGrid").then(module => ({ default: module.ProductGrid })));
-const About = lazy(() => import("@/components/About").then(module => ({ default: module.About })));
+const ProductGridEncomenda = lazy(() => import("@/components/ProductGridEncomenda").then(module => ({ default: module.ProductGridEncomenda })));
 const Testimonials = lazy(() => import("@/components/Testimonials").then(module => ({ default: module.Testimonials })));
-const Contact = lazy(() => import("@/components/Contact").then(module => ({ default: module.Contact })));
 
 // Loading component for lazy-loaded sections
 const SectionLoader = ({ title }: { title: string }) => (
@@ -24,22 +23,20 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <Hero />
+      <div className="pt-16 md:pt-20">
+        <Hero />
+      </div>
       
       <Suspense fallback={<SectionLoader title="produtos" />}>
         <ProductGrid />
       </Suspense>
       
-      <Suspense fallback={<SectionLoader title="sobre nós" />}>
-        <About />
+      <Suspense fallback={<SectionLoader title="encomendas" />}>
+        <ProductGridEncomenda />
       </Suspense>
       
       <Suspense fallback={<SectionLoader title="depoimentos" />}>
         <Testimonials />
-      </Suspense>
-      
-      <Suspense fallback={<SectionLoader title="contato" />}>
-        <Contact />
       </Suspense>
       
       <Footer />

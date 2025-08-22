@@ -1,6 +1,6 @@
 import { MessageCircle, Phone, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logoImage from "@/assets/logo2.png";
 import {
@@ -14,6 +14,8 @@ import {
 
 export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
   const whatsappNumber = "5511999999999"; // Replace with actual number
   const whatsappMessage = encodeURIComponent("Olá! Gostaria de saber mais sobre os doces da Açucarada 🍫");
@@ -35,8 +37,48 @@ export const Header = () => {
     setIsMobileMenuOpen(false);
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const isMobile = window.innerWidth < 768; // md breakpoint
+      
+      if (isMobile) {
+        if (currentScrollY < lastScrollY || currentScrollY < 10) {
+          // Scrolling up or near top
+          setIsHeaderVisible(true);
+        } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+          // Scrolling down and past threshold
+          setIsHeaderVisible(false);
+          setIsMobileMenuOpen(false); // Close mobile menu when hiding
+        }
+      } else {
+        // Always visible on desktop
+        setIsHeaderVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768;
+      if (!isMobile) {
+        setIsHeaderVisible(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [lastScrollY]);
+
   return (
-    <header className="bg-rose-light border-b border-border/50 sticky top-0 z-50 backdrop-blur-sm">
+    <header className={`bg-rose-light border-b border-border/50 fixed top-0 left-0 right-0 z-50 backdrop-blur-sm transition-transform duration-300 ease-in-out ${
+      isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+    }`}>
       <div className="container mx-auto px-2 py-2 md:px-4 md:py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
