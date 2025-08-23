@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "./ProductCard";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, ChefHat, Grid3X3, List } from "lucide-react";
+import { ChefHat, Grid3X3, List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Product {
   id: string;
@@ -18,8 +19,14 @@ interface Product {
 export const ProductGrid = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const isMobile = useIsMobile();
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(isMobile ? 'list' : 'grid');
   const navigate = useNavigate();
+
+  // Atualiza automaticamente o viewMode baseado no tamanho da tela
+  useEffect(() => {
+    setViewMode(isMobile ? 'list' : 'grid');
+  }, [isMobile]);
 
   useEffect(() => {
     fetchFeaturedProducts();
@@ -82,12 +89,9 @@ export const ProductGrid = () => {
       <div className="container mx-auto px-4">
         {/* Section Header with animation */}
         <div className="text-center mb-8 md:mb-16 animate-fade-in">
-          <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm text-primary px-4 py-2 rounded-full mb-6 border border-primary/20">
-            <Sparkles className="h-4 w-4" />
-            <span className="text-sm font-medium">Produtos Pronta Entrega</span>
-          </div>
+          
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-display font-bold mb-4 md:mb-6">
-            Nossos <span className="gradient-primary bg-clip-text text-transparent">Doces</span>
+            Doces <span className="gradient-primary bg-clip-text text-transparent">do dia</span>
           </h2>
           <p className="text-sm md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4 md:px-0">
             Cada doce é cuidadosamente preparado com ingredientes selecionados e muito carinho. 
@@ -101,7 +105,7 @@ export const ProductGrid = () => {
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
-                className="px-2 md:px-3"
+                className="px-2 md:px-3 order-2 md:order-1"
               >
                 <Grid3X3 className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
@@ -109,7 +113,7 @@ export const ProductGrid = () => {
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('list')}
-                className="px-2 md:px-3"
+                className="px-2 md:px-3 order-1 md:order-2"
               >
                 <List className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
@@ -142,34 +146,6 @@ export const ProductGrid = () => {
               />
             </div>
           ))}
-        </div>
-
-        {/* Enhanced CTA Section */}
-        <div className="text-center mt-16 space-y-8">
-          <div className="animate-fade-in" style={{animationDelay: '0.8s'}}>
-            <Button 
-              variant="hero" 
-              size="lg"
-              onClick={() => navigate("/catalog")}
-              className="group hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
-            >
-              <ChefHat className="mr-2 h-5 w-5 group-hover:animate-pulse" />
-              Ver Catálogo Completo
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </div>
-          
-          <div className="flex items-center justify-center gap-6 max-w-lg mx-auto animate-fade-in bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/80 transition-colors" style={{animationDelay: '1s'}}>
-            <div className="flex items-center gap-2">
-              <span className="text-xl">📱</span>
-              <span className="text-sm font-medium">Pedidos via WhatsApp</span>
-            </div>
-            <div className="w-px h-6 bg-border/50"></div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🚚</span>
-              <span className="text-sm font-medium">Entrega rápida</span>
-            </div>
-          </div>
         </div>
       </div>
     </section>

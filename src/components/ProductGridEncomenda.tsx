@@ -4,6 +4,7 @@ import ProductCard from "./ProductCard";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock, Package, Grid3X3, List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Product {
   id: string;
@@ -18,8 +19,14 @@ interface Product {
 export const ProductGridEncomenda = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const isMobile = useIsMobile();
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(isMobile ? 'list' : 'grid');
   const navigate = useNavigate();
+
+  // Atualiza automaticamente o viewMode baseado no tamanho da tela
+  useEffect(() => {
+    setViewMode(isMobile ? 'list' : 'grid');
+  }, [isMobile]);
 
   useEffect(() => {
     fetchEncomendaProducts();
@@ -82,12 +89,9 @@ export const ProductGridEncomenda = () => {
       <div className="container mx-auto px-4">
         {/* Section Header with animation */}
         <div className="text-center mb-8 md:mb-16 animate-fade-in">
-          <div className="inline-flex items-center gap-2 bg-amber-500/10 backdrop-blur-sm text-amber-600 px-4 py-2 rounded-full mb-6 border border-amber-500/20">
-            <Clock className="h-4 w-4" />
-            <span className="text-sm font-medium">Produtos Encomenda</span>
-          </div>
+          
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-display font-bold mb-4 md:mb-6">
-            Doces <span className="gradient-primary bg-clip-text text-transparent">Especiais</span>
+            Doces <span className="gradient-primary bg-clip-text text-transparent">Encomendas</span>
           </h2>
           <p className="text-sm md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4 md:px-0">
             Criações exclusivas feitas sob encomenda com todo carinho e dedicação. 
@@ -101,7 +105,7 @@ export const ProductGridEncomenda = () => {
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
-                className="px-2 md:px-3"
+                className="px-2 md:px-3 order-2 md:order-1"
               >
                 <Grid3X3 className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
@@ -109,7 +113,7 @@ export const ProductGridEncomenda = () => {
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('list')}
-                className="px-2 md:px-3"
+                className="px-2 md:px-3 order-1 md:order-2"
               >
                 <List className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
@@ -161,13 +165,13 @@ export const ProductGridEncomenda = () => {
           
           <div className="flex items-center justify-center gap-6 max-w-lg mx-auto animate-fade-in bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/80 transition-colors" style={{animationDelay: '1s'}}>
             <div className="flex items-center gap-2">
-              <span className="text-xl">⏰</span>
-              <span className="text-sm font-medium">Prazo de 2-3 dias</span>
+              <span className="text-xl">📱</span>
+              <span className="text-sm font-medium">Pedidos via WhatsApp</span>
             </div>
             <div className="w-px h-6 bg-border/50"></div>
             <div className="flex items-center gap-2">
-              <span className="text-xl">🎂</span>
-              <span className="text-sm font-medium">Feito especialmente</span>
+              <span className="text-xl">🚚</span>
+              <span className="text-sm font-medium">Entrega rápida</span>
             </div>
           </div>
         </div>

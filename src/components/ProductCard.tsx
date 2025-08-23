@@ -51,18 +51,7 @@ const ProductCard = ({ id, name, description, price, image, category, is_feature
             {is_featured ? 'Pronta entrega' : 'Encomenda'}
           </span>
         </div>
-        <div className="absolute top-3 right-3">
-          <Button
-            variant="soft"
-            size="icon"
-            className={`h-8 w-8 opacity-0 group-hover:opacity-100 transition-all ${
-              analytics.is_liked ? 'text-red-500 opacity-100' : ''
-            }`}
-            onClick={handleLikeClick}
-          >
-            <Heart className={`h-4 w-4 ${analytics.is_liked ? 'fill-current' : ''}`} />
-          </Button>
-        </div>
+
       </div>
       
       <CardContent className="p-3 md:p-6">
@@ -78,10 +67,17 @@ const ProductCard = ({ id, name, description, price, image, category, is_feature
             {price}
           </span>
           <div className="flex items-center gap-2 md:gap-3">
-            <div className="flex items-center gap-1 text-xs md:text-sm text-muted-foreground">
-              <Heart className="h-3 w-3 md:h-4 md:w-4" />
-              <span className="hidden md:inline">{analytics.total_likes}</span>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`p-1 h-auto transition-colors ${
+                analytics.is_liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'
+              }`}
+              onClick={handleLikeClick}
+            >
+              <Heart className={`h-3 w-3 md:h-4 md:w-4 ${analytics.is_liked ? 'fill-current' : ''}`} />
+              <span className="hidden md:inline ml-1">{analytics.total_likes}</span>
+            </Button>
             <span className="text-xs md:text-sm text-muted-foreground font-medium hidden md:inline">
               Ver detalhes
             </span>

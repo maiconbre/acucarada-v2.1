@@ -42,11 +42,11 @@ export const Hero = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center md:text-left md:mx-0 md:max-w-2xl">
           {/* Main Title with improved mobile hierarchy */}
-          <div className="flex flex-col items-center md:items-start animate-slide-up">
+          <div className="flex flex-col items-center md:items-start animate-slide-up -mt-40 md:-mt-12 py-2">
             <img
           src={logoImage}
           alt="Açucarada"
-          className="h-auto object-contain m-0 p-0 w-[150%] max-w-none"
+          className="h-auto object-contain m-0 p-0 w-[155%] max-w-2xl md:max-w-3xl lg:max-w-4xl"
           loading="eager"
         />
           </div>
@@ -89,14 +89,8 @@ export const Hero = () => {
               </div>
               <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left font-text">500+ clientes satisfeitos</span>
             </div>
-            <div className="flex items-center justify-center sm:justify-start gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:bg-card/80 transition-colors">
-              <ChefHat className="h-4 w-4 text-rose-primary shrink-0" />
-              <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left font-text">Entrega em toda região</span>
-            </div>
-            <div className="flex items-center justify-center sm:justify-start gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:bg-card/80 transition-colors sm:col-span-2 lg:col-span-1">
-              <ChefHat className="h-4 w-4 text-rose-primary shrink-0" />
-              <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left font-text">Feito no dia da entrega</span>
-            </div>
+            
+            
           </div>
         </div>
       </div>
