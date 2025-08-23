@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Eye } from "lucide-react";
+import { Heart, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProductAnalytics } from "@/hooks/useProductAnalytics";
-import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductCardProps {
   id: string;
@@ -17,12 +17,8 @@ interface ProductCardProps {
 
 const ProductCard = ({ id, name, description, price, image, category, is_featured }: ProductCardProps) => {
   const navigate = useNavigate();
-  const { analytics, toggleLike, trackView, trackClick } = useProductAnalytics(id);
-
-  // Track view when component mounts
-  useEffect(() => {
-    trackView();
-  }, [trackView]);
+  const { toast } = useToast();
+  const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id);
 
   const handleCardClick = () => {
     trackClick('view_details', 'catalog');
@@ -33,6 +29,33 @@ const ProductCard = ({ id, name, description, price, image, category, is_feature
     e.stopPropagation();
     await toggleLike();
     trackClick('like', 'catalog');
+  };
+
+  const handleShareClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const shareData = {
+      title: name,
+      text: `Confira este delicioso ${name} - ${price}`,
+      url: `${window.location.origin}/produto/${id}`,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        trackShare('native_share', 'catalog');
+      } else {
+        // Fallback para copiar URL
+        await navigator.clipboard.writeText(`${window.location.origin}/produto/${id}`);
+        trackShare('copy_link', 'catalog');
+        toast({
+          title: "Link copiado!",
+          description: "O link do produto foi copiado para a área de transferência.",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao compartilhar:", error);
+    }
   };
 
   return (
@@ -66,19 +89,28 @@ const ProductCard = ({ id, name, description, price, image, category, is_feature
           <span className="text-lg md:text-2xl font-bold text-primary">
             {price}
           </span>
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
-              className={`p-1 h-auto transition-colors ${
-                analytics.is_liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'
+              className={`p-2 h-8 w-8 md:h-auto md:w-auto md:p-1 transition-colors rounded-full md:rounded-md ${
+                analytics.is_liked ? 'text-red-500 bg-red-50' : 'text-muted-foreground hover:text-red-500 hover:bg-red-50'
               }`}
               onClick={handleLikeClick}
             >
-              <Heart className={`h-3 w-3 md:h-4 md:w-4 ${analytics.is_liked ? 'fill-current' : ''}`} />
-              <span className="hidden md:inline ml-1">{analytics.total_likes}</span>
+              <Heart className={`h-4 w-4 md:h-4 md:w-4 ${analytics.is_liked ? 'fill-current' : ''}`} />
+              <span className="hidden md:inline ml-1 text-xs">{analytics.total_likes}</span>
             </Button>
-            <span className="text-xs md:text-sm text-muted-foreground font-medium hidden md:inline">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-2 h-8 w-8 md:h-auto md:w-auto md:p-1 text-muted-foreground hover:text-blue-500 hover:bg-blue-50 transition-colors rounded-full md:rounded-md"
+              onClick={handleShareClick}
+            >
+              <Share2 className="h-4 w-4 md:h-4 md:w-4" />
+              <span className="hidden md:inline ml-1 text-xs">{analytics.total_shares}</span>
+            </Button>
+            <span className="text-xs md:text-sm text-muted-foreground font-medium hidden lg:inline">
               Ver detalhes
             </span>
           </div>

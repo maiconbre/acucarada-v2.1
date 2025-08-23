@@ -114,7 +114,7 @@ WHERE table_schema = 'public'
 AND (
     (table_name = 'products' AND column_name IN ('category_id', 'delivery_type', 'preparation_time_days'))
     OR 
-    (table_name = 'categories' AND column_name IN ('parent_id', 'delivery_type', 'is_master', 'sort_order'))
+    (table_name = 'categories' AND column_name IN ('parent_id', 'delivery_type', 'sort_order'))
 );
 
 -- Verificar produtos sem categoria ou com categoria inválida

@@ -1,17 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Star, ChefHat } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAppSettings } from "@/hooks/useAppSettings";
 import heroImage from "@/assets/hero-sweets.jpg";
 import logoImage from "@/assets/Fundo Transparente PNGPrancheta 1.png";
 
 
 export const Hero = () => {
   const navigate = useNavigate();
+  const { getWhatsAppLink } = useAppSettings();
   
   const handleOrderClick = () => {
-    const whatsappNumber = "5511999999999";
-    const message = encodeURIComponent("Olá! Gostaria de fazer um pedido dos doces da Açucarada 🍫✨");
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    const customMessage = "Olá! Gostaria de fazer um pedido dos doces da Açucarada 🍫✨";
+    const link = getWhatsAppLink(customMessage);
+    window.open(link, '_blank');
   };
   
   const handleCatalogClick = () => {

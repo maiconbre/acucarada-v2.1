@@ -23,7 +23,6 @@ A reversão irá desfazer (baseado no arquivo `2.ultimos.arquivos.sql`):
 2. **Campos adicionados na tabela `categories`:**
    - `parent_id` (UUID)
    - `delivery_type` (enum)
-   - `is_master` (boolean)
    - `sort_order` (integer)
 
 3. **Funções RPC criadas:**
@@ -99,7 +98,7 @@ O script de verificação `20250822100100_verify_revert_status.sql` irá confirm
 
 2. **Campos hierárquicos foram removidos:**
    - Nenhum campo `category_id`, `delivery_type`, `preparation_time_days` em `products`
-   - Nenhum campo `parent_id`, `delivery_type`, `is_master`, `sort_order` em `categories`
+   - Nenhum campo `parent_id`, `delivery_type`, `sort_order` em `categories`
 
 3. **Funções RPC específicas foram removidas:**
    - `get_products_with_category_info()`, `get_products_by_delivery_type()`, etc.

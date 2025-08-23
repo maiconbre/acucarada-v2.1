@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAppSettings } from "@/hooks/useAppSettings";
 import logoImage from "@/assets/formiga-empinando-logo.png";
 import {
   NavigationMenu,
@@ -18,11 +19,12 @@ export const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
-  const whatsappNumber = "5511999999999"; // Replace with actual number
-  const whatsappMessage = encodeURIComponent("Olá! Gostaria de saber mais sobre os doces da Açucarada 🍫");
+  const { getWhatsAppLink } = useAppSettings();
 
   const handleWhatsAppClick = () => {
-    window.open(`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`, '_blank');
+    const customMessage = "Olá! Gostaria de saber mais sobre os doces da Açucarada 🍫";
+    const link = getWhatsAppLink(customMessage);
+    window.open(link, '_blank');
     setIsMobileMenuOpen(false);
   };
 

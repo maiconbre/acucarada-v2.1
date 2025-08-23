@@ -49,6 +49,7 @@ interface AnalyticsDataItem {
   products: {
     name: string;
     category: string;
+    is_active: boolean;
   };
 }
 
@@ -145,16 +146,18 @@ const AnalyticsPanel = () => {
     try {
       setLoading(true);
 
-      // Fetch product analytics with product details
+      // Fetch product analytics with product details (only active products)
       const { data: analyticsData, error: analyticsError } = await supabase
         .from('product_analytics')
         .select(`
           *,
           products!inner(
             name,
-            category
+            category,
+            is_active
           )
-        `);
+        `)
+        .eq('products.is_active', true);
 
       if (analyticsError) throw analyticsError;
 
@@ -228,9 +231,16 @@ const AnalyticsPanel = () => {
 
   const fetchClickStats = async () => {
     try {
+      // Fetch click stats only for active products
       const { data: clickData, error: clickError } = await supabase
         .from('product_clicks')
-        .select('click_type');
+        .select(`
+          click_type,
+          products!inner(
+            is_active
+          )
+        `)
+        .eq('products.is_active', true);
 
       if (clickError) throw clickError;
 
@@ -300,8 +310,8 @@ const AnalyticsPanel = () => {
 
   return (
     <div className="space-y-6 pb-20 sm:pb-6">
-      {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between">
+      {/* Filtros - Ocultos no mobile */}
+      <div className="hidden sm:flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between">
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center w-full sm:w-auto">
           <Select value={sortBy} onValueChange={(value: 'likes' | 'views' | 'clicks') => setSortBy(value)}>
             <SelectTrigger className="w-full sm:w-48">

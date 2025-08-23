@@ -5,7 +5,7 @@ import { useUser } from '@/contexts/user-context';
 
 interface ProductAnalytics {
   total_likes: number;
-  total_views: number;
+  total_shares: number;
   total_clicks: number;
   unique_viewers: number;
   is_liked: boolean;
@@ -15,20 +15,21 @@ interface UseProductAnalyticsReturn {
   analytics: ProductAnalytics;
   loading: boolean;
   toggleLike: () => Promise<void>;
-  trackView: () => Promise<void>;
+  trackShare: (shareType: string, pageSource?: string) => Promise<void>;
   trackClick: (clickType: string, pageSource?: string) => Promise<void>;
+  trackView: () => Promise<void>;
 }
 
 export const useProductAnalytics = (productId: string): UseProductAnalyticsReturn => {
   const { toast } = useToast();
   const [analytics, setAnalytics] = useState<ProductAnalytics>({
     total_likes: 0,
-    total_views: 0,
+    total_shares: 0,
     total_clicks: 0,
     unique_viewers: 0,
     is_liked: false,
   });
-  const [lastViewTrack, setLastViewTrack] = useState<number>(0);
+
   const [loading, setLoading] = useState(true);
   const [sessionId] = useState(() => {
     // Generate or get session ID for anonymous users
@@ -56,7 +57,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
       // Get analytics summary
       const { data: analyticsData, error: analyticsError } = await supabase
         .from('product_analytics')
-        .select('total_likes, total_views, total_clicks, unique_viewers')
+        .select('total_likes, total_shares, total_clicks, unique_viewers')
         .eq('product_id', productId)
         .limit(1);
 
@@ -99,7 +100,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
 
       setAnalytics({
         total_likes: analytics?.total_likes || 0,
-        total_views: analytics?.total_views || 0,
+        total_shares: analytics?.total_shares || 0,
         total_clicks: analytics?.total_clicks || 0,
         unique_viewers: analytics?.unique_viewers || 0,
         is_liked: isLiked,
@@ -110,7 +111,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
       clearTimeout(timeoutId);
       setLoading(false);
     }
-  }, [productId, sessionId]);
+  }, [productId, sessionId, getCurrentUser]);
 
   // Toggle like
   const toggleLike = async () => {
@@ -148,31 +149,21 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
     }
   };
 
-  // Track view with debounce
-  const trackView = async () => {
-    const now = Date.now();
-    const DEBOUNCE_TIME = 5000; // 5 seconds debounce
-    
-    // Prevent multiple calls within debounce time
-    if (now - lastViewTrack < DEBOUNCE_TIME) {
-      return;
-    }
-    
-    setLastViewTrack(now);
-    
+  // Track share
+  const trackShare = async (shareType: string, pageSource?: string) => {
     try {
       const currentUser = await getCurrentUser();
       const ip = await getUserIP();
       const userAgent = getUserAgent();
-      const referrer = document.referrer;
 
-      const { error } = await supabase.rpc('track_product_view', {
+      const { error } = await supabase.rpc('track_product_share', {
         p_product_id: productId,
+        p_share_type: shareType,
+        p_page_source: pageSource || window.location.pathname,
         p_user_id: currentUser?.id || null,
         p_session_id: currentUser ? null : sessionId,
         p_ip_address: ip,
         p_user_agent: userAgent,
-        p_referrer: referrer || null,
       });
 
       if (error) throw error;
@@ -180,10 +171,10 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
       // Update local state
       setAnalytics(prev => ({
         ...prev,
-        total_views: prev.total_views + 1,
+        total_shares: prev.total_shares + 1,
       }));
     } catch (error) {
-      console.error('Error tracking view:', error);
+      console.error('Error tracking share:', error);
     }
   };
 
@@ -213,6 +204,34 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
       }));
     } catch (error) {
       console.error('Error tracking click:', error);
+    }
+  };
+
+  // Track view
+  const trackView = async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      const ip = await getUserIP();
+      const userAgent = getUserAgent();
+
+      const { error } = await supabase.rpc('track_product_view', {
+        p_product_id: productId,
+        p_user_id: currentUser?.id || null,
+        p_session_id: currentUser ? null : sessionId,
+        p_ip_address: ip,
+        p_user_agent: userAgent,
+        p_referrer: document.referrer || null,
+      });
+
+      if (error) throw error;
+
+      // Update local state
+      setAnalytics(prev => ({
+        ...prev,
+        unique_viewers: prev.unique_viewers + 1,
+      }));
+    } catch (error) {
+      console.error('Error tracking view:', error);
     }
   };
 
@@ -257,19 +276,19 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
         )
         .subscribe();
 
-      // Set up subscription for views
-      const viewsSubscription = supabase
-        .channel(`product_views_${productId}`)
+      // Set up subscription for shares
+      const sharesSubscription = supabase
+        .channel(`product_shares_${productId}`)
         .on(
           'postgres_changes',
           {
             event: '*',
             schema: 'public',
-            table: 'product_views',
+            table: 'product_shares',
             filter: `product_id=eq.${productId}`,
           },
           (payload) => {
-            console.log('Views updated:', payload);
+            console.log('Shares updated:', payload);
             fetchAnalytics();
           }
         )
@@ -279,7 +298,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
       return () => {
         analyticsSubscription.unsubscribe();
         likesSubscription.unsubscribe();
-        viewsSubscription.unsubscribe();
+        sharesSubscription.unsubscribe();
       };
     }
   }, [productId, fetchAnalytics]);
@@ -288,7 +307,8 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
     analytics,
     loading,
     toggleLike,
-    trackView,
+    trackShare,
     trackClick,
+    trackView,
   };
 };

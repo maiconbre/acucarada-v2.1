@@ -14,7 +14,6 @@ import MobileDashboard from "@/components/admin/MobileDashboard";
 import { LogOut, Package, BarChart, Tag, TrendingUp, Settings as SettingsIcon, Menu, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import logoImage from "@/assets/logo.png";
 
 interface Product {
   id: string;
@@ -149,12 +148,7 @@ const Admin = () => {
       <header className="bg-card/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex-1 flex items-center gap-3">
-              <img 
-                src={logoImage} 
-                alt="Açucarada Logo" 
-                className="h-8 w-8 md:h-10 md:w-10 object-contain transition-transform hover:scale-105"
-              />
+            <div className="flex-1 flex items-center">
               <div>
                 <h1 className="text-lg md:text-2xl font-display font-bold gradient-primary bg-clip-text text-transparent">
                   Açucarada Admin

@@ -1,8 +1,10 @@
 import { Heart, MessageCircle, Settings, Sparkles, Star, ChefHat } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAppSettings } from "@/hooks/useAppSettings";
 import footerLogoImage from "@/assets/Fundo Transparente PNGPrancheta 3.png";
 
 export const Footer = () => {
+  const { getWhatsAppLink } = useAppSettings();
   const currentYear = new Date().getFullYear();
 
   const handleSectionClick = (sectionId: string) => {
@@ -129,7 +131,7 @@ export const Footer = () => {
               <span className="text-muted-foreground text-sm font-medium font-text">Conecte-se conosco:</span>
               <div className="flex items-center gap-4">
                 <a 
-                  href="https://wa.me/5511999999999" 
+                  href={getWhatsAppLink()} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="group bg-green-500 hover:bg-green-600 text-white p-3 rounded-full transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl"
