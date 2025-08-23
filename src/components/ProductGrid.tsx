@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "./ProductCard";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,21 @@ interface Product {
   is_featured: boolean;
 }
 
+// Simple cache for products
+const productCache = {
+  data: null as Product[] | null,
+  timestamp: 0,
+  ttl: 5 * 60 * 1000 // 5 minutes cache
+};
+
 export const ProductGrid = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(isMobile ? 'list' : 'grid');
   const navigate = useNavigate();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Atualiza automaticamente o viewMode baseado no tamanho da tela
   useEffect(() => {
@@ -34,17 +43,50 @@ export const ProductGrid = () => {
 
   const fetchFeaturedProducts = async () => {
     try {
+      setError(null);
+      
+      // Check cache first
+      const now = Date.now();
+      if (productCache.data && (now - productCache.timestamp) < productCache.ttl) {
+        setProducts(productCache.data);
+        setLoading(false);
+        return;
+      }
+
+      // Set timeout to prevent infinite loading
+      timeoutRef.current = setTimeout(() => {
+        setLoading(false);
+        setError("Tempo limite excedido. Tente novamente.");
+      }, 10000); // 10 second timeout
+
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select("id, name, description, price, image_url, category, is_featured")
         .eq("is_active", true)
         .eq("is_featured", true)
         .limit(6);
 
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+
       if (error) throw error;
-      setProducts(data || []);
+      
+      const productsData = data || [];
+      setProducts(productsData);
+      
+      // Update cache
+      productCache.data = productsData;
+      productCache.timestamp = now;
+      
     } catch (error) {
       console.error("Error fetching products:", error);
+      setError("Erro ao carregar produtos. Tente novamente.");
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     } finally {
       setLoading(false);
     }
@@ -77,6 +119,34 @@ export const ProductGrid = () => {
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
               <ChefHat className="h-5 w-5 animate-pulse" />
               <span>Preparando nossos deliciosos doces...</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <section id="produtos" className="py-20 gradient-soft">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-8 max-w-md mx-auto">
+              <ChefHat className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-destructive mb-2">Ops! Algo deu errado</h3>
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button 
+                onClick={() => {
+                  setError(null);
+                  setLoading(true);
+                  fetchFeaturedProducts();
+                }}
+                variant="outline"
+                className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              >
+                Tentar novamente
+              </Button>
             </div>
           </div>
         </div>

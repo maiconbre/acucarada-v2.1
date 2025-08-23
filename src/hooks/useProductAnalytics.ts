@@ -63,52 +63,69 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
 
   // Fetch analytics data
   const fetchAnalytics = useCallback(async () => {
+    const timeoutId = setTimeout(() => {
+      console.warn('Analytics fetch timeout');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+
     try {
       setLoading(true);
       
       // Get analytics summary
       const { data: analyticsData, error: analyticsError } = await supabase
         .from('product_analytics')
-        .select('*')
+        .select('total_likes, total_views, total_clicks, unique_viewers')
         .eq('product_id', productId)
-        .single();
+        .limit(1);
 
-      if (analyticsError && analyticsError.code !== 'PGRST116') {
-        throw analyticsError;
+      if (analyticsError) {
+        console.warn('Error fetching analytics:', analyticsError);
+        // Continue with default values instead of throwing
       }
+      
+      const analytics = analyticsData && analyticsData.length > 0 ? analyticsData[0] : null;
 
       // Check if user has liked this product
       const user = await getCurrentUser();
       let isLiked = false;
 
       if (user) {
-        const { data: likeData } = await supabase
+        const { data: likeData, error: likeError } = await supabase
           .from('product_likes')
           .select('id')
           .eq('product_id', productId)
           .eq('user_id', user.id)
-          .single();
-        isLiked = !!likeData;
+          .limit(1);
+        
+        if (likeError) {
+          console.warn('Error checking user like:', likeError);
+        }
+        isLiked = !!(likeData && likeData.length > 0);
       } else {
-        const { data: likeData } = await supabase
+        const { data: likeData, error: likeError } = await supabase
           .from('product_likes')
           .select('id')
           .eq('product_id', productId)
           .eq('session_id', sessionId)
-          .single();
-        isLiked = !!likeData;
+          .limit(1);
+        
+        if (likeError) {
+          console.warn('Error checking session like:', likeError);
+        }
+        isLiked = !!(likeData && likeData.length > 0);
       }
 
       setAnalytics({
-        total_likes: analyticsData?.total_likes || 0,
-        total_views: analyticsData?.total_views || 0,
-        total_clicks: analyticsData?.total_clicks || 0,
-        unique_viewers: analyticsData?.unique_viewers || 0,
+        total_likes: analytics?.total_likes || 0,
+        total_views: analytics?.total_views || 0,
+        total_clicks: analytics?.total_clicks || 0,
+        unique_viewers: analytics?.unique_viewers || 0,
         is_liked: isLiked,
       });
     } catch (error) {
       console.error('Error fetching analytics:', error);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   }, [productId, sessionId]);
