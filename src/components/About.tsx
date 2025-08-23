@@ -2,56 +2,56 @@ import { Heart, Award, Clock, Sparkles, Users, Star, ChefHat, Gift } from "lucid
 
 export function About() {
   return (
-    <section id="sobre" className="py-20 bg-background relative overflow-hidden">
+    <section id="sobre" className="py-12 md:py-20 bg-background relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-primary/5" />
       <div className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
       <div className="absolute bottom-20 right-10 w-40 h-40 bg-secondary/10 rounded-full blur-3xl" />
       
       <div className="container mx-auto px-4 relative">
-        <div className="text-center mb-16 animate-fade-in">
+        <div className="text-center mb-8 md:mb-16 animate-fade-in">
           <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm text-primary px-4 py-2 rounded-full mb-6 border border-primary/20">
             <Sparkles className="h-4 w-4" />
             <span className="text-sm font-medium font-text">Nossa História</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-title font-bold mb-6">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-title font-bold mb-4 md:mb-6">
             Por que escolher a <span className="gradient-primary bg-clip-text text-transparent">Doce Conecta</span>?
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-text">
+          <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-text px-4">
             Somos apaixonados por criar momentos especiais através dos nossos doces artesanais. 
             Cada produto é feito com dedicação e os melhores ingredientes.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <div className="text-center group animate-fade-in hover:scale-105 transition-all duration-300" style={{animationDelay: '0.2s'}}>
-            <div className="w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/30 transition-all duration-300 shadow-lg group-hover:shadow-xl">
-              <Heart className="h-10 w-10 text-primary group-hover:scale-110 transition-transform" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-8 md:mb-16 px-4 md:px-0">
+          <div className="text-center group animate-fade-in hover:scale-105 transition-all duration-300 p-4 md:p-0" style={{animationDelay: '0.2s'}}>
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 group-hover:bg-primary/30 transition-all duration-300 shadow-lg group-hover:shadow-xl">
+              <Heart className="h-8 w-8 md:h-10 md:w-10 text-primary group-hover:scale-110 transition-transform" />
             </div>
-            <h3 className="text-xl font-semibold mb-4 group-hover:text-primary transition-colors font-title">Feito com Amor</h3>
-            <p className="text-muted-foreground leading-relaxed font-text">
+            <h3 className="text-lg md:text-xl font-semibold mb-2 md:mb-4 group-hover:text-primary transition-colors font-title">Feito com Amor</h3>
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed font-text">
               Cada doce é preparado com carinho e atenção aos detalhes, 
               garantindo sabor e qualidade únicos.
             </p>
           </div>
 
-          <div className="text-center group animate-fade-in hover:scale-105 transition-all duration-300" style={{animationDelay: '0.4s'}}>
-            <div className="w-20 h-20 bg-secondary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-secondary/30 transition-all duration-300 shadow-lg group-hover:shadow-xl">
-              <Award className="h-10 w-10 text-secondary group-hover:scale-110 transition-transform" />
+          <div className="text-center group animate-fade-in hover:scale-105 transition-all duration-300 p-4 md:p-0" style={{animationDelay: '0.4s'}}>
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-secondary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 group-hover:bg-secondary/30 transition-all duration-300 shadow-lg group-hover:shadow-xl">
+              <Award className="h-8 w-8 md:h-10 md:w-10 text-secondary group-hover:scale-110 transition-transform" />
             </div>
-            <h3 className="text-xl font-semibold mb-4 group-hover:text-secondary transition-colors font-title">Ingredientes Premium</h3>
-            <p className="text-muted-foreground leading-relaxed">
+            <h3 className="text-lg md:text-xl font-semibold mb-2 md:mb-4 group-hover:text-secondary transition-colors font-title">Ingredientes Premium</h3>
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed font-text">
               Utilizamos apenas ingredientes selecionados e de alta qualidade 
               para garantir o melhor sabor em cada mordida.
             </p>
           </div>
 
-          <div className="text-center group animate-fade-in hover:scale-105 transition-all duration-300" style={{animationDelay: '0.6s'}}>
-            <div className="w-20 h-20 bg-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-accent/30 transition-all duration-300 shadow-lg group-hover:shadow-xl">
-              <Clock className="h-10 w-10 text-accent group-hover:scale-110 transition-transform" />
+          <div className="text-center group animate-fade-in hover:scale-105 transition-all duration-300 p-4 md:p-0" style={{animationDelay: '0.6s'}}>
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 group-hover:bg-accent/30 transition-all duration-300 shadow-lg group-hover:shadow-xl">
+              <Clock className="h-8 w-8 md:h-10 md:w-10 text-accent group-hover:scale-110 transition-transform" />
             </div>
-            <h3 className="text-xl font-semibold mb-4 group-hover:text-accent transition-colors font-title">Sempre Frescos</h3>
-            <p className="text-muted-foreground leading-relaxed">
+            <h3 className="text-lg md:text-xl font-semibold mb-2 md:mb-4 group-hover:text-accent transition-colors font-title">Sempre Frescos</h3>
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed font-text">
               Nossos doces são preparados diariamente para garantir 
               frescor e sabor incomparáveis.
             </p>
@@ -59,21 +59,21 @@ export function About() {
         </div>
 
         {/* Story Section */}
-        <div className="mb-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="mb-12 md:mb-20">
+          <div className="grid lg:grid-cols-2 gap-6 md:gap-12 items-center px-4 md:px-0">
             {/* Story Content - Left */}
-            <div className="space-y-6 animate-fade-in" style={{animationDelay: '1s'}}>
+            <div className="space-y-4 md:space-y-6 animate-fade-in" style={{animationDelay: '1s'}}>
               <div className="inline-flex items-center gap-2 bg-accent/10 backdrop-blur-sm text-accent px-4 py-2 rounded-full border border-accent/20">
                 <ChefHat className="h-4 w-4" />
                 <span className="text-sm font-medium font-text">Nossa Jornada</span>
               </div>
               
-              <h3 className="text-3xl md:text-4xl font-title font-bold text-foreground">
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-title font-bold text-foreground">
                 Como tudo <span className="gradient-primary bg-clip-text text-transparent">começou</span>
               </h3>
               
-              <div className="space-y-4 text-muted-foreground leading-relaxed font-text">
-                <p className="text-lg">
+              <div className="space-y-3 md:space-y-4 text-muted-foreground leading-relaxed font-text">
+                <p className="text-base md:text-lg">
                   Em 2020, durante um período desafiador para todos, <strong className="text-foreground">Maria Clara</strong> descobriu sua paixão pela confeitaria em sua própria cozinha. O que começou como uma forma de trazer alegria para a família rapidamente se transformou em algo muito maior.
                 </p>
                 
@@ -140,29 +140,29 @@ export function About() {
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto animate-fade-in" style={{animationDelay: '0.8s'}}>
-          <div className="text-center bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-6 hover:bg-card/70 transition-all duration-300">
-            <div className="flex items-center justify-center mb-2">
-              <Users className="h-6 w-6 text-primary mr-2" />
-              <span className="text-2xl md:text-3xl font-bold text-primary">500+</span>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 max-w-4xl mx-auto animate-fade-in px-4 md:px-0" style={{animationDelay: '0.8s'}}>
+          <div className="text-center bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 md:p-6 hover:bg-card/70 transition-all duration-300">
+            <div className="flex items-center justify-center mb-1 md:mb-2">
+              <Users className="h-5 w-5 md:h-6 md:w-6 text-primary mr-1 md:mr-2" />
+              <span className="text-xl md:text-2xl lg:text-3xl font-bold text-primary">500+</span>
             </div>
-            <p className="text-sm text-muted-foreground font-text">Clientes Satisfeitos</p>
+            <p className="text-xs md:text-sm text-muted-foreground font-text">Clientes Satisfeitos</p>
           </div>
           
-          <div className="text-center bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-6 hover:bg-card/70 transition-all duration-300">
-            <div className="flex items-center justify-center mb-2">
-              <Star className="h-6 w-6 text-yellow-500 mr-2" />
-              <span className="text-2xl md:text-3xl font-bold text-yellow-500">4.9</span>
+          <div className="text-center bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 md:p-6 hover:bg-card/70 transition-all duration-300">
+            <div className="flex items-center justify-center mb-1 md:mb-2">
+              <Star className="h-5 w-5 md:h-6 md:w-6 text-yellow-500 mr-1 md:mr-2" />
+              <span className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-500">4.9</span>
             </div>
-            <p className="text-sm text-muted-foreground font-text">Avaliação Média</p>
+            <p className="text-xs md:text-sm text-muted-foreground font-text">Avaliação Média</p>
           </div>
           
-          <div className="text-center bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-6 hover:bg-card/70 transition-all duration-300 col-span-2 md:col-span-1">
+          <div className="text-center bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 md:p-6 hover:bg-card/70 transition-all duration-300 col-span-2 md:col-span-1">
             <div className="flex items-center justify-center mb-2">
-              <Heart className="h-6 w-6 text-red-500 mr-2" />
-              <span className="text-2xl md:text-3xl font-bold text-red-500">3+</span>
+              <Heart className="h-5 w-5 md:h-6 md:w-6 text-red-500 mr-1 md:mr-2" />
+              <span className="text-xl md:text-2xl lg:text-3xl font-bold text-red-500">3+</span>
             </div>
-            <p className="text-sm text-muted-foreground font-text">Anos de Experiência</p>
+            <p className="text-xs md:text-sm text-muted-foreground font-text">Anos de Experiência</p>
           </div>
         </div>
       </div>

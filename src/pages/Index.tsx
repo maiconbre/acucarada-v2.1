@@ -1,6 +1,7 @@
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { Footer } from "@/components/Footer";
+import { WaveTransition } from "@/components/WaveTransition";
 import { lazy, Suspense } from "react";
 import { ChefHat } from "lucide-react";
 
@@ -38,6 +39,9 @@ export default function Index() {
       <Suspense fallback={<SectionLoader title="depoimentos" />}>
         <Testimonials />
       </Suspense>
+      
+      {/* Efeito de ondas entre Testimonials e Footer */}
+      <WaveTransition />
       
       <Footer />
     </div>

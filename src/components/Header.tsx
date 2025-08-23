@@ -151,22 +151,16 @@ export const Header = () => {
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
-                    <button 
-                      onClick={() => handleSectionClick('sobre')} 
-                      className="text-white hover:text-white transition-smooth bg-transparent border-none cursor-pointer px-6 py-3 rounded-md hover:bg-accent font-text text-base h-12 flex items-center"
-                    >
+                    <Link to="/sobre" className="text-white hover:text-white transition-smooth px-6 py-3 rounded-md hover:bg-accent font-text text-base h-12 flex items-center">
                       Sobre
-                    </button>
+                    </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
-                    <button 
-                      onClick={() => handleSectionClick('contato')} 
-                      className="text-white hover:text-white transition-smooth bg-transparent border-none cursor-pointer px-6 py-3 rounded-md hover:bg-accent font-text text-base h-12 flex items-center"
-                    >
+                    <Link to="/contato" className="text-white hover:text-white transition-smooth px-6 py-3 rounded-md hover:bg-accent font-text text-base h-12 flex items-center">
                       Contato
-                    </button>
+                    </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               </NavigationMenuList>
@@ -288,18 +282,20 @@ export const Header = () => {
               >
                 <span className="font-medium">Catálogo</span>
               </Link>
-              <button 
-                onClick={() => handleSectionClick('sobre')} 
-                className="block text-left w-full text-white font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-white/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-white/20 transform bg-transparent border-none cursor-pointer text-base"
+              <Link 
+                to="/sobre" 
+                className="block text-white font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-white/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-white/20 transform text-base"
+                onClick={handleMenuItemClick}
               >
                 <span className="font-medium">Sobre</span>
-              </button>
-              <button 
-                onClick={() => handleSectionClick('contato')} 
-                className="block text-left w-full text-white font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-white/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-white/20 transform bg-transparent border-none cursor-pointer text-base"
+              </Link>
+              <Link 
+                to="/contato" 
+                className="block text-white font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-white/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-white/20 transform text-base"
+                onClick={handleMenuItemClick}
               >
                 <span className="font-medium">Contato</span>
-              </button>
+              </Link>
               <div className="pt-2 border-t border-white/20 mt-4">
                 <Button
                   variant="whatsapp"
