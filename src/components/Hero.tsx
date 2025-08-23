@@ -19,7 +19,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden pt-24 md:pt-32">
+    <section className="relative min-h-screen flex items-center overflow-hidden pt-100 md:pt-20">
       {/* Background Image with improved mobile optimization */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -42,11 +42,11 @@ export const Hero = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center md:text-left md:mx-0 md:max-w-2xl">
           {/* Main Title with improved mobile hierarchy */}
-          <div className="flex flex-col items-center md:items-start animate-slide-up">
+          <div className="flex flex-col items-center md:items-start animate-slide-up -mt-8 md:-mt-12">
             <img
           src={logoImage}
           alt="Açucarada"
-          className="h-auto object-contain m-0 p-0 w-[150%] max-w-none"
+          className="h-auto object-contain m-0 p-0 w-full max-w-sm md:max-w-md lg:max-w-lg"
           loading="eager"
         />
           </div>

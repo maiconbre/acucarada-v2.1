@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -36,9 +36,9 @@ const ProductDetail = () => {
       // Track view when component mounts
       trackView();
     }
-  }, [id]);
+  }, [id, trackView]);
 
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("products")
@@ -68,7 +68,7 @@ const ProductDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate, toast]);
 
   const handleWhatsAppOrder = () => {
     if (!product) return;

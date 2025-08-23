@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -80,7 +80,7 @@ const Settings = () => {
     }
   }, [user]);
 
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -116,7 +116,7 @@ const Settings = () => {
         description: "Erro ao carregar dados do perfil"
       });
     }
-  };
+  }, [user?.id, user?.email, toast]);
 
   const loadAppSettings = () => {
     const savedSettings = localStorage.getItem('app_settings');
