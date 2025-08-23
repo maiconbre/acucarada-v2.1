@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,7 +49,7 @@ const Admin = () => {
     }
   }, [user]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("products")
@@ -59,16 +59,16 @@ const Admin = () => {
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Erro ao buscar produtos:", error);
       toast({
         variant: "destructive",
         title: "Erro",
-        description: "Erro ao carregar produtos",
+        description: "Não foi possível carregar os produtos.",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   const handleSignOut = async () => {
     await signOut();

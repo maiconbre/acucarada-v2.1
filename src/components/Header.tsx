@@ -97,7 +97,7 @@ export const Header = () => {
     <header className={`bg-rose-light border-b border-border/50 fixed top-0 left-0 right-0 z-50 backdrop-blur-sm transition-transform duration-300 ease-in-out ${
       isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
     }`}>
-      <div className="container mx-auto px-2 md:px-4 md:py-6">
+      <div className="container mx-auto px-2 md:px-4 py-2 md:py-6">
         <div className="flex items-center justify-between md:justify-start">
           {/* Mobile: Logo centralizado */}
           <div className="flex-1 flex justify-center md:hidden items-center">
@@ -109,7 +109,7 @@ export const Header = () => {
             />
             </Link>
             {/* Badge ao lado do logo mobile */}
-            <div className="ml-4 inline-flex items-center gap-1 bg-rose-primary/10 backdrop-blur-sm text-rose-primary px-2 py-1 rounded-full border border-rose-primary/20">
+            <div className="ml-2 inline-flex items-center gap-1 bg-rose-primary/10 backdrop-blur-sm text-rose-primary px-2 py-1 rounded-full border border-rose-primary/20">
               <Sparkles className="h-2 w-2 animate-pulse" />
               <span className="text-xs font-medium font-text">Confeitaria</span>
             </div>
