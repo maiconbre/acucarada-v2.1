@@ -73,7 +73,13 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   });
   
   const [dragActive, setDragActive] = useState(false);
-  const [metadata, setMetadata] = useState<any>(null);
+  const [metadata, setMetadata] = useState<{
+    width: number;
+    height: number;
+    size: number;
+    type: string;
+    name: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -302,7 +308,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                   className="mt-2"
                   onClick={(e) => {
                     e.stopPropagation();
-                    !disabled && fileInputRef.current?.click();
+                    if (!disabled) {
+                      fileInputRef.current?.click();
+                    }
                   }}
                 >
                   <ImageIcon className="h-4 w-4 mr-2" />
