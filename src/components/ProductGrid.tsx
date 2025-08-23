@@ -160,7 +160,7 @@ export const ProductGrid = () => {
         {/* Section Header with animation */}
         <div className="text-center mb-8 md:mb-16 animate-fade-in">
           
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-display font-bold mb-4 md:mb-6">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-4 md:mb-6">
             Doces <span className="gradient-primary bg-clip-text text-transparent">do dia</span>
           </h2>
           <p className="text-sm md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4 md:px-0">
@@ -170,22 +170,22 @@ export const ProductGrid = () => {
           
           {/* View Mode Toggle */}
           <div className="flex justify-center mt-4 md:mt-8">
-            <div className="flex items-center gap-1 border rounded-md p-1 bg-background/50 backdrop-blur-sm">
+            <div className="flex items-center gap-1 border rounded-md p-1 bg-background/50 backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-background/70">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
-                className="px-2 md:px-3 order-2 md:order-1"
+                className="px-2 md:px-3 order-2 md:order-1 transition-all duration-300 ease-in-out hover:scale-105"
               >
-                <Grid3X3 className="h-3 w-3 md:h-4 md:w-4" />
+                <Grid3X3 className="h-3 w-3 md:h-4 md:w-4 transition-transform duration-300 ease-in-out" />
               </Button>
               <Button
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('list')}
-                className="px-2 md:px-3 order-1 md:order-2"
+                className="px-2 md:px-3 order-1 md:order-2 transition-all duration-300 ease-in-out hover:scale-105"
               >
-                <List className="h-3 w-3 md:h-4 md:w-4" />
+                <List className="h-3 w-3 md:h-4 md:w-4 transition-transform duration-300 ease-in-out" />
               </Button>
             </div>
           </div>

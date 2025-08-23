@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logoImage from "@/assets/logo-navbar.png";
+import logoImage from "@/assets/formiga-empinando-logo.png";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -94,13 +94,13 @@ export const Header = () => {
   }, [lastScrollY]);
 
   return (
-    <header className={`bg-rose-light border-b border-border/50 fixed top-0 left-0 right-0 z-50 backdrop-blur-sm transition-transform duration-300 ease-in-out ${
+    <header className={`border-b border-brown-primary/30 fixed top-0 left-0 right-0 z-50 backdrop-blur-sm transition-transform duration-300 ease-in-out ${
       isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-    }`}>
+    }`} style={{backgroundColor: '#FDE7E5'}}>
       <div className="container mx-auto px-2 md:px-4 py-2 md:py-6">
         <div className="flex items-center justify-between md:justify-start">
           {/* Mobile: Logo centralizado */}
-          <div className="flex-1 flex justify-center md:hidden items-center">
+          <div className="flex-1 flex justify-center md:hidden items-center relative">
             <Link to="/">
               <img 
               src={logoImage} 
@@ -108,10 +108,41 @@ export const Header = () => {
               className="h-16 w-16 object-contain transition-transform hover:scale-105"
             />
             </Link>
-            {/* Badge ao lado do logo mobile */}
-            <div className="ml-2 inline-flex items-center gap-1 bg-rose-primary/10 backdrop-blur-sm text-rose-primary px-2 py-1 rounded-full border border-rose-primary/20">
-              <Sparkles className="h-2 w-2 animate-pulse" />
-              <span className="text-xs font-medium font-text">Confeitaria</span>
+            
+            {/* Mobile Search Expanded */}
+            {isSearchOpen && (
+              <div className="absolute inset-0 flex items-center justify-center animate-in slide-in-from-right-5 duration-300">
+                <form onSubmit={handleSearchSubmit} className="flex items-center w-full px-3">
+                  <Input
+                    type="text"
+                    placeholder="Buscar..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1 h-10 backdrop-blur-md bg-black/20 border border-brown-primary rounded-lg text-white placeholder:text-white focus:ring-0 focus:outline-none text-sm px-3"
+                    autoFocus
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSearchToggle}
+                    className="text-brown-primary hover:bg-brown-primary/10 h-8 w-8 p-0 ml-1"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </form>
+              </div>
+            )}
+            
+            {/* Badge - Hidden when search is open */}
+            <div className={`transition-opacity duration-300 ${
+              isSearchOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            }`}>
+              <div className="bg-gradient-to-r from-brown-primary/10 to-brown-primary/5 backdrop-blur-sm border border-brown-primary/20 rounded-full px-3 py-1.5 shadow-sm">
+                <span className="text-brown-primary text-xs font-medium tracking-wide">
+                  By: Evelyn Martins
+                </span>
+              </div>
             </div>
           </div>
           
@@ -137,28 +168,28 @@ export const Header = () => {
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
-                    <Link to="/" className="text-white hover:text-white transition-smooth px-4 py-2 rounded-md hover:bg-accent font-text">
+                    <Link to="/" className="text-brown-primary hover:text-brown-primary transition-smooth px-4 py-2 rounded-md hover:bg-brown-primary/10 font-text">
                       Início
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
-                    <Link to="/catalog" className="text-white hover:text-white transition-smooth px-6 py-3 rounded-md hover:bg-accent font-text text-base h-12 flex items-center">
+                    <Link to="/catalog" className="text-brown-primary hover:text-brown-primary transition-smooth px-6 py-3 rounded-md hover:bg-brown-primary/10 font-text text-base h-12 flex items-center">
                       Catálogo
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
-                    <Link to="/sobre" className="text-white hover:text-white transition-smooth px-6 py-3 rounded-md hover:bg-accent font-text text-base h-12 flex items-center">
+                    <Link to="/sobre" className="text-brown-primary hover:text-brown-primary transition-smooth px-6 py-3 rounded-md hover:bg-brown-primary/10 font-text text-base h-12 flex items-center">
                       Sobre
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
-                    <Link to="/contato" className="text-white hover:text-white transition-smooth px-6 py-3 rounded-md hover:bg-accent font-text text-base h-12 flex items-center">
+                    <Link to="/contato" className="text-brown-primary hover:text-brown-primary transition-smooth px-6 py-3 rounded-md hover:bg-brown-primary/10 font-text text-base h-12 flex items-center">
                       Contato
                     </Link>
                   </NavigationMenuLink>
@@ -184,7 +215,7 @@ export const Header = () => {
                       variant="ghost"
                       size="sm"
                       onClick={handleSearchToggle}
-                      className="text-white hover:bg-white/10"
+                      className="text-brown-primary hover:bg-brown-primary/10"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -194,7 +225,7 @@ export const Header = () => {
                     variant="ghost"
                     size="lg"
                     onClick={handleSearchToggle}
-                    className="text-white hover:bg-white/10 h-12 w-12"
+                    className="text-brown-primary hover:bg-brown-primary/10 h-12 w-12"
                   >
                     <Search className="h-6 w-6" />
                   </Button>
@@ -219,7 +250,7 @@ export const Header = () => {
               variant="ghost"
               size="sm"
               onClick={handleSearchToggle}
-              className="text-white hover:bg-white/10"
+              className="text-brown-primary hover:bg-brown-primary/10"
             >
               <Search className="h-4 w-4" />
             </Button>
@@ -227,38 +258,24 @@ export const Header = () => {
               variant="ghost"
               size="sm"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="h-10 w-10 text-white hover:bg-white/10"
+              className="h-10 w-10 text-brown-primary hover:bg-brown-primary/10 transition-all duration-300 ease-in-out"
             >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              <div className="relative w-5 h-5 flex items-center justify-center">
+                <Menu className={`h-5 w-5 absolute transition-all duration-300 ease-in-out transform ${
+                  isMobileMenuOpen 
+                    ? 'opacity-0 rotate-90 scale-75' 
+                    : 'opacity-100 rotate-0 scale-100'
+                }`} />
+                <X className={`h-5 w-5 absolute transition-all duration-300 ease-in-out transform ${
+                  isMobileMenuOpen 
+                    ? 'opacity-100 rotate-0 scale-100' 
+                    : 'opacity-0 -rotate-90 scale-75'
+                }`} />
+              </div>
             </Button>
           </div>
         </div>
-        
-        {/* Mobile Search */}
-        {isSearchOpen && (
-          <div className="md:hidden bg-rose-light/95 backdrop-blur-md border-t border-white/20">
-            <div className="container mx-auto px-4 py-3">
-              <form onSubmit={handleSearchSubmit} className="flex items-center space-x-2">
-                <Input
-                  type="text"
-                  placeholder="Buscar produtos..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 bg-white/90 border-white/20 text-gray-800 placeholder:text-gray-500"
-                  autoFocus
-                />
-                <Button
-                  type="submit"
-                  variant="ghost"
-                  size="lg"
-                  className="text-white hover:bg-white/10 h-12 w-12"
-                >
-                  <Search className="h-6 w-6" />
-                </Button>
-              </form>
-            </div>
-          </div>
-        )}
+
 
         {/* Mobile Menu */}
         <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
@@ -266,32 +283,32 @@ export const Header = () => {
             ? 'max-h-96 opacity-100' 
             : 'max-h-0 opacity-0'
         }`}>
-          <div className="bg-rose-light/98 backdrop-blur-md border-t border-white/20 shadow-lg">
+          <div className="backdrop-blur-md border-t border-white/20 shadow-lg" style={{backgroundColor: '#FDE7E5'}}>
             <nav className="container mx-auto px-4 py-4 space-y-1">
               <Link 
                 to="/" 
-                className="block text-white font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-white/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-white/20 transform text-base"
+                className="block text-brown-primary font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-brown-primary/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-brown-primary/20 transform text-base"
                 onClick={handleMenuItemClick}
               >
                 <span className="font-medium">Início</span>
               </Link>
               <Link 
                 to="/catalog" 
-                className="block text-white font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-white/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-white/20 transform text-base"
+                className="block text-brown-primary font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-brown-primary/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-brown-primary/20 transform text-base"
                 onClick={handleMenuItemClick}
               >
                 <span className="font-medium">Catálogo</span>
               </Link>
               <Link 
                 to="/sobre" 
-                className="block text-white font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-white/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-white/20 transform text-base"
+                className="block text-brown-primary font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-brown-primary/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-brown-primary/20 transform text-base"
                 onClick={handleMenuItemClick}
               >
                 <span className="font-medium">Sobre</span>
               </Link>
               <Link 
                 to="/contato" 
-                className="block text-white font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-white/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-white/20 transform text-base"
+                className="block text-brown-primary font-text py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:bg-brown-primary/10 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] active:bg-brown-primary/20 transform text-base"
                 onClick={handleMenuItemClick}
               >
                 <span className="font-medium">Contato</span>
