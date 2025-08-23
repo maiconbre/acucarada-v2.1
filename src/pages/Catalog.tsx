@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, SlidersHorizontal, Grid3X3, List, Star, TrendingUp } from "lucide-react";
+import { Search, Filter, Grid3X3, List, Star, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -51,7 +51,7 @@ const Catalog = () => {
   const [showReadyDelivery, setShowReadyDelivery] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [showFilters, setShowFilters] = useState(false);
+
 
   useEffect(() => {
     fetchProducts();
@@ -316,28 +316,76 @@ const Catalog = () => {
 
             {/* Filter Controls */}
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-              {/* Mobile Filter Toggle */}
-              <div className="flex items-center gap-2 sm:hidden w-full">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex-1"
-                >
-                  <SlidersHorizontal className="h-4 w-4 mr-2" />
-                  Filtros
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                  className="px-3"
-                >
-                  {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
-                </Button>
+              {/* Mobile Filters - Simplified Layout */}
+              <div className="flex flex-col gap-3 w-full sm:hidden">
+                {/* First row: Category, Price, and View Mode */}
+                <div className="flex items-center gap-2">
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="flex-1">
+                      <Filter className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={priceRange} onValueChange={setPriceRange}>
+                    <SelectTrigger className="flex-1">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Preço" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os preços</SelectItem>
+                      <SelectItem value="0-10">Até R$ 10</SelectItem>
+                      <SelectItem value="10-25">R$ 10 - R$ 25</SelectItem>
+                      <SelectItem value="25-50">R$ 25 - R$ 50</SelectItem>
+                      <SelectItem value="50+">Acima de R$ 50</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                    className="px-3"
+                  >
+                    {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
+                  </Button>
+                </div>
+                
+                {/* Second row: Sort and Featured */}
+                <div className="flex items-center gap-2">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Ordenar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Mais recentes</SelectItem>
+                      <SelectItem value="name">Nome A-Z</SelectItem>
+                      <SelectItem value="price-low">Menor preço</SelectItem>
+                      <SelectItem value="price-high">Maior preço</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button
+                    variant={showReadyDelivery ? "default" : "outline"}
+                    onClick={() => setShowReadyDelivery(!showReadyDelivery)}
+                    className="flex-1"
+                  >
+                    <Star className={`h-4 w-4 mr-2 ${showReadyDelivery ? 'fill-current' : ''}`} />
+                    Pronta entrega
+                  </Button>
+                </div>
               </div>
 
               {/* Desktop Filters */}
-              <div className={`flex flex-col sm:flex-row gap-3 w-full sm:w-auto ${showFilters ? 'block' : 'hidden sm:flex'}`}>
+              <div className="hidden sm:flex flex-row gap-3 w-auto">
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger className="w-full sm:w-40">
                     <Filter className="h-4 w-4 mr-2" />

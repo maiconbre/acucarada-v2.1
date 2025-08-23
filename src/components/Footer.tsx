@@ -18,8 +18,6 @@ export const Footer = () => {
       <div className="absolute inset-0 bg-rose-primary/5" />
       <div className="absolute top-10 left-10 w-24 h-24 bg-rose-primary/10 rounded-full blur-2xl animate-pulse" />
       <div className="absolute bottom-10 right-10 w-32 h-32 bg-brown-primary/10 rounded-full blur-3xl" />
-      <div className="absolute top-20 right-20 w-4 h-4 bg-rose-primary/20 rounded-full animate-bounce" />
-      <div className="absolute bottom-32 left-20 w-2 h-2 bg-rose-light/60 rounded-full animate-pulse" style={{animationDelay: '1s'}} />
       
       <div className="container mx-auto px-4 py-8 md:py-16 relative z-10">
         <div className="grid md:grid-cols-3 gap-8 md:gap-12 items-start">
