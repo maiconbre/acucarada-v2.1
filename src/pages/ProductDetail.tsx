@@ -33,10 +33,10 @@ const ProductDetail = () => {
   useEffect(() => {
     if (id) {
       fetchProduct();
-      // Track view when component mounts
-      trackView();
+      // Removed automatic trackView to prevent excessive API calls
+      // trackView will only be called on user interactions
     }
-  }, [id, trackView]);
+  }, [id]); // Only depend on id to avoid infinite loops
 
   const fetchProduct = useCallback(async () => {
     try {
@@ -73,6 +73,8 @@ const ProductDetail = () => {
   const handleWhatsAppOrder = () => {
     if (!product) return;
     
+    // Track view when user actually engages with the product
+    trackView();
     trackClick('whatsapp_order', 'product_detail');
     const whatsappNumber = "5511999999999";
     const message = encodeURIComponent(
@@ -216,7 +218,7 @@ const ProductDetail = () => {
                   <span className="text-sm text-muted-foreground block mb-1 font-text">
                     Preço
                   </span>
-                  <span className="text-4xl font-bold text-rose-primary font-title">
+                  <span className="text-4xl font-bold text-rose-primary font-text">
                     {formatPrice(product.price)}
                   </span>
                 </div>
@@ -255,7 +257,6 @@ const ProductDetail = () => {
             {/* Estatísticas do Produto */}
             <Card className="border-0 bg-muted/50 mb-6">
               <CardContent className="p-6">
-                <h3 className="font-semibold mb-3 font-title">Estatísticas</h3>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="flex items-center justify-center gap-1 text-lg font-bold text-red-500">
@@ -264,13 +265,7 @@ const ProductDetail = () => {
                     </div>
                     <span className="text-xs text-muted-foreground font-text">Curtidas</span>
                   </div>
-                  <div>
-                    <div className="flex items-center justify-center gap-1 text-lg font-bold text-blue-500">
-                      <Eye className="h-4 w-4" />
-                      {analytics.total_views}
-                    </div>
-                    <span className="text-xs text-muted-foreground font-text">Visualizações</span>
-                  </div>
+                  
 
                 </div>
               </CardContent>

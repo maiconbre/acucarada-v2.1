@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useUser } from "@/contexts/user-context";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,15 +26,6 @@ import {
   CheckCircle
 } from "lucide-react";
 
-interface UserProfile {
-  id: string;
-  email: string;
-  username?: string;
-  full_name?: string;
-  avatar_url?: string;
-  created_at: string;
-}
-
 interface AppSettings {
   theme: 'light' | 'dark' | 'system';
   notifications_enabled: boolean;
@@ -45,9 +37,9 @@ interface AppSettings {
 
 const Settings = () => {
   const { user } = useAuth();
+  const { profile, updateProfile, loading: userLoading, refreshUserData } = useUser();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [appSettings, setAppSettings] = useState<AppSettings>({
     theme: 'light',
     notifications_enabled: true,
@@ -75,48 +67,22 @@ const Settings = () => {
 
   useEffect(() => {
     if (user) {
-      fetchUserProfile();
       loadAppSettings();
     }
   }, [user]);
 
-  const fetchUserProfile = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user?.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-
-      const profile = data || {
-        id: user?.id || '',
-        user_id: user?.id || '',
-        email: user?.email || '',
-        username: '',
-        full_name: '',
-        avatar_url: '',
-        created_at: new Date().toISOString()
-      };
-
-      setUserProfile(profile);
+  // Update profile form when profile data changes
+  useEffect(() => {
+    if (profile) {
       setProfileForm({
-        username: 'username' in profile ? profile.username : '',
-        fullName: 'full_name' in profile ? profile.full_name : '',
+        username: profile.username || '',
+        fullName: profile.full_name || '',
         email: profile.email || ''
       });
-    } catch (error) {
-      console.error('Erro ao carregar perfil:', error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Erro ao carregar dados do perfil"
-      });
     }
-  }, [user?.id, user?.email, toast]);
+  }, [profile]);
+
+
 
   const loadAppSettings = () => {
     const savedSettings = localStorage.getItem('app_settings');
@@ -205,53 +171,14 @@ const Settings = () => {
       return;
     }
 
-    setLoading(true);
-    try {
-      // Verificar se o perfil já existe
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .eq('user_id', user?.id)
-        .single();
+    const result = await updateProfile({
+      username: profileForm.username.trim(),
+      full_name: profileForm.fullName.trim()
+    });
 
-      const profileData = {
-        user_id: user?.id,
-        username: profileForm.username.trim(),
-        full_name: profileForm.fullName.trim(),
-        email: user?.email,
-        updated_at: new Date().toISOString()
-      };
-
-      let result;
-      if (existingProfile) {
-        // Atualizar perfil existente
-        result = await supabase
-          .from('profiles')
-          .update(profileData)
-          .eq('user_id', user?.id);
-      } else {
-        // Criar novo perfil
-        result = await supabase
-          .from('profiles')
-          .insert([{ ...profileData, created_at: new Date().toISOString() }]);
-      }
-
-      if (result.error) throw result.error;
-
-      await fetchUserProfile();
-      toast({
-        title: "Sucesso",
-        description: "Perfil atualizado com sucesso"
-      });
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Erro ao atualizar perfil";
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: errorMessage
-      });
-    } finally {
-      setLoading(false);
+    if (!result.success) {
+      // Error handling is done in the context
+      return;
     }
   };
 
@@ -383,8 +310,8 @@ const Settings = () => {
                   O email não pode ser alterado por questões de segurança
                 </p>
               </div>
-              <Button onClick={handleProfileUpdate} disabled={loading}>
-                {loading ? (
+              <Button onClick={handleProfileUpdate} disabled={userLoading}>
+                {userLoading ? (
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
@@ -638,7 +565,7 @@ const Settings = () => {
                 <div>
                   <Label className="font-semibold">Conta criada em:</Label>
                   <p className="text-muted-foreground">
-                    {userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString('pt-BR') : 'N/A'}
+                    {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('pt-BR') : 'N/A'}
                   </p>
                 </div>
                 <div>
