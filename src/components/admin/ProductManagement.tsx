@@ -1,3 +1,19 @@
+/**
+ * ProductManagement Component
+ * 
+ * Gerencia produtos com funcionalidade de soft delete implementada.
+ * 
+ * Funcionalidades:
+ * - Soft Delete: Desativa produtos preservando dados históricos (padrão)
+ * - Hard Delete: Exclusão física permanente (disponível mas não exposta na UI)
+ * - Toggle Active: Ativa/desativa produtos
+ * 
+ * O soft delete permite:
+ * - Preservação de dados de analytics
+ * - Recuperação posterior via painel do Supabase
+ * - Manutenção do histórico de vendas e interações
+ */
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -43,7 +59,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
-    type: 'toggle' | 'delete';
+    type: 'toggle' | 'soft_delete' | 'hard_delete';
     product: Product | null;
   }>({ isOpen: false, type: 'toggle', product: null });
   const [formData, setFormData] = useState({
@@ -159,26 +175,107 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     }
   };
 
-  const handleDelete = async (id: string) => {
+  /**
+   * Soft delete: Desativa o produto em vez de excluí-lo fisicamente
+   * Preserva os dados históricos e permite recuperação posterior
+   */
+  const handleSoftDelete = async (id: string) => {
     try {
+      // Verificar se o usuário está autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      console.log('Desativando produto (soft delete):', id);
+      
+      // Soft delete: apenas marcar como inativo
+      const { error } = await supabase
+        .from("products")
+        .update({ is_active: false })
+        .eq("id", id);
+
+      if (error) {
+        console.error('Erro ao desativar produto:', error);
+        throw error;
+      }
+
+      toast({
+        title: "Produto desativado!",
+        description: "O produto foi removido do catálogo público, mas os dados foram preservados.",
+      });
+      
+      onProductsChange();
+    } catch (error: unknown) {
+      console.error('Erro ao desativar produto:', error);
+      let errorMessage = "Erro desconhecido";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Verificar tipos específicos de erro
+        if (error.message.includes('permission') || error.message.includes('policy')) {
+          errorMessage = "Você não tem permissão para desativar este produto.";
+        }
+      }
+      
+      toast({
+        variant: "destructive",
+        title: "Erro ao desativar produto",
+        description: errorMessage,
+      });
+    }
+  };
+
+  /**
+   * Hard delete: Exclusão física do produto (mantido para casos especiais)
+   * Use com cuidado - remove permanentemente todos os dados
+   */
+  const handleHardDelete = async (id: string) => {
+    try {
+      // Verificar se o usuário está autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      console.log('Excluindo produto permanentemente:', id);
+      
+      // Hard delete: exclusão física
       const { error } = await supabase
         .from("products")
         .delete()
         .eq("id", id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado:', error);
+        throw error;
+      }
 
       toast({
-        title: "Produto excluído!",
-        description: "O produto foi removido do catálogo.",
+        title: "Produto excluído permanentemente!",
+        description: "O produto e todos os dados relacionados foram removidos.",
       });
       
       onProductsChange();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      console.error('Erro ao excluir produto:', error);
+      let errorMessage = "Erro desconhecido";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Verificar tipos específicos de erro
+        if (error.message.includes('409') || error.message.includes('conflict')) {
+          errorMessage = "Não é possível excluir este produto pois ele possui dados relacionados. Tente desativar o produto em vez de excluí-lo.";
+        } else if (error.message.includes('permission') || error.message.includes('policy')) {
+          errorMessage = "Você não tem permissão para excluir este produto.";
+        }
+      }
+      
       toast({
         variant: "destructive",
-        title: "Erro",
+        title: "Erro ao excluir produto",
         description: errorMessage,
       });
     }
@@ -209,7 +306,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     }
   };
 
-  const openConfirmDialog = (type: 'toggle' | 'delete', product: Product) => {
+  const openConfirmDialog = (type: 'toggle' | 'soft_delete' | 'hard_delete', product: Product) => {
     setConfirmDialog({ isOpen: true, type, product });
   };
 
@@ -218,8 +315,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     
     if (confirmDialog.type === 'toggle') {
       await toggleActive(confirmDialog.product);
-    } else if (confirmDialog.type === 'delete') {
-      await handleDelete(confirmDialog.product.id);
+    } else if (confirmDialog.type === 'soft_delete') {
+      await handleSoftDelete(confirmDialog.product.id);
+    } else if (confirmDialog.type === 'hard_delete') {
+      await handleHardDelete(confirmDialog.product.id);
     }
     
     setConfirmDialog({ isOpen: false, type: 'toggle', product: null });
@@ -448,7 +547,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => openConfirmDialog('delete', product)}
+                            onClick={() => openConfirmDialog('soft_delete', product)}
                             className="text-destructive hover:text-destructive h-8 w-8 p-0 mobile-touch-target"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -515,7 +614,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => openConfirmDialog('delete', product)}
+                          onClick={() => openConfirmDialog('soft_delete', product)}
                           className="text-destructive hover:text-destructive h-7 w-7 p-0 mobile-touch-target"
                         >
                           <Trash2 className="h-3 w-3" />
@@ -592,7 +691,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => openConfirmDialog('delete', product)}
+                          onClick={() => openConfirmDialog('soft_delete', product)}
                           className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -612,10 +711,15 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {confirmDialog.type === 'delete' ? (
+              {confirmDialog.type === 'soft_delete' ? (
                 <>
                   <Trash2 className="h-5 w-5 text-destructive" />
                   Excluir Produto
+                </>
+              ) : confirmDialog.type === 'hard_delete' ? (
+                <>
+                  <Trash2 className="h-5 w-5 text-destructive" />
+                  Excluir Produto Permanentemente
                 </>
               ) : (
                 <>
@@ -653,8 +757,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
             )}
             
             <p className="text-sm text-muted-foreground">
-              {confirmDialog.type === 'delete' ? (
-                "Esta ação não pode ser desfeita. O produto será permanentemente removido do catálogo."
+              {confirmDialog.type === 'soft_delete' ? (
+                "Este item está sendo excluído, mas não se preocupe os dados podem ser recuperados se necessário! ✨"
+              ) : confirmDialog.type === 'hard_delete' ? (
+                "Esta ação não pode ser desfeita. O produto será permanentemente removido do catálogo e todos os dados relacionados serão excluídos."
               ) : confirmDialog.product?.is_active ? (
                 "O produto será removido do catálogo público e não ficará visível para os clientes."
               ) : (
@@ -671,12 +777,14 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
               Cancelar
             </Button>
             <Button
-              variant={confirmDialog.type === 'delete' ? 'destructive' : 'default'}
+              variant={confirmDialog.type === 'hard_delete' ? 'destructive' : 'default'}
               onClick={handleConfirmAction}
               className={confirmDialog.type === 'toggle' && !confirmDialog.product?.is_active ? 'bg-green-600 hover:bg-green-700' : ''}
             >
-              {confirmDialog.type === 'delete' ? (
+              {confirmDialog.type === 'soft_delete' ? (
                 'Excluir'
+              ) : confirmDialog.type === 'hard_delete' ? (
+                'Excluir Permanentemente'
               ) : confirmDialog.product?.is_active ? (
                 'Ocultar'
               ) : (

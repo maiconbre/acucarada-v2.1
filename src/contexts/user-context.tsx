@@ -220,8 +220,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       });
       
       return { success: true };
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Erro ao atualizar perfil';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar perfil';
       toast({
         variant: "destructive",
         title: "Erro",
