@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Session } from "@supabase/supabase-js";
+import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "@/contexts/auth-context";
 
@@ -28,12 +28,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+  const signIn = async (emailOrUsername: string, password: string) => {
+    try {
+      // First, try to get the actual email if username was provided
+      const { data: emailResult, error: emailError } = await supabase
+        .rpc('get_email_by_username', {
+          input_username: emailOrUsername
+        });
+      
+      if (emailError) {
+        console.warn('Error getting email by username, trying direct login:', emailError);
+      }
+      
+      // Use the resolved email or the original input
+      // If emailResult is null/undefined, use the original input (assuming it's an email)
+      const emailToUse = (emailResult as string) || emailOrUsername;
+      
+      const { error } = await supabase.auth.signInWithPassword({
+        email: emailToUse,
+        password,
+      });
+      
+      return { error };
+    } catch (err) {
+      console.error('Sign in error:', err);
+      return { error: err as AuthError };
+    }
   };
 
   const signUp = async (email: string, password: string) => {

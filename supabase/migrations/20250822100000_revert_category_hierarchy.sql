@@ -68,7 +68,7 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM information_schema.columns 
     WHERE table_name = 'categories' 
-    AND column_name IN ('parent_id', 'delivery_type', 'is_master')
+    AND column_name IN ('parent_id', 'delivery_type')
   ) THEN
     DELETE FROM public.categories;
     

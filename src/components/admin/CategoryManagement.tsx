@@ -36,6 +36,11 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
   });
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    type: 'toggle' | 'delete';
+    category: Category | null;
+  }>({ isOpen: false, type: 'delete', category: null });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -150,34 +155,36 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir esta categoria?")) {
-      return;
-    }
-
+  const handleDelete = async (category: Category) => {
     try {
       // Check if category is being used by products
       const { data: products, error: checkError } = await supabase
         .from("products")
         .select("id")
-        .eq("category", categories.find(c => c.id === id)?.name)
-        .limit(1);
+        .eq("category", category.name);
 
       if (checkError) throw checkError;
 
+      // If category is being used by products, update them to "Sem categoria"
       if (products && products.length > 0) {
+        const { error: updateError } = await supabase
+          .from("products")
+          .update({ category: "Sem categoria" })
+          .eq("category", category.name);
+
+        if (updateError) throw updateError;
+
         toast({
-          title: "Erro",
-          description: "Não é possível excluir uma categoria que está sendo usada por produtos",
-          variant: "destructive",
+          title: "Produtos atualizados",
+          description: `${products.length} produto(s) foram movidos para "Sem categoria"`,
         });
-        return;
       }
 
+      // Delete the category
       const { error } = await supabase
         .from('categories')
         .delete()
-        .eq("id", id);
+        .eq("id", category.id);
 
       if (error) throw error;
 
@@ -196,6 +203,22 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
         variant: "destructive",
       });
     }
+  };
+
+  const openConfirmDialog = (type: 'toggle' | 'delete', category: Category) => {
+    setConfirmDialog({ isOpen: true, type, category });
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmDialog.category) return;
+    
+    if (confirmDialog.type === 'toggle') {
+      await toggleActive(confirmDialog.category);
+    } else if (confirmDialog.type === 'delete') {
+      await handleDelete(confirmDialog.category);
+    }
+    
+    setConfirmDialog({ isOpen: false, type: 'delete', category: null });
   };
 
   const toggleActive = async (category: Category) => {
@@ -341,7 +364,7 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toggleActive(category)}
+                        onClick={() => openConfirmDialog('toggle', category)}
                         className="h-8 w-8 p-0"
                       >
                         {category.is_active ? (
@@ -361,7 +384,7 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(category.id)}
+                        onClick={() => openConfirmDialog('delete', category)}
                         className="text-destructive hover:text-destructive h-8 w-8 p-0"
                       >
                         <Trash2 className="h-3 w-3" />
@@ -405,7 +428,7 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => toggleActive(category)}
+                          onClick={() => openConfirmDialog('toggle', category)}
                         >
                           {category.is_active ? (
                             <EyeOff className="h-4 w-4" />
@@ -423,7 +446,7 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDelete(category.id)}
+                          onClick={() => openConfirmDialog('delete', category)}
                           className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -445,6 +468,83 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Confirmação */}
+      <Dialog open={confirmDialog.isOpen} onOpenChange={(open) => !open && setConfirmDialog({ isOpen: false, type: 'delete', category: null })}>
+        <DialogContent className="sm:max-w-md" aria-describedby="confirm-dialog-description">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {confirmDialog.type === 'delete' ? (
+                <>
+                  <Trash2 className="h-5 w-5 text-destructive" />
+                  Excluir Categoria
+                </>
+              ) : (
+                <>
+                  {confirmDialog.category?.is_active ? (
+                    <>
+                      <EyeOff className="h-5 w-5 text-orange-500" />
+                      Ocultar Categoria
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-5 w-5 text-green-500" />
+                      Mostrar Categoria
+                    </>
+                  )}
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription id="confirm-dialog-description">
+              {confirmDialog.type === 'delete'
+                ? `Tem certeza que deseja excluir a categoria "${confirmDialog.category?.name}"? Esta ação não pode ser desfeita.`
+                : `Tem certeza que deseja ${confirmDialog.category?.is_active ? 'desativar' : 'ativar'} a categoria "${confirmDialog.category?.name}"?`
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {confirmDialog.category && (
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <div className="h-12 w-12 rounded-md bg-primary/10 flex items-center justify-center">
+                  <Tag className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium">{confirmDialog.category.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {confirmDialog.category.description || "Sem descrição"}
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            <p className="text-sm text-muted-foreground">
+              {confirmDialog.type === 'delete' ? (
+                "Esta ação não pode ser desfeita. A categoria será permanentemente removida do sistema."
+              ) : confirmDialog.category?.is_active ? (
+                "A categoria será desativada e não ficará disponível para novos produtos."
+              ) : (
+                "A categoria será ativada e ficará disponível para uso em produtos."
+              )}
+            </p>
+          </div>
+          
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialog({ isOpen: false, type: 'delete', category: null })}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant={confirmDialog.type === 'delete' ? 'destructive' : 'default'}
+              onClick={handleConfirmAction}
+            >
+              {confirmDialog.type === 'delete' ? 'Excluir' : 'Confirmar'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,10 +1,14 @@
 import { MapPin, Phone, Clock, MessageCircle, Sparkles, Send, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAppSettings } from "@/hooks/useAppSettings";
 
 export function Contact() {
+  const { getWhatsAppLink } = useAppSettings();
+
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent("Olá! Gostaria de fazer um pedido dos seus doces artesanais.");
-    window.open(`https://wa.me/5511999999999?text=${message}`, "_blank");
+    const customMessage = "Olá! Gostaria de fazer um pedido dos seus doces artesanais.";
+    const link = getWhatsAppLink(customMessage);
+    window.open(link, "_blank");
   };
 
   return (

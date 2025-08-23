@@ -10,12 +10,13 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useAppSettings } from "@/hooks/useAppSettings";
 import { 
   User, 
   Lock, 
   Bell, 
-  Palette, 
   Shield, 
   Database,
   Eye,
@@ -23,15 +24,13 @@ import {
   Save,
   RefreshCw,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  MessageCircle,
+  Phone,
+  BarChart
 } from "lucide-react";
 
 interface AppSettings {
-  theme: 'light' | 'dark' | 'system';
-  notifications_enabled: boolean;
-  email_notifications: boolean;
-  analytics_enabled: boolean;
-  auto_backup: boolean;
   maintenance_mode: boolean;
 }
 
@@ -40,13 +39,21 @@ const Settings = () => {
   const { profile, updateProfile, loading: userLoading, refreshUserData } = useUser();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [whatsappLoading, setWhatsappLoading] = useState(false);
   const [appSettings, setAppSettings] = useState<AppSettings>({
-    theme: 'light',
-    notifications_enabled: true,
-    email_notifications: true,
-    analytics_enabled: true,
-    auto_backup: false,
     maintenance_mode: false
+  });
+
+  const { 
+    settings: systemSettings, 
+    loading: settingsLoading, 
+    updateSetting, 
+    getWhatsAppLink 
+  } = useAppSettings();
+  
+  const [whatsappForm, setWhatsappForm] = useState({
+    number: '',
+    message: ''
   });
 
   // Estados para formulários
@@ -70,6 +77,15 @@ const Settings = () => {
       loadAppSettings();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!settingsLoading) {
+      setWhatsappForm({
+        number: systemSettings.whatsapp_number || '',
+        message: systemSettings.whatsapp_message || ''
+      });
+    }
+  }, [systemSettings, settingsLoading]);
 
   // Update profile form when profile data changes
   useEffect(() => {
@@ -99,6 +115,35 @@ const Settings = () => {
       description: "Configurações salvas com sucesso"
     });
   };
+
+  const handleSaveWhatsAppSettings = async () => {
+    if (!whatsappForm.number.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: 'O número do WhatsApp é obrigatório.'
+      });
+      return;
+    }
+    
+    setWhatsappLoading(true);
+    
+    try {
+      const success1 = await updateSetting('whatsapp_number', whatsappForm.number);
+      const success2 = await updateSetting('whatsapp_message', whatsappForm.message);
+      
+      if (success1 && success2) {
+        toast({
+          title: 'Configurações do WhatsApp salvas',
+          description: 'As configurações do WhatsApp foram atualizadas com sucesso.'
+        });
+      }
+    } finally {
+      setWhatsappLoading(false);
+    }
+  };
+  
+
 
   const handlePasswordChange = async () => {
     if (!passwordForm.newPassword || !passwordForm.confirmPassword) {
@@ -246,22 +291,23 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
-          <TabsTrigger value="profile" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-1 p-1 h-auto">
+          <TabsTrigger value="profile" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
             <User className="h-4 w-4" />
-            Perfil
+            <span className="hidden sm:inline">Perfil</span>
           </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
+          <TabsTrigger value="security" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
             <Lock className="h-4 w-4" />
-            Segurança
+            <span className="hidden sm:inline">Segurança</span>
           </TabsTrigger>
-          <TabsTrigger value="preferences" className="flex items-center gap-2">
-            <Palette className="h-4 w-4" />
-            Preferências
+          <TabsTrigger value="whatsapp" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
+            <MessageCircle className="h-4 w-4" />
+            <span className="hidden sm:inline">WhatsApp</span>
           </TabsTrigger>
-          <TabsTrigger value="system" className="flex items-center gap-2">
+
+          <TabsTrigger value="system" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
             <Database className="h-4 w-4" />
-            Sistema
+            <span className="hidden sm:inline">Sistema</span>
           </TabsTrigger>
         </TabsList>
 
@@ -289,12 +335,12 @@ const Settings = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Nome Completo</Label>
+                  <Label htmlFor="fullName">Nome</Label>
                   <Input
                     id="fullName"
                     value={profileForm.fullName}
                     onChange={(e) => setProfileForm(prev => ({ ...prev, fullName: e.target.value }))}
-                    placeholder="Digite seu nome completo"
+                    placeholder="Digite seu nome"
                   />
                 </div>
               </div>
@@ -310,7 +356,12 @@ const Settings = () => {
                   O email não pode ser alterado por questões de segurança
                 </p>
               </div>
-              <Button onClick={handleProfileUpdate} disabled={userLoading}>
+              <Button 
+                onClick={handleProfileUpdate} 
+                disabled={userLoading}
+                size="lg"
+                className="w-full sm:w-auto"
+              >
                 {userLoading ? (
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
@@ -342,8 +393,8 @@ const Settings = () => {
                 </AlertDescription>
               </Alert>
               
-              <div className="space-y-4">
-                <div className="space-y-2">
+              <div className="space-y-6">
+                <div className="space-y-3">
                   <Label htmlFor="newPassword">Nova Senha *</Label>
                   <div className="relative">
                     <Input
@@ -352,6 +403,7 @@ const Settings = () => {
                       value={passwordForm.newPassword}
                       onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
                       placeholder="Digite sua nova senha"
+                      className="text-lg py-3 pr-12"
                     />
                     <Button
                       type="button"
@@ -369,7 +421,7 @@ const Settings = () => {
                   </div>
                 </div>
                 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor="confirmPassword">Confirmar Nova Senha *</Label>
                   <div className="relative">
                     <Input
@@ -378,6 +430,7 @@ const Settings = () => {
                       value={passwordForm.confirmPassword}
                       onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
                       placeholder="Confirme sua nova senha"
+                      className="text-lg py-3 pr-12"
                     />
                     <Button
                       type="button"
@@ -396,82 +449,101 @@ const Settings = () => {
                 </div>
               </div>
               
-              <Button onClick={handlePasswordChange} disabled={loading}>
-                {loading ? (
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Lock className="h-4 w-4 mr-2" />
-                )}
-                Alterar Senha
-              </Button>
+              <Card className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer border-2 hover:border-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100">
+                <Button 
+                  onClick={handlePasswordChange} 
+                  disabled={loading}
+                  size="lg"
+                  className="w-full h-14 text-base font-semibold bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  {loading ? (
+                    <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                  ) : (
+                    <Lock className="h-5 w-5 mr-2" />
+                  )}
+                  {loading ? 'Alterando...' : 'Alterar Senha'}
+                </Button>
+              </Card>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Aba Preferências */}
-        <TabsContent value="preferences" className="space-y-6">
+        {/* Aba WhatsApp */}
+        <TabsContent value="whatsapp" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5" />
-                Preferências do Sistema
+                <MessageCircle className="h-5 w-5" />
+                Configurações do WhatsApp
               </CardTitle>
               <CardDescription>
-                Personalize sua experiência no sistema
+                Configure o número e mensagem padrão para contato via WhatsApp
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Notificações</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receber notificações do sistema
-                  </p>
-                </div>
-                <Switch
-                  checked={appSettings.notifications_enabled}
-                  onCheckedChange={(checked) => 
-                    saveAppSettings({ ...appSettings, notifications_enabled: checked })
-                  }
-                />
+              <div className="space-y-6">
+                <Card className="p-4 border-2 hover:border-green-200 transition-all duration-200">
+                  <div className="space-y-3">
+                    <Label htmlFor="whatsapp-number" className="text-base font-semibold flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-green-600" />
+                      Número do WhatsApp *
+                    </Label>
+                    <Input
+                      id="whatsapp-number"
+                      value={whatsappForm.number}
+                      onChange={(e) => setWhatsappForm(prev => ({ ...prev, number: e.target.value }))}
+                      placeholder="Ex: 5511999999999"
+                      className="text-lg py-4 h-12 border-2 focus:border-green-400 transition-all duration-200"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Digite o número com código do país e DDD (sem espaços ou símbolos)
+                    </p>
+                  </div>
+                </Card>
+                
+                <Card className="p-4 border-2 hover:border-green-200 transition-all duration-200">
+                  <div className="space-y-3">
+                    <Label htmlFor="whatsapp-message" className="text-base font-semibold flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4 text-green-600" />
+                      Mensagem Padrão
+                    </Label>
+                    <Textarea
+                      id="whatsapp-message"
+                      value={whatsappForm.message}
+                      onChange={(e) => setWhatsappForm(prev => ({ ...prev, message: e.target.value }))}
+                      placeholder="Olá! Vi seus produtos no catálogo e gostaria de mais informações."
+                      rows={4}
+                      className="text-base border-2 focus:border-green-400 transition-all duration-200 min-h-[100px]"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Esta mensagem será enviada automaticamente quando alguém clicar no botão WhatsApp
+                    </p>
+                  </div>
+                </Card>
               </div>
               
-              <Separator />
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Notificações por Email</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receber notificações importantes por email
-                  </p>
-                </div>
-                <Switch
-                  checked={appSettings.email_notifications}
-                  onCheckedChange={(checked) => 
-                    saveAppSettings({ ...appSettings, email_notifications: checked })
-                  }
-                />
-              </div>
-              
-              <Separator />
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Analytics</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Coletar dados de analytics para melhorar o sistema
-                  </p>
-                </div>
-                <Switch
-                  checked={appSettings.analytics_enabled}
-                  onCheckedChange={(checked) => 
-                    saveAppSettings({ ...appSettings, analytics_enabled: checked })
-                  }
-                />
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Card className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer border-2 hover:border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100" onClick={handleSaveWhatsAppSettings}>
+                  <Button 
+                    onClick={handleSaveWhatsAppSettings} 
+                    disabled={whatsappLoading || settingsLoading}
+                    size="lg"
+                    className="w-full h-14 text-base font-semibold bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    {whatsappLoading ? (
+                      <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-5 w-5 mr-2" />
+                    )}
+                    {whatsappLoading ? 'Salvando...' : 'Salvar Configurações'}
+                  </Button>
+                </Card>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
+
+
 
         {/* Aba Sistema */}
         <TabsContent value="system" className="space-y-6">
@@ -486,32 +558,44 @@ const Settings = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="p-4">
-                  <div className="space-y-2">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <RefreshCw className="h-4 w-4" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="p-6 border-2 hover:border-orange-200 hover:shadow-lg transition-all duration-200 cursor-pointer bg-gradient-to-br from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100" onClick={handleClearCache}>
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-bold flex items-center gap-3">
+                      <RefreshCw className="h-6 w-6 text-orange-600" />
                       Limpar Cache
                     </h4>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       Remove dados temporários armazenados localmente
                     </p>
-                    <Button variant="outline" onClick={handleClearCache} className="w-full">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleClearCache} 
+                      className="w-full h-12 text-base font-semibold border-2 border-orange-300 text-orange-700 hover:bg-orange-100 hover:border-orange-400 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                      size="lg"
+                    >
+                      <RefreshCw className="h-5 w-5 mr-2" />
                       Limpar Cache
                     </Button>
                   </div>
                 </Card>
                 
-                <Card className="p-4">
-                  <div className="space-y-2">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <Database className="h-4 w-4" />
+                <Card className="p-6 border-2 hover:border-blue-200 hover:shadow-lg transition-all duration-200 cursor-pointer bg-gradient-to-br from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100" onClick={handleExportData}>
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-bold flex items-center gap-3">
+                      <Database className="h-6 w-6 text-blue-600" />
                       Exportar Dados
                     </h4>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       Baixe um backup dos seus dados
                     </p>
-                    <Button variant="outline" onClick={handleExportData} className="w-full">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleExportData} 
+                      className="w-full h-12 text-base font-semibold border-2 border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                      size="lg"
+                    >
+                      <Database className="h-5 w-5 mr-2" />
                       Exportar Dados
                     </Button>
                   </div>
@@ -520,23 +604,26 @@ const Settings = () => {
               
               <Separator />
               
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-orange-500" />
-                    Modo Manutenção
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Ativar modo de manutenção para o catálogo público
-                  </p>
+              <Card className="p-6 border-2 hover:border-red-200 hover:shadow-md transition-all duration-200 cursor-pointer bg-gradient-to-r from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100" onClick={() => saveAppSettings({ ...appSettings, maintenance_mode: !appSettings.maintenance_mode })}>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <Label className="text-lg font-semibold flex items-center gap-3">
+                      <AlertTriangle className="h-6 w-6 text-red-600" />
+                      Modo Manutenção
+                    </Label>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Ativar modo de manutenção para o catálogo público
+                    </p>
+                  </div>
+                  <Switch
+                    checked={appSettings.maintenance_mode}
+                    onCheckedChange={(checked) => 
+                      saveAppSettings({ ...appSettings, maintenance_mode: checked })
+                    }
+                    className="scale-125"
+                  />
                 </div>
-                <Switch
-                  checked={appSettings.maintenance_mode}
-                  onCheckedChange={(checked) => 
-                    saveAppSettings({ ...appSettings, maintenance_mode: checked })
-                  }
-                />
-              </div>
+              </Card>
               
               {appSettings.maintenance_mode && (
                 <Alert>

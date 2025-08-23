@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: string
+          key: string
+          value: string
+          description: string | null
+          category: string
+          is_public: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          value: string
+          description?: string | null
+          category?: string
+          is_public?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          value?: string
+          description?: string | null
+          category?: string
+          is_public?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           id: string
@@ -48,8 +81,10 @@ export type Database = {
           total_likes: number
           total_views: number
           total_clicks: number
+          total_shares: number
           unique_viewers: number
           last_updated: string
+          updated_at: string
         }
         Insert: {
           id?: string
@@ -57,8 +92,10 @@ export type Database = {
           total_likes?: number
           total_views?: number
           total_clicks?: number
+          total_shares?: number
           unique_viewers?: number
           last_updated?: string
+          updated_at?: string
         }
         Update: {
           id?: string
@@ -66,14 +103,60 @@ export type Database = {
           total_likes?: number
           total_views?: number
           total_clicks?: number
+          total_shares?: number
           unique_viewers?: number
           last_updated?: string
+          updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "product_analytics_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      product_shares: {
+        Row: {
+          id: string
+          product_id: string
+          share_type: string
+          page_source: string | null
+          user_id: string | null
+          session_id: string | null
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          share_type: string
+          page_source?: string | null
+          user_id?: string | null
+          session_id?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          share_type?: string
+          page_source?: string | null
+          user_id?: string | null
+          session_id?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_shares_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
           }
@@ -270,6 +353,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_email_by_username: {
+        Args: {
+          input_username: string
+        }
+        Returns: string
+      }
+      get_public_settings: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          key: string
+          value: string
+          description: string
+          category: string
+        }[]
+      }
+      update_app_setting: {
+        Args: {
+          setting_key: string
+          setting_value: string
+        }
+        Returns: boolean
+      }
       toggle_product_like: {
         Args: {
           p_product_id: string
@@ -286,14 +391,26 @@ export type Database = {
           p_session_id: string | null
           p_ip_address: string | null
           p_user_agent: string | null
-          p_referrer: string | null
+          p_referrer?: string | null
         }
-        Returns: void
+        Returns: boolean
       }
       track_product_click: {
         Args: {
           p_product_id: string
           p_click_type: string
+          p_page_source: string | null
+          p_user_id: string | null
+          p_session_id: string | null
+          p_ip_address: string | null
+          p_user_agent: string | null
+        }
+        Returns: void
+      }
+      track_product_share: {
+        Args: {
+          p_product_id: string
+          p_share_type: string
           p_page_source: string | null
           p_user_id: string | null
           p_session_id: string | null

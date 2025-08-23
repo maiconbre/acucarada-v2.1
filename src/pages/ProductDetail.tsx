@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MessageCircle, Heart, Share2, Eye, Star, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAppSettings } from "@/hooks/useAppSettings";
 import { useProductAnalytics } from "@/hooks/useProductAnalytics";
 
 interface Product {
@@ -25,10 +26,11 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getWhatsAppLink } = useAppSettings();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState(true);
-  const { analytics, toggleLike, trackView, trackClick } = useProductAnalytics(id || '');
+  const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id || '');
 
   useEffect(() => {
     if (id) {
@@ -73,14 +75,10 @@ const ProductDetail = () => {
   const handleWhatsAppOrder = () => {
     if (!product) return;
     
-    // Track view when user actually engages with the product
-    trackView();
     trackClick('whatsapp_order', 'product_detail');
-    const whatsappNumber = "5511999999999";
-    const message = encodeURIComponent(
-      `Olá! Gostaria de encomendar:\n\n🍫 *${product.name}*\n💰 ${formatPrice(product.price)}\n\nPoderia me dar mais informações sobre disponibilidade e entrega?`
-    );
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    const customMessage = `Olá! Gostaria de encomendar:\n\n🍫 *${product.name}*\n💰 ${formatPrice(product.price)}\n\nPoderia me dar mais informações sobre disponibilidade e entrega?`;
+    const link = getWhatsAppLink(customMessage);
+    window.open(link, '_blank');
   };
 
   const handleLikeClick = async () => {
@@ -91,8 +89,6 @@ const ProductDetail = () => {
   const handleShare = async () => {
     if (!product) return;
     
-    trackClick('share', 'product_detail');
-    
     const shareData = {
       title: product.name,
       text: `Confira este delicioso ${product.name} - ${formatPrice(product.price)}`,
@@ -102,9 +98,11 @@ const ProductDetail = () => {
     try {
       if (navigator.share) {
         await navigator.share(shareData);
+        trackShare('native_share', 'product_detail');
       } else {
         // Fallback para copiar URL
         await navigator.clipboard.writeText(window.location.href);
+        trackShare('copy_link', 'product_detail');
         toast({
           title: "Link copiado!",
           description: "O link do produto foi copiado para a área de transferência.",
@@ -229,24 +227,26 @@ const ProductDetail = () => {
                     {formatPrice(product.price)}
                   </span>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={handleShare}
-                    className="h-10 w-10 lg:h-12 lg:w-12"
+                    className="h-12 w-12 lg:h-14 lg:w-14 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 active:scale-95"
                   >
-                    <Share2 className="h-4 w-4 lg:h-5 lg:w-5" />
+                    <Share2 className="h-5 w-5 lg:h-6 lg:w-6" />
                   </Button>
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={handleLikeClick}
-                    className={`h-10 w-10 lg:h-12 lg:w-12 transition-colors ${
-                      analytics.is_liked ? 'text-red-500 border-red-500' : ''
+                    className={`h-12 w-12 lg:h-14 lg:w-14 transition-all duration-200 active:scale-95 ${
+                      analytics.is_liked 
+                        ? 'text-red-500 border-red-300 bg-red-50 hover:bg-red-100' 
+                        : 'hover:bg-red-50 hover:border-red-300 hover:text-red-500'
                     }`}
                   >
-                    <Heart className={`h-4 w-4 lg:h-5 lg:w-5 ${analytics.is_liked ? 'fill-current' : ''}`} />
+                    <Heart className={`h-5 w-5 lg:h-6 lg:w-6 ${analytics.is_liked ? 'fill-current' : ''}`} />
                   </Button>
                 </div>
               </div>
@@ -283,13 +283,20 @@ const ProductDetail = () => {
             <Card className="border-0 bg-muted/50">
               <CardContent className="p-4 lg:p-6">
                 <h3 className="font-semibold mb-3 font-title text-sm lg:text-base">Estatísticas</h3>
-                <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="flex items-center justify-center gap-1 text-base lg:text-lg font-bold text-red-500">
                       <Heart className="h-3 w-3 lg:h-4 lg:w-4" />
                       {analytics.total_likes}
                     </div>
                     <span className="text-xs text-muted-foreground font-text">Curtidas</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-center gap-1 text-base lg:text-lg font-bold text-blue-500">
+                      <Share2 className="h-3 w-3 lg:h-4 lg:w-4" />
+                      {analytics.total_shares}
+                    </div>
+                    <span className="text-xs text-muted-foreground font-text">Compartilhamentos</span>
                   </div>
                   <div>
                     <div className="flex items-center justify-center gap-1 text-base lg:text-lg font-bold text-yellow-500">
