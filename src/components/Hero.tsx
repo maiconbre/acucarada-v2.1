@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Heart, Star, Sparkles, ChefHat } from "lucide-react";
+import { Heart, Star, ChefHat } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-sweets.jpg";
 import logoImage from "@/assets/Fundo Transparente PNGPrancheta 1.png";
@@ -19,7 +19,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center overflow-hidden pt-24 md:pt-32">
       {/* Background Image with improved mobile optimization */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -41,12 +41,6 @@ export const Hero = () => {
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center md:text-left md:mx-0 md:max-w-2xl">
-          {/* Badge with animation */}
-          <div className="inline-flex items-center gap-2 sm:gap-2 bg-rose-primary/10 backdrop-blur-sm text-rose-primary px-2 sm:px-4 py-1 sm:py-2 rounded-full mb-4 mt-4 sm:mt-0 border border-rose-primary/20 animate-fade-in">
-            <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 animate-pulse" />
-            <span className="text-xs font-medium font-text">Doces Artesanais</span>
-          </div>
-
           {/* Main Title with improved mobile hierarchy */}
           <div className="flex flex-col items-center md:items-start animate-slide-up">
             <img
@@ -96,7 +90,7 @@ export const Hero = () => {
               <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left font-text">500+ clientes satisfeitos</span>
             </div>
             <div className="flex items-center justify-center sm:justify-start gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:bg-card/80 transition-colors">
-              <Sparkles className="h-4 w-4 text-rose-primary shrink-0" />
+              <ChefHat className="h-4 w-4 text-rose-primary shrink-0" />
               <span className="text-sm sm:text-xs lg:text-sm font-medium text-center sm:text-left font-text">Entrega em toda região</span>
             </div>
             <div className="flex items-center justify-center sm:justify-start gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-3 sm:p-4 hover:bg-card/80 transition-colors sm:col-span-2 lg:col-span-1">
