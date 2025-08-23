@@ -19,7 +19,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden pt-24 md:pt-32">
+    <section className="relative min-h-screen flex items-center overflow-hidden pt-100 md:pt-20">
       {/* Background Image with improved mobile optimization */}
       <div className="absolute inset-0 z-0">
         <img 

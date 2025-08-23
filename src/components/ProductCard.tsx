@@ -22,7 +22,7 @@ const ProductCard = ({ id, name, description, price, image, category, is_feature
   // Track view when component mounts
   useEffect(() => {
     trackView();
-  }, []);
+  }, [trackView]);
 
   const handleCardClick = () => {
     trackClick('view_details', 'catalog');

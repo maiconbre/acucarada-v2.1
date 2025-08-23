@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,9 +40,9 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  });
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('categories')
@@ -61,7 +61,7 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
     } finally {
       setFetchLoading(false);
     }
-  };
+  }, [toast]);
 
   const resetForm = () => {
     setFormData({

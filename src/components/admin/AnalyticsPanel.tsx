@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -141,7 +141,7 @@ const AnalyticsPanel = () => {
     };
   }, [sortBy]);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -224,7 +224,7 @@ const AnalyticsPanel = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sortBy, toast]);
 
   const fetchClickStats = async () => {
     try {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "@/components/ProductCard";
 import { Header } from "@/components/Header";
@@ -91,7 +91,7 @@ const Catalog = () => {
     }
   };
 
-  const filterProducts = () => {
+  const filterProducts = useCallback(() => {
     let filtered = products;
 
     // Filter by search term
@@ -148,7 +148,7 @@ const Catalog = () => {
     }
 
     setFilteredProducts(filtered);
-  };
+  }, [products, searchTerm, selectedCategory, priceRange, showReadyDelivery, sortBy]);
 
   if (loading) {
     return (
