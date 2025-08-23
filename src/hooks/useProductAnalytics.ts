@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/contexts/user-context';
 
 interface ProductAnalytics {
   total_likes: number;
@@ -27,6 +28,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
     unique_viewers: 0,
     is_liked: false,
   });
+  const [lastViewTrack, setLastViewTrack] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [sessionId] = useState(() => {
     // Generate or get session ID for anonymous users
@@ -38,77 +40,74 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
     return sessionId;
   });
 
-  // Get user IP address (simplified)
-  const getUserIP = async (): Promise<string | null> => {
-    try {
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      return data.ip;
-    } catch (error) {
-      console.error('Error getting IP:', error);
-      return null;
-    }
-  };
-
-  // Get user agent
-  const getUserAgent = (): string => {
-    return navigator.userAgent;
-  };
-
-  // Get current user
-  const getCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
-  };
+  // Use centralized user context
+  const { getCurrentUser, getUserIP, getUserAgent } = useUser();
 
   // Fetch analytics data
   const fetchAnalytics = useCallback(async () => {
+    const timeoutId = setTimeout(() => {
+      console.warn('Analytics fetch timeout');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+
     try {
       setLoading(true);
       
       // Get analytics summary
       const { data: analyticsData, error: analyticsError } = await supabase
         .from('product_analytics')
-        .select('*')
+        .select('total_likes, total_views, total_clicks, unique_viewers')
         .eq('product_id', productId)
-        .single();
+        .limit(1);
 
-      if (analyticsError && analyticsError.code !== 'PGRST116') {
-        throw analyticsError;
+      if (analyticsError) {
+        console.warn('Error fetching analytics:', analyticsError);
+        // Continue with default values instead of throwing
       }
+      
+      const analytics = analyticsData && analyticsData.length > 0 ? analyticsData[0] : null;
 
       // Check if user has liked this product
-      const user = await getCurrentUser();
+      const currentUser = await getCurrentUser();
       let isLiked = false;
 
-      if (user) {
-        const { data: likeData } = await supabase
+      if (currentUser) {
+        const { data: likeData, error: likeError } = await supabase
           .from('product_likes')
           .select('id')
           .eq('product_id', productId)
-          .eq('user_id', user.id)
-          .single();
-        isLiked = !!likeData;
+          .eq('user_id', currentUser.id)
+          .limit(1);
+        
+        if (likeError) {
+          console.warn('Error checking user like:', likeError);
+        }
+        isLiked = !!(likeData && likeData.length > 0);
       } else {
-        const { data: likeData } = await supabase
+        const { data: likeData, error: likeError } = await supabase
           .from('product_likes')
           .select('id')
           .eq('product_id', productId)
           .eq('session_id', sessionId)
-          .single();
-        isLiked = !!likeData;
+          .limit(1);
+        
+        if (likeError) {
+          console.warn('Error checking session like:', likeError);
+        }
+        isLiked = !!(likeData && likeData.length > 0);
       }
 
       setAnalytics({
-        total_likes: analyticsData?.total_likes || 0,
-        total_views: analyticsData?.total_views || 0,
-        total_clicks: analyticsData?.total_clicks || 0,
-        unique_viewers: analyticsData?.unique_viewers || 0,
+        total_likes: analytics?.total_likes || 0,
+        total_views: analytics?.total_views || 0,
+        total_clicks: analytics?.total_clicks || 0,
+        unique_viewers: analytics?.unique_viewers || 0,
         is_liked: isLiked,
       });
     } catch (error) {
       console.error('Error fetching analytics:', error);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   }, [productId, sessionId]);
@@ -116,13 +115,13 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
   // Toggle like
   const toggleLike = async () => {
     try {
-      const user = await getCurrentUser();
+      const currentUser = await getCurrentUser();
       const ip = await getUserIP();
 
       const { data, error } = await supabase.rpc('toggle_product_like', {
         p_product_id: productId,
-        p_user_id: user?.id || null,
-        p_session_id: user ? null : sessionId,
+        p_user_id: currentUser?.id || null,
+        p_session_id: currentUser ? null : sessionId,
         p_ip_address: ip,
       });
 
@@ -149,18 +148,28 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
     }
   };
 
-  // Track view
+  // Track view with debounce
   const trackView = async () => {
+    const now = Date.now();
+    const DEBOUNCE_TIME = 5000; // 5 seconds debounce
+    
+    // Prevent multiple calls within debounce time
+    if (now - lastViewTrack < DEBOUNCE_TIME) {
+      return;
+    }
+    
+    setLastViewTrack(now);
+    
     try {
-      const user = await getCurrentUser();
+      const currentUser = await getCurrentUser();
       const ip = await getUserIP();
       const userAgent = getUserAgent();
       const referrer = document.referrer;
 
       const { error } = await supabase.rpc('track_product_view', {
         p_product_id: productId,
-        p_user_id: user?.id || null,
-        p_session_id: user ? null : sessionId,
+        p_user_id: currentUser?.id || null,
+        p_session_id: currentUser ? null : sessionId,
         p_ip_address: ip,
         p_user_agent: userAgent,
         p_referrer: referrer || null,
@@ -181,7 +190,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
   // Track click
   const trackClick = async (clickType: string, pageSource?: string) => {
     try {
-      const user = await getCurrentUser();
+      const currentUser = await getCurrentUser();
       const ip = await getUserIP();
       const userAgent = getUserAgent();
 
@@ -189,8 +198,8 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
         p_product_id: productId,
         p_click_type: clickType,
         p_page_source: pageSource || window.location.pathname,
-        p_user_id: user?.id || null,
-        p_session_id: user ? null : sessionId,
+        p_user_id: currentUser?.id || null,
+        p_session_id: currentUser ? null : sessionId,
         p_ip_address: ip,
         p_user_agent: userAgent,
       });

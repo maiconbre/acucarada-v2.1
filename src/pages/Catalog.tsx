@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "@/components/ProductCard";
 import { Header } from "@/components/Header";
@@ -26,15 +26,27 @@ interface Category {
   is_active: boolean;
 }
 
+// Cache for products and categories
+const catalogCache = {
+  products: { data: null as Product[] | null, timestamp: 0, ttl: 3 * 60 * 1000 }, // 3 minutes
+  categories: { data: null as Category[] | null, timestamp: 0, ttl: 10 * 60 * 1000 } // 10 minutes
+};
+
 const Catalog = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [priceRange, setPriceRange] = useState("all");
   const [showReadyDelivery, setShowReadyDelivery] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
@@ -53,23 +65,90 @@ const Catalog = () => {
     }
   }, [searchParams]);
 
+  // Debounced search effect
   useEffect(() => {
-    filterProducts();
-  }, [products, searchTerm, selectedCategory, priceRange, showReadyDelivery, sortBy]);
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    searchTimeoutRef.current = setTimeout(() => {
+      // Reset to first page when search changes
+      if (searchTerm || selectedCategory !== 'all' || priceRange !== 'all' || showReadyDelivery) {
+        setPage(0);
+        setHasMore(true);
+      }
+    }, 300);
 
-  const fetchProducts = async () => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchTerm, selectedCategory, priceRange, showReadyDelivery]);
+
+
+
+  const fetchProducts = async (pageNum = 0, append = false) => {
     try {
+      if (!append) {
+        setLoading(true);
+        setError(null);
+        
+        // Check cache for initial load
+        const now = Date.now();
+        if (pageNum === 0 && catalogCache.products.data && 
+            (now - catalogCache.products.timestamp) < catalogCache.products.ttl) {
+          setProducts(catalogCache.products.data);
+          setLoading(false);
+          return;
+        }
+        
+        // Set timeout to prevent infinite loading
+        fetchTimeoutRef.current = setTimeout(() => {
+          setLoading(false);
+          setError("Tempo limite excedido. Tente recarregar a página.");
+        }, 15000); // 15 second timeout
+      }
+      
+      const pageSize = 20;
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select("id, name, description, price, image_url, category, is_featured")
         .eq("is_active", true)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(pageNum * pageSize, (pageNum + 1) * pageSize - 1);
+
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+        fetchTimeoutRef.current = null;
+      }
 
       if (error) throw error;
 
-      setProducts(data || []);
+      const newProducts = data || [];
+      setHasMore(newProducts.length === pageSize);
+      
+      if (append) {
+        setProducts(prev => [...prev, ...newProducts]);
+      } else {
+        setProducts(newProducts);
+        // Update cache for initial load
+        if (pageNum === 0) {
+          catalogCache.products.data = newProducts;
+          catalogCache.products.timestamp = Date.now();
+        }
+      }
+      
+      setPage(pageNum);
     } catch (error) {
       console.error("Error fetching products:", error);
+      if (!append) {
+        setError("Erro ao carregar produtos. Tente novamente.");
+      }
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+        fetchTimeoutRef.current = null;
+      }
     } finally {
       setLoading(false);
     }
@@ -77,29 +156,47 @@ const Catalog = () => {
 
   const fetchCategories = async () => {
     try {
+      // Check cache first
+      const now = Date.now();
+      if (catalogCache.categories.data && 
+          (now - catalogCache.categories.timestamp) < catalogCache.categories.ttl) {
+        setCategories(catalogCache.categories.data);
+        setCategoriesLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("categories")
-        .select("*")
+        .select("id, name, description, is_active")
         .eq("is_active", true)
         .order("name", { ascending: true });
 
       if (error) throw error;
 
-      setCategories(data || []);
+      const categoriesData: Category[] = data || [];
+      setCategories(categoriesData);
+      
+      // Update cache
+      catalogCache.categories.data = categoriesData;
+      catalogCache.categories.timestamp = now;
+      
     } catch (error) {
       console.error("Error fetching categories:", error);
+    } finally {
+      setCategoriesLoading(false);
     }
   };
 
-  const filterProducts = useCallback(() => {
+  const filteredProducts = useMemo(() => {
     let filtered = products;
 
     // Filter by search term
     if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (product) =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.description?.toLowerCase().includes(searchTerm.toLowerCase())
+          product.name.toLowerCase().includes(searchLower) ||
+          product.description?.toLowerCase().includes(searchLower)
       );
     }
 
@@ -132,28 +229,59 @@ const Catalog = () => {
     }
 
     // Sort products
+    const sorted = [...filtered];
     switch (sortBy) {
       case "newest":
         // Already sorted by created_at desc from database
         break;
       case "price-low":
-        filtered.sort((a, b) => a.price - b.price);
+        sorted.sort((a, b) => a.price - b.price);
         break;
       case "price-high":
-        filtered.sort((a, b) => b.price - a.price);
+        sorted.sort((a, b) => b.price - a.price);
         break;
       case "name":
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
         break;
     }
 
-    setFilteredProducts(filtered);
+    return sorted;
   }, [products, searchTerm, selectedCategory, priceRange, showReadyDelivery, sortBy]);
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-rose-primary"></div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen gradient-soft">
+        <Header />
+        <div className="container mx-auto px-4 py-20">
+          <div className="text-center">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-8 max-w-md mx-auto">
+              <TrendingUp className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-destructive mb-2">Erro ao carregar catálogo</h3>
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button 
+                onClick={() => {
+                  setError(null);
+                  setLoading(true);
+                  fetchProducts();
+                }}
+                variant="outline"
+                className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              >
+                Tentar novamente
+              </Button>
+            </div>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -313,6 +441,20 @@ const Catalog = () => {
                 />
               </div>
             ))}
+          </div>
+        )}
+        
+        {/* Load More Button */}
+        {filteredProducts.length > 0 && hasMore && (
+          <div className="text-center mt-8">
+            <Button 
+              onClick={() => fetchProducts(page + 1, true)}
+              disabled={loading}
+              variant="outline"
+              className="px-8 py-2"
+            >
+              {loading ? "Carregando..." : "Carregar Mais"}
+            </Button>
           </div>
         )}
       </div>

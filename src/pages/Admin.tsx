@@ -54,6 +54,7 @@ const Admin = () => {
       const { data, error } = await supabase
         .from("products")
         .select("*")
+        .eq("is_active", true) // Filtrar apenas produtos ativos após soft delete
         .order("created_at", { ascending: false });
 
       if (error) throw error;
