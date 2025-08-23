@@ -28,6 +28,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Edit, Trash2, Eye, EyeOff, Grid3X3, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 interface Product {
   id: string;
@@ -389,13 +390,21 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="image_url">URL da Imagem</Label>
-                <Input
-                  id="image_url"
-                  type="url"
+                <Label>Imagem do Produto</Label>
+                <ImageUpload
                   value={formData.image_url}
-                  onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-                  placeholder="https://exemplo.com/imagem.jpg"
+                  onChange={(url) => setFormData({...formData, image_url: url})}
+                  bucketName="product-images"
+                  folder="products"
+                  showPreview={true}
+                  showMetadata={false}
+                  processingOptions={{
+                    maxWidth: 1200,
+                    maxHeight: 1200,
+                    quality: 0.85,
+                    generateThumbnail: true,
+                    thumbnailSize: 300
+                  }}
                 />
               </div>
 
