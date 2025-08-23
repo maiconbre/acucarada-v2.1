@@ -1,12 +1,13 @@
 name: Performance & Quality Check
 
 on:
-  schedule:
-    - cron: '0 2 * * 1' # Toda segunda-feira às 2h
-  pull_request:
+  workflow_dispatch: # Apenas execução manual
+  push:
     branches: [main]
-    types: [opened, synchronize]
-  workflow_dispatch: # Permite execução manual
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
 
 jobs:
   performance-audit:
