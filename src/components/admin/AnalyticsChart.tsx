@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Eye, Heart, MousePointer, Users, Package } from 'lucide-react';
+import { TrendingUp, Heart, MousePointer, Users, Package } from 'lucide-react';
 
 interface ProductAnalytics {
   id: string;
@@ -8,20 +8,18 @@ interface ProductAnalytics {
   product_name: string;
   product_category: string;
   total_likes: number;
-  total_views: number;
   total_clicks: number;
-  unique_viewers: number;
+  unique_viewers: number; // Sempre 0 - tracking removido
   last_updated: string;
 }
 
 interface OverallStats {
   total_products: number;
   total_likes: number;
-  total_views: number;
   total_clicks: number;
-  total_unique_viewers: number;
+  total_shares: number;
+  total_unique_viewers: number; // Sempre 0 - tracking removido
   most_liked_product: string;
-  most_viewed_product: string;
 }
 
 interface AnalyticsChartProps {
@@ -52,7 +50,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ analytics, overallStats
   }
 
   const topProducts = analytics
-    .sort((a, b) => b.total_views - a.total_views)
+    .sort((a, b) => b.total_likes - a.total_likes)
     .slice(0, 5);
 
   const mostEngagedProducts = analytics
@@ -63,15 +61,15 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ analytics, overallStats
     <div className="space-y-6">
       {/* Grid Principal - Top 5 Produtos e Maior Engajamento lado a lado */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Produtos Mais Visualizados */}
-        <Card className="transition-all duration-300 hover:shadow-lg border-0 shadow-md">
+        {/* Produtos Mais Curtidos */}
+        <Card className="hidden sm:block transition-all duration-300 hover:shadow-lg border-0 shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-blue-500" />
-              Top 5 Produtos Mais Visualizados
+              <Heart className="h-5 w-5 text-red-500" />
+              Top 5 Produtos Mais Curtidos
             </CardTitle>
             <CardDescription>
-              Produtos com maior número de visualizações
+              Produtos com maior número de curtidas
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -79,7 +77,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ analytics, overallStats
               {topProducts.map((product, index) => (
                 <div key={product.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-semibold text-sm">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-600 font-semibold text-sm">
                       {index + 1}
                     </div>
                     <div>
@@ -88,8 +86,8 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ analytics, overallStats
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-blue-600">{product.total_views.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">visualizações</p>
+                    <p className="font-semibold text-red-600">{product.total_likes.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">curtidas</p>
                   </div>
                 </div>
               ))}
@@ -139,7 +137,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ analytics, overallStats
       </div>
 
       {/* Insights Rápidos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
         <Card className="transition-all duration-300 hover:shadow-lg border-0 shadow-md">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -156,23 +154,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ analytics, overallStats
             </p>
           </CardContent>
         </Card>
-
-        <Card className="transition-all duration-300 hover:shadow-lg border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Eye className="h-5 w-5 text-blue-500" />
-              Produto Mais Visto
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xl font-semibold text-blue-600">
-              {overallStats.most_viewed_product || 'N/A'}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Produto com maior número de visualizações
-            </p>
-          </CardContent>
-        </Card>
+        {/* Card "Produto Mais Visto" removido - tracking eliminado */}
       </div>
     </div>
   );

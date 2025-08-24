@@ -79,10 +79,8 @@ export type Database = {
           id: string
           product_id: string
           total_likes: number
-          total_views: number
           total_clicks: number
           total_shares: number
-          unique_viewers: number
           last_updated: string
           updated_at: string
         }
@@ -90,10 +88,8 @@ export type Database = {
           id?: string
           product_id: string
           total_likes?: number
-          total_views?: number
           total_clicks?: number
           total_shares?: number
-          unique_viewers?: number
           last_updated?: string
           updated_at?: string
         }
@@ -101,10 +97,8 @@ export type Database = {
           id?: string
           product_id?: string
           total_likes?: number
-          total_views?: number
           total_clicks?: number
           total_shares?: number
-          unique_viewers?: number
           last_updated?: string
           updated_at?: string
         }
@@ -241,47 +235,7 @@ export type Database = {
           }
         ]
       }
-      product_views: {
-        Row: {
-          id: string
-          product_id: string
-          user_id: string | null
-          session_id: string | null
-          ip_address: string | null
-          user_agent: string | null
-          referrer: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          product_id: string
-          user_id?: string | null
-          session_id?: string | null
-          ip_address?: string | null
-          user_agent?: string | null
-          referrer?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          product_id?: string
-          user_id?: string | null
-          session_id?: string | null
-          ip_address?: string | null
-          user_agent?: string | null
-          referrer?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_views_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
+
       products: {
         Row: {
           category: string
@@ -384,17 +338,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      track_product_view: {
-        Args: {
-          p_product_id: string
-          p_user_id: string | null
-          p_session_id: string | null
-          p_ip_address: string | null
-          p_user_agent: string | null
-          p_referrer?: string | null
-        }
-        Returns: boolean
-      }
+
       track_product_click: {
         Args: {
           p_product_id: string

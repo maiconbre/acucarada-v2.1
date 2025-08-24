@@ -7,7 +7,7 @@ interface ProductAnalytics {
   total_likes: number;
   total_shares: number;
   total_clicks: number;
-  unique_viewers: number;
+  unique_viewers: number; // Sempre 0 - tracking removido
   is_liked: boolean;
 }
 
@@ -17,7 +17,6 @@ interface UseProductAnalyticsReturn {
   toggleLike: () => Promise<void>;
   trackShare: (shareType: string, pageSource?: string) => Promise<void>;
   trackClick: (clickType: string, pageSource?: string) => Promise<void>;
-  trackView: () => Promise<void>;
 }
 
 export const useProductAnalytics = (productId: string): UseProductAnalyticsReturn => {
@@ -57,7 +56,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
       // Get analytics summary
       const { data: analyticsData, error: analyticsError } = await supabase
         .from('product_analytics')
-        .select('total_likes, total_shares, total_clicks, unique_viewers')
+        .select('total_likes, total_shares, total_clicks')
         .eq('product_id', productId)
         .limit(1);
 
@@ -102,7 +101,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
         total_likes: analytics?.total_likes || 0,
         total_shares: analytics?.total_shares || 0,
         total_clicks: analytics?.total_clicks || 0,
-        unique_viewers: analytics?.unique_viewers || 0,
+        unique_viewers: 0, // Sempre 0 - tracking removido
         is_liked: isLiked,
       });
     } catch (error) {
@@ -207,33 +206,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
     }
   };
 
-  // Track view
-  const trackView = async () => {
-    try {
-      const currentUser = await getCurrentUser();
-      const ip = await getUserIP();
-      const userAgent = getUserAgent();
 
-      const { error } = await supabase.rpc('track_product_view', {
-        p_product_id: productId,
-        p_user_id: currentUser?.id || null,
-        p_session_id: currentUser ? null : sessionId,
-        p_ip_address: ip,
-        p_user_agent: userAgent,
-        p_referrer: document.referrer || null,
-      });
-
-      if (error) throw error;
-
-      // Update local state
-      setAnalytics(prev => ({
-        ...prev,
-        unique_viewers: prev.unique_viewers + 1,
-      }));
-    } catch (error) {
-      console.error('Error tracking view:', error);
-    }
-  };
 
   useEffect(() => {
     if (productId) {
@@ -309,6 +282,5 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
     toggleLike,
     trackShare,
     trackClick,
-    trackView,
   };
 };
