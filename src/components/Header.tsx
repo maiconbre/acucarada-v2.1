@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppSettings } from "@/hooks/useAppSettings";
-import logoImage from "@/assets/logo-empinando.png";
+import logoImage from "@/assets/formicirculo.png";
 import {
   NavigationMenu,
   NavigationMenuItem,

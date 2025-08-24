@@ -38,7 +38,7 @@ const ProductDetail = () => {
       // Removed automatic trackView to prevent excessive API calls
       // trackView will only be called on user interactions
     }
-  }, [id]); // Only depend on id to avoid infinite loops
+  }, [id]); // Remove fetchProduct from dependencies since it's defined after useEffect
 
   const fetchProduct = useCallback(async () => {
     try {
