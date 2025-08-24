@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@/contexts/user-context';
+import { useUser } from '@/hooks/useUser';
 
 interface ProductAnalytics {
   total_likes: number;
