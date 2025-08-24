@@ -19,17 +19,26 @@ interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
-  image_url: string;
+  price: string;
+  image: string;
   category: string;
   is_featured: boolean;
   is_active: boolean;
 }
 
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 const Admin = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
