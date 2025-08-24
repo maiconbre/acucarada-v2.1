@@ -35,10 +35,8 @@ const ProductDetail = () => {
   useEffect(() => {
     if (id) {
       fetchProduct();
-      // Removed automatic trackView to prevent excessive API calls
-      // trackView will only be called on user interactions
     }
-  }, [id]); // Remove fetchProduct from dependencies since it's defined after useEffect
+  }, [id]);
 
   const fetchProduct = useCallback(async () => {
     try {

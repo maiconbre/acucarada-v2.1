@@ -19,8 +19,8 @@ interface Product {
   id: string;
   name: string;
   description: string;
-  price: string;
-  image: string;
+  price: number;
+  image_url: string;
   category: string;
   is_featured: boolean;
   is_active: boolean;

@@ -9,13 +9,13 @@ interface ProductCardProps {
   id: string;
   name: string;
   description: string;
-  price: string;
-  image: string;
+  price: number;
+  image_url: string;
   category: string;
   is_featured: boolean;
 }
 
-const ProductCard = ({ id, name, description, price, image, category, is_featured }: ProductCardProps) => {
+const ProductCard = ({ id, name, description, price, image_url, category, is_featured }: ProductCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id);
@@ -65,7 +65,7 @@ const ProductCard = ({ id, name, description, price, image, category, is_feature
     >
       <div className="relative overflow-hidden">
         <img
-          src={image}
+          src={image_url}
           alt={name}
           className="w-full h-48 md:h-64 object-cover transition-transform duration-300 group-hover:scale-105"
         />
@@ -87,7 +87,7 @@ const ProductCard = ({ id, name, description, price, image, category, is_feature
         
         <div className="flex items-center justify-between">
           <span className="text-lg md:text-2xl font-bold text-primary">
-            {price}
+            R$ {price.toFixed(2).replace('.', ',')}
           </span>
           <div className="flex items-center gap-2">
             <Button

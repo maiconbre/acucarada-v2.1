@@ -482,8 +482,8 @@ const Catalog = () => {
                   id={product.id}
                   name={product.name}
                   description={product.description || ""}
-                  price={`R$ ${product.price.toFixed(2).replace(".", ",")}`}
-                  image={product.image_url || ""}
+                  price={product.price}
+                  image_url={product.image_url || ""}
                   category={product.category}
                   is_featured={product.is_featured}
                 />

@@ -19,7 +19,6 @@ interface ProductAnalytics {
   total_likes: number;
   total_clicks: number;
   total_shares: number;
-  unique_viewers: number; // Sempre 0 - tracking removido
   last_updated: string;
 }
 
@@ -28,7 +27,6 @@ interface OverallStats {
   total_likes: number;
   total_clicks: number;
   total_shares: number;
-  total_unique_viewers: number; // Sempre 0 - tracking removido
   most_liked_product: string;
 }
 
@@ -119,11 +117,28 @@ const AnalyticsPanel = () => {
       )
       .subscribe();
 
+    const sharesSubscription = supabase
+      .channel('admin_shares')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'product_shares',
+        },
+        (payload) => {
+          console.log('Admin shares updated:', payload);
+          fetchAnalytics();
+        }
+      )
+      .subscribe();
+
     // Cleanup subscriptions
     return () => {
       analyticsSubscription.unsubscribe();
       likesSubscription.unsubscribe();
       clicksSubscription.unsubscribe();
+      sharesSubscription.unsubscribe();
     };
   }, [sortBy]);
 
@@ -155,7 +170,6 @@ const AnalyticsPanel = () => {
         total_likes: item.total_likes || 0,
         total_clicks: item.total_clicks || 0,
         total_shares: item.total_shares || 0,
-        unique_viewers: 0, // Tracking removido
         last_updated: item.last_updated,
       })) || [];
 
@@ -189,7 +203,6 @@ const AnalyticsPanel = () => {
         total_likes: totalLikes,
         total_clicks: totalClicks,
         total_shares: totalShares,
-        total_unique_viewers: 0, // Tracking removido
         most_liked_product: mostLikedProduct.product_name,
       });
 
@@ -370,18 +383,7 @@ const AnalyticsPanel = () => {
 
             <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
               <CardContent className="p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="p-2 rounded-lg bg-green-50">
-                    <Users className="h-4 w-4 text-green-600" />
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-green-500">{overallStats.total_unique_viewers}</div>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-sm font-semibold text-foreground">Visitantes</h3>
-                  <p className="text-xs text-muted-foreground">Únicos</p>
-                </div>
+
               </CardContent>
             </Card>
           </div>
@@ -458,22 +460,7 @@ const AnalyticsPanel = () => {
               </CardContent>
             </Card>
 
-            <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="p-2 rounded-lg bg-green-50">
-                    <Users className="h-4 w-4 text-green-600" />
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-green-500">{overallStats.total_unique_viewers}</div>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-sm font-semibold text-foreground">Visitantes</h3>
-                  <p className="text-xs text-muted-foreground">Únicos registrados</p>
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         </>
       )}
@@ -510,10 +497,11 @@ const AnalyticsPanel = () => {
                 </TableHead>
                 <TableHead className="text-center">
                   <div className="flex items-center justify-center gap-1">
-                    <Users className="h-4 w-4" />
-                    Únicos
+                    <Share className="h-4 w-4" />
+                    Shares
                   </div>
                 </TableHead>
+
                 <TableHead>Última Atualização</TableHead>
               </TableRow>
             </TableHeader>
@@ -533,11 +521,12 @@ const AnalyticsPanel = () => {
                   </TableCell>
                   {/* Célula de visualizações removida - tracking eliminado */}
                   <TableCell className="text-center">
-                    <span className="font-bold text-purple-500">{item.total_clicks}</span>
+                    <span className="font-bold text-blue-500">{item.total_clicks}</span>
                   </TableCell>
                   <TableCell className="text-center">
-                    <span className="font-bold text-green-500">{item.unique_viewers}</span>
+                    <span className="font-bold text-purple-500">{item.total_shares}</span>
                   </TableCell>
+
                   <TableCell className="text-sm text-muted-foreground">
                     {formatDate(item.last_updated)}
                   </TableCell>
