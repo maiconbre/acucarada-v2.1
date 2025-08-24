@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Heart, Eye, MousePointer, Users, Activity, RefreshCw } from 'lucide-react';
+import { Heart, MousePointer, Users, Activity, RefreshCw, Share } from 'lucide-react';
 import AnalyticsChart from './AnalyticsChart';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -17,20 +17,19 @@ interface ProductAnalytics {
   product_name: string;
   product_category: string;
   total_likes: number;
-  total_views: number;
   total_clicks: number;
-  unique_viewers: number;
+  total_shares: number;
+  unique_viewers: number; // Sempre 0 - tracking removido
   last_updated: string;
 }
 
 interface OverallStats {
   total_products: number;
   total_likes: number;
-  total_views: number;
   total_clicks: number;
-  total_unique_viewers: number;
+  total_shares: number;
+  total_unique_viewers: number; // Sempre 0 - tracking removido
   most_liked_product: string;
-  most_viewed_product: string;
 }
 
 interface ClickTypeStats {
@@ -43,9 +42,10 @@ interface AnalyticsDataItem {
   id: string;
   product_id: string;
   total_likes: number;
-  total_views: number;
   total_clicks: number;
-  unique_viewers: number;
+  total_shares: number;
+  last_updated: string;
+  updated_at: string;
   products: {
     name: string;
     category: string;
@@ -63,7 +63,7 @@ const AnalyticsPanel = () => {
   const [overallStats, setOverallStats] = useState<OverallStats | null>(null);
   const [clickStats, setClickStats] = useState<ClickTypeStats[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<'likes' | 'views' | 'clicks'>('views');
+  const [sortBy, setSortBy] = useState<'likes' | 'clicks'>('likes');
 
   useEffect(() => {
     fetchAnalytics();
@@ -101,21 +101,7 @@ const AnalyticsPanel = () => {
       )
       .subscribe();
 
-    const viewsSubscription = supabase
-      .channel('admin_views')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'product_views',
-        },
-        (payload) => {
-          console.log('Admin views updated:', payload);
-          fetchAnalytics();
-        }
-      )
-      .subscribe();
+    // Views subscription removido - tracking de views foi eliminado
 
     const clicksSubscription = supabase
       .channel('admin_clicks')
@@ -137,7 +123,6 @@ const AnalyticsPanel = () => {
     return () => {
       analyticsSubscription.unsubscribe();
       likesSubscription.unsubscribe();
-      viewsSubscription.unsubscribe();
       clicksSubscription.unsubscribe();
     };
   }, [sortBy]);
@@ -168,10 +153,10 @@ const AnalyticsPanel = () => {
         product_name: item.products.name,
         product_category: item.products.category,
         total_likes: item.total_likes || 0,
-        total_views: item.total_views || 0,
         total_clicks: item.total_clicks || 0,
-        unique_viewers: item.unique_viewers || 0,
-        last_updated: new Date().toISOString(), // Default to current timestamp since last_updated is missing from AnalyticsDataItem
+        total_shares: item.total_shares || 0,
+        unique_viewers: 0, // Tracking removido
+        last_updated: item.last_updated,
       })) || [];
 
       // Sort data
@@ -179,39 +164,33 @@ const AnalyticsPanel = () => {
         switch (sortBy) {
           case 'likes':
             return b.total_likes - a.total_likes;
-          case 'views':
-            return b.total_views - a.total_views;
           case 'clicks':
             return b.total_clicks - a.total_clicks;
           default:
-            return b.total_views - a.total_views;
+            return b.total_likes - a.total_likes;
         }
       });
 
       setAnalytics(sortedData);
 
       // Calculate overall stats
-      const totalLikes = transformedData.reduce((sum, item) => sum + item.total_likes, 0);
-      const totalViews = transformedData.reduce((sum, item) => sum + item.total_views, 0);
-      const totalClicks = transformedData.reduce((sum, item) => sum + item.total_clicks, 0);
-      const totalUniqueViewers = transformedData.reduce((sum, item) => sum + item.unique_viewers, 0);
+      const totalLikes = transformedData.reduce((sum, item) => sum + (item.total_likes || 0), 0);
+      const totalClicks = transformedData.reduce((sum, item) => sum + (item.total_clicks || 0), 0);
+      const totalShares = transformedData.reduce((sum, item) => sum + (item.total_shares || 0), 0);
       
-      const mostLikedProduct = transformedData.reduce((max, item) => 
-        item.total_likes > max.total_likes ? item : max, transformedData[0] || { total_likes: 0, product_name: 'N/A' }
-      );
-      
-      const mostViewedProduct = transformedData.reduce((max, item) => 
-        item.total_views > max.total_views ? item : max, transformedData[0] || { total_views: 0, product_name: 'N/A' }
-      );
+      const mostLikedProduct = transformedData.length > 0 
+        ? transformedData.reduce((max, item) => 
+            (item.total_likes || 0) > (max.total_likes || 0) ? item : max
+          )
+        : { total_likes: 0, product_name: 'N/A' };
 
       setOverallStats({
         total_products: transformedData.length,
         total_likes: totalLikes,
-        total_views: totalViews,
         total_clicks: totalClicks,
-        total_unique_viewers: totalUniqueViewers,
+        total_shares: totalShares,
+        total_unique_viewers: 0, // Tracking removido
         most_liked_product: mostLikedProduct.product_name,
-        most_viewed_product: mostViewedProduct.product_name,
       });
 
       // Fetch click type statistics
@@ -313,12 +292,11 @@ const AnalyticsPanel = () => {
       {/* Filtros - Ocultos no mobile */}
       <div className="hidden sm:flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between">
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center w-full sm:w-auto">
-          <Select value={sortBy} onValueChange={(value: 'likes' | 'views' | 'clicks') => setSortBy(value)}>
+          <Select value={sortBy} onValueChange={(value: 'likes' | 'clicks') => setSortBy(value)}>
             <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Ordenar por" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="views">Mais Visualizados</SelectItem>
               <SelectItem value="likes">Mais Curtidos</SelectItem>
               <SelectItem value="clicks">Mais Clicados</SelectItem>
             </SelectContent>
@@ -335,87 +313,169 @@ const AnalyticsPanel = () => {
 
       {/* Cards de Estatísticas Gerais */}
       {overallStats && (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-gray-50">
-                  <Activity className="h-4 w-4 text-gray-600" />
+        <>
+          {/* Layout Mobile - 4 cards em grade 2x2 */}
+          <div className="grid grid-cols-2 gap-3 sm:hidden">
+            {/* Card de Engajamento (Cliques) - Primeiro no mobile */}
+            <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-blue-50">
+                    <MousePointer className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-blue-500">{overallStats.total_clicks}</div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-lg sm:text-2xl font-bold text-gray-900">{overallStats.total_products}</div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-foreground">Engajamento</h3>
+                  <p className="text-xs text-muted-foreground">Total de cliques</p>
                 </div>
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-foreground">Produtos</h3>
-                <p className="text-xs text-muted-foreground">Com dados de análise</p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-red-50">
-                  <Heart className="h-4 w-4 text-red-600" />
+            <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-gray-50">
+                    <Activity className="h-4 w-4 text-gray-600" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-gray-900">{overallStats.total_products}</div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-lg sm:text-2xl font-bold text-red-500">{overallStats.total_likes}</div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-foreground">Produtos</h3>
+                  <p className="text-xs text-muted-foreground">Com dados de análise</p>
                 </div>
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-foreground">Curtidas</h3>
-                <p className="text-xs text-muted-foreground truncate" title={`Produto mais curtido: ${overallStats.most_liked_product}`}>
-                  <span className="hidden sm:inline">Mais curtido: </span>
-                  <span className="sm:hidden">Top: </span>
-                  {overallStats.most_liked_product}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-blue-50">
-                  <Eye className="h-4 w-4 text-blue-600" />
+            <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-purple-50">
+                    <Share className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-purple-500">{overallStats.total_shares}</div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-lg sm:text-2xl font-bold text-blue-500">{overallStats.total_views}</div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-foreground">Compartilhamentos</h3>
+                  <p className="text-xs text-muted-foreground">Total de shares</p>
                 </div>
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-foreground">Visualizações</h3>
-                <p className="text-xs text-muted-foreground truncate" title={`Produto mais visto: ${overallStats.most_viewed_product}`}>
-                  <span className="hidden sm:inline">Mais visto: </span>
-                  <span className="sm:hidden">Top: </span>
-                  {overallStats.most_viewed_product}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 rounded-lg bg-green-50">
-                  <Users className="h-4 w-4 text-green-600" />
+            <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-green-50">
+                    <Users className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-green-500">{overallStats.total_unique_viewers}</div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-lg sm:text-2xl font-bold text-green-500">{overallStats.total_unique_viewers}</div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-foreground">Visitantes</h3>
+                  <p className="text-xs text-muted-foreground">Únicos</p>
                 </div>
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-foreground">Visitantes</h3>
-                <p className="text-xs text-muted-foreground">
-                  <span className="hidden sm:inline">Cliques: </span>
-                  <span className="sm:hidden">Cliques: </span>
-                  {overallStats.total_clicks}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Layout Desktop - 5 cards */}
+          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-gray-50">
+                    <Activity className="h-4 w-4 text-gray-600" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-gray-900">{overallStats.total_products}</div>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-foreground">Produtos</h3>
+                  <p className="text-xs text-muted-foreground">Com dados de análise</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-red-50">
+                    <Heart className="h-4 w-4 text-red-600" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-red-500">{overallStats.total_likes}</div>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-foreground">Curtidas</h3>
+                  <p className="text-xs text-muted-foreground truncate" title={`Produto mais curtido: ${overallStats.most_liked_product}`}>
+                    Mais curtido: {overallStats.most_liked_product}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-blue-50">
+                    <MousePointer className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-blue-500">{overallStats.total_clicks}</div>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-foreground">Engajamento</h3>
+                  <p className="text-xs text-muted-foreground">Total de cliques</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-purple-50">
+                    <Share className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-purple-500">{overallStats.total_shares}</div>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-foreground">Compartilhamentos</h3>
+                  <p className="text-xs text-muted-foreground">Total de shares</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="transition-all duration-200 hover:shadow-md border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-green-50">
+                    <Users className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-green-500">{overallStats.total_unique_viewers}</div>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-foreground">Visitantes</h3>
+                  <p className="text-xs text-muted-foreground">Únicos registrados</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </>
       )}
 
       {/* Gráfico de Analytics */}
@@ -441,12 +501,7 @@ const AnalyticsPanel = () => {
                     Curtidas
                   </div>
                 </TableHead>
-                <TableHead className="text-center">
-                  <div className="flex items-center justify-center gap-1">
-                    <Eye className="h-4 w-4" />
-                    Visualizações
-                  </div>
-                </TableHead>
+                {/* Coluna de visualizações removida - tracking eliminado */}
                 <TableHead className="text-center">
                   <div className="flex items-center justify-center gap-1">
                     <MousePointer className="h-4 w-4" />
@@ -476,9 +531,7 @@ const AnalyticsPanel = () => {
                   <TableCell className="text-center">
                     <span className="font-bold text-red-500">{item.total_likes}</span>
                   </TableCell>
-                  <TableCell className="text-center">
-                    <span className="font-bold text-blue-500">{item.total_views}</span>
-                  </TableCell>
+                  {/* Célula de visualizações removida - tracking eliminado */}
                   <TableCell className="text-center">
                     <span className="font-bold text-purple-500">{item.total_clicks}</span>
                   </TableCell>

@@ -19,16 +19,26 @@ interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
-  image_url: string;
+  price: string;
+  image: string;
   category: string;
   is_featured: boolean;
   is_active: boolean;
 }
 
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 const Admin = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -44,7 +54,7 @@ const Admin = () => {
 
   useEffect(() => {
     if (user) {
-      fetchProducts();
+      Promise.all([fetchProducts(), fetchCategories()]).finally(() => setLoading(false));
     }
   }, [user]);
 
@@ -67,6 +77,26 @@ const Admin = () => {
       });
     } finally {
       setLoading(false);
+    }
+  }, [toast]);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("is_active", true)
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Erro ao buscar categorias:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao carregar categorias",
+      });
     }
   }, [toast]);
 
@@ -252,7 +282,7 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold transition-colors duration-200">
-                  {[...new Set(products.map(p => p.category))].length}
+                  {categories.length}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Diferentes categorias
