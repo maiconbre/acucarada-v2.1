@@ -7,7 +7,6 @@ interface ProductAnalytics {
   total_likes: number;
   total_shares: number;
   total_clicks: number;
-  unique_viewers: number; // Sempre 0 - tracking removido
   is_liked: boolean;
 }
 
@@ -19,13 +18,14 @@ interface UseProductAnalyticsReturn {
   trackClick: (clickType: string, pageSource?: string) => Promise<void>;
 }
 
+
+
 export const useProductAnalytics = (productId: string): UseProductAnalyticsReturn => {
   const { toast } = useToast();
   const [analytics, setAnalytics] = useState<ProductAnalytics>({
     total_likes: 0,
     total_shares: 0,
     total_clicks: 0,
-    unique_viewers: 0,
     is_liked: false,
   });
 
@@ -101,7 +101,6 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
         total_likes: analytics?.total_likes || 0,
         total_shares: analytics?.total_shares || 0,
         total_clicks: analytics?.total_clicks || 0,
-        unique_viewers: 0, // Sempre 0 - tracking removido
         is_liked: isLiked,
       });
     } catch (error) {
@@ -155,7 +154,15 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
       const ip = await getUserIP();
       const userAgent = getUserAgent();
 
-      const { error } = await supabase.rpc('track_product_share', {
+      console.log('🔗 Tentando rastrear compartilhamento:', {
+        productId,
+        shareType,
+        pageSource: pageSource || window.location.pathname,
+        userId: currentUser?.id || null,
+        sessionId: currentUser ? null : sessionId
+      });
+
+      const { data, error } = await supabase.rpc('track_product_share', {
         p_product_id: productId,
         p_share_type: shareType,
         p_page_source: pageSource || window.location.pathname,
@@ -165,7 +172,12 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
         p_user_agent: userAgent,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro na função track_product_share:', error);
+        throw error;
+      }
+
+      console.log('✅ Compartilhamento rastreado com sucesso:', data);
 
       // Update local state
       setAnalytics(prev => ({
@@ -173,7 +185,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
         total_shares: prev.total_shares + 1,
       }));
     } catch (error) {
-      console.error('Error tracking share:', error);
+      console.error('❌ Erro geral ao rastrear compartilhamento:', error);
     }
   };
 
@@ -266,6 +278,8 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
           }
         )
         .subscribe();
+
+
 
       // Cleanup subscriptions on unmount
       return () => {

@@ -16,6 +16,8 @@ interface Product {
   price: number;
   image_url: string;
   category: string;
+  ingredientes?: string;
+  validade_armazenamento_dias?: number;
   is_featured: boolean;
 }
 
@@ -290,7 +292,7 @@ const Catalog = () => {
     <div className="min-h-screen gradient-soft">
       <Header />
       {/* Header */}
-      <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 pt-16 md:pt-20">
+      <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 pt-24 md:pt-28">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center mb-6 md:mb-8">
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-title font-bold mb-2 md:mb-4 px-4">
@@ -482,8 +484,8 @@ const Catalog = () => {
                   id={product.id}
                   name={product.name}
                   description={product.description || ""}
-                  price={`R$ ${product.price.toFixed(2).replace(".", ",")}`}
-                  image={product.image_url || ""}
+                  price={product.price}
+                  image_url={product.image_url || ""}
                   category={product.category}
                   is_featured={product.is_featured}
                 />

@@ -13,6 +13,8 @@ interface Product {
   price: number;
   image_url: string;
   category: string;
+  ingredientes?: string;
+  validade_armazenamento_dias?: number;
   is_featured: boolean;
 }
 
@@ -209,8 +211,8 @@ export const ProductGridEncomenda = () => {
                 id={product.id}
                 name={product.name}
                 description={product.description || ""}
-                price={`R$ ${product.price.toFixed(2)}`}
-                image={product.image_url || ""}
+                price={product.price}
+                image_url={product.image_url || ""}
                 category={product.category}
                 is_featured={product.is_featured}
               />

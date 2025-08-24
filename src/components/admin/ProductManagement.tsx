@@ -37,6 +37,8 @@ interface Product {
   price: number;
   image_url: string;
   category: string;
+  ingredientes?: string;
+  validade_armazenamento_dias?: number;
   is_featured: boolean;
   is_active: boolean;
 }
@@ -69,6 +71,8 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     price: "",
     image_url: "",
     category: "Outros",
+    ingredientes: "",
+    validade_armazenamento_dias: "",
     is_featured: false,
     is_active: true,
   });
@@ -101,6 +105,8 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       price: "",
       image_url: "",
       category: "Outros",
+      ingredientes: "",
+      validade_armazenamento_dias: "",
       is_featured: false,
       is_active: true,
     });
@@ -115,6 +121,8 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       price: product.price.toString(),
       image_url: product.image_url || "",
       category: product.category,
+      ingredientes: product.ingredientes || "",
+      validade_armazenamento_dias: product.validade_armazenamento_dias?.toString() || "",
       is_featured: product.is_featured,
       is_active: product.is_active,
     });
@@ -132,6 +140,8 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
         price: parseFloat(formData.price),
         image_url: formData.image_url,
         category: formData.category,
+        ingredientes: formData.ingredientes || null,
+        validade_armazenamento_dias: formData.validade_armazenamento_dias ? parseInt(formData.validade_armazenamento_dias) : null,
         is_featured: formData.is_featured,
         is_active: formData.is_active,
       };
@@ -425,6 +435,32 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Campos Opcionais */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="ingredientes">Ingredientes (opcional)</Label>
+                  <Textarea
+                    id="ingredientes"
+                    value={formData.ingredientes}
+                    onChange={(e) => setFormData({...formData, ingredientes: e.target.value})}
+                    placeholder="Liste os ingredientes do produto..."
+                    rows={3}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="validade_armazenamento_dias">Validade para armazenamento (dias)</Label>
+                  <Input
+                    id="validade_armazenamento_dias"
+                    type="number"
+                    min="1"
+                    value={formData.validade_armazenamento_dias}
+                    onChange={(e) => setFormData({...formData, validade_armazenamento_dias: e.target.value})}
+                    placeholder="Ex: 7, 15, 30..."
+                  />
+                </div>
               </div>
 
               <div className="flex items-center space-x-6">

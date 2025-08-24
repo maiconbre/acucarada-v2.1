@@ -9,7 +9,7 @@ interface ProductAnalytics {
   product_category: string;
   total_likes: number;
   total_clicks: number;
-  unique_viewers: number; // Sempre 0 - tracking removido
+  total_shares: number;
   last_updated: string;
 }
 
@@ -18,7 +18,6 @@ interface OverallStats {
   total_likes: number;
   total_clicks: number;
   total_shares: number;
-  total_unique_viewers: number; // Sempre 0 - tracking removido
   most_liked_product: string;
 }
 
@@ -54,7 +53,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ analytics, overallStats
     .slice(0, 5);
 
   const mostEngagedProducts = analytics
-    .sort((a, b) => (b.total_likes + b.total_clicks) - (a.total_likes + a.total_clicks))
+    .sort((a, b) => (b.total_likes + b.total_clicks + b.total_shares) - (a.total_likes + a.total_clicks + a.total_shares))
     .slice(0, 3);
 
   return (
@@ -103,13 +102,13 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ analytics, overallStats
               Produtos com Maior Engajamento
             </CardTitle>
             <CardDescription>
-              Produtos com mais curtidas e cliques combinados
+              Produtos com mais curtidas, cliques e compartilhamentos combinados
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {mostEngagedProducts.map((product, index) => {
-                const totalEngagement = product.total_likes + product.total_clicks;
+                const totalEngagement = product.total_likes + product.total_clicks + product.total_shares;
                 return (
                   <div key={product.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                     <div className="flex items-center gap-3">
@@ -126,6 +125,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ analytics, overallStats
                       <div className="flex gap-2 text-xs text-muted-foreground">
                         <span>{product.total_likes} ❤️</span>
                         <span>{product.total_clicks} 👆</span>
+                        <span>{product.total_shares} 🔗</span>
                       </div>
                     </div>
                   </div>
