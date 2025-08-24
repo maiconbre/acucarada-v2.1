@@ -22,6 +22,8 @@ interface Product {
   price: number;
   image_url: string;
   category: string;
+  ingredientes?: string;
+  validade_armazenamento_dias?: number;
   is_featured: boolean;
   is_active: boolean;
 }
