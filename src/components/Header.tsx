@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppSettings } from "@/hooks/useAppSettings";
-import logoImage from "@/assets/formiga-empinando-logo.png";
+import logoImage from "@/assets/logo-empinando.png";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -99,15 +99,15 @@ export const Header = () => {
     <header className={`border-b border-brown-primary/30 fixed top-0 left-0 right-0 z-50 backdrop-blur-sm transition-transform duration-300 ease-in-out ${
       isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
     }`} style={{backgroundColor: '#FDE7E5'}}>
-      <div className="container mx-auto px-2 md:px-4 py-2 md:py-6">
+      <div className="container mx-auto px-2 md:px-4 py-3 md:py-8">
         <div className="flex items-center justify-between md:justify-start">
-          {/* Mobile: Logo centralizado */}
-          <div className="flex-1 flex justify-center md:hidden items-center relative">
+          {/* Mobile: Logo à esquerda */}
+          <div className="flex-1 flex justify-start ml-2 md:hidden items-center relative">
             <Link to="/">
               <img 
               src={logoImage} 
               alt="Açucarada Logo" 
-              className="h-16 w-16 object-contain transition-transform hover:scale-105"
+              className="h-20 w-20 object-contain transition-transform hover:scale-105"
             />
             </Link>
             
@@ -137,7 +137,7 @@ export const Header = () => {
             )}
             
             {/* Badge - Hidden when search is open */}
-            <div className={`transition-opacity duration-300 ${
+            <div className={`transition-opacity duration-300 ml-4 ${
               isSearchOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
             }`}>
               <div className="bg-gradient-to-r from-brown-primary/10 to-brown-primary/5 backdrop-blur-sm border border-brown-primary/20 rounded-full px-3 py-1.5 shadow-sm">
@@ -154,11 +154,11 @@ export const Header = () => {
               <img 
                 src={logoImage} 
                 alt="Açucarada Logo" 
-                className="h-12 lg:h-16 w-auto object-contain transition-transform hover:scale-105"
+                className="h-16 lg:h-20 w-auto object-contain transition-transform hover:scale-105"
               />
             </Link>
             {/* Badge ao lado do logo */}
-            <div className="ml-3 inline-flex items-center gap-1 bg-rose-primary/10 backdrop-blur-sm text-rose-primary px-2 py-1 rounded-full border border-rose-primary/20">
+            <div className="ml-20 inline-flex items-center gap-1 bg-rose-primary/10 backdrop-blur-sm text-rose-primary px-2 py-1 rounded-full border border-rose-primary/20">
               <Sparkles className="h-3 w-3 animate-pulse" />
               <span className="text-xs font-medium font-text">Doces Artesanais</span>
             </div>
