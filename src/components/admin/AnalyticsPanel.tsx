@@ -174,13 +174,15 @@ const AnalyticsPanel = () => {
       setAnalytics(sortedData);
 
       // Calculate overall stats
-      const totalLikes = transformedData.reduce((sum, item) => sum + item.total_likes, 0);
-      const totalClicks = transformedData.reduce((sum, item) => sum + item.total_clicks, 0);
-      const totalShares = transformedData.reduce((sum, item) => sum + item.total_shares, 0);
+      const totalLikes = transformedData.reduce((sum, item) => sum + (item.total_likes || 0), 0);
+      const totalClicks = transformedData.reduce((sum, item) => sum + (item.total_clicks || 0), 0);
+      const totalShares = transformedData.reduce((sum, item) => sum + (item.total_shares || 0), 0);
       
-      const mostLikedProduct = transformedData.reduce((max, item) => 
-        item.total_likes > max.total_likes ? item : max, transformedData[0] || { total_likes: 0, product_name: 'N/A' }
-      );
+      const mostLikedProduct = transformedData.length > 0 
+        ? transformedData.reduce((max, item) => 
+            (item.total_likes || 0) > (max.total_likes || 0) ? item : max
+          )
+        : { total_likes: 0, product_name: 'N/A' };
 
       setOverallStats({
         total_products: transformedData.length,
