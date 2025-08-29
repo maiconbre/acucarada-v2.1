@@ -1,240 +1,287 @@
-# Doce Conecta Digital - Açucarada
+# Açucarada v2 🍫
 
-## 🍫 Visão Geral do Projeto
+> **Plataforma digital moderna para confeitaria artesanal com sistema completo de gestão e analytics**
 
-### Objetivos Principais
+[![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue.svg)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-green.svg)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.17-blue.svg)](https://tailwindcss.com/)
 
-O **Doce Conecta Digital** é uma plataforma web moderna desenvolvida para a confeitaria artesanal "Açucarada", com os seguintes objetivos:
+## 📋 Sobre o Projeto
 
-- **Digitalização do Negócio**: Criar presença digital profissional para a confeitaria
-- **Catálogo Online**: Apresentar produtos de forma atrativa e organizada
-- **Gestão Administrativa**: Fornecer ferramentas completas para gerenciamento de produtos e análise de desempenho
-- **Experiência do Cliente**: Proporcionar navegação intuitiva e facilitar o processo de pedidos
-- **Analytics Avançado**: Implementar sistema de métricas para tomada de decisões baseada em dados
+**Açucarada v2** é uma aplicação web completa desenvolvida para modernizar confeitarias artesanais, oferecendo uma solução integrada que combina vitrine digital, sistema de gestão administrativo e analytics avançado.
 
-### Contexto e Propósito
+### 🎯 Objetivos
 
-Este projeto surge da necessidade de modernizar o modelo de negócio de confeitarias artesanais, oferecendo uma solução completa que combina:
+- **Digitalização Completa**: Presença digital profissional com catálogo interativo
+- **Gestão Inteligente**: Painel administrativo completo para produtos, categorias e analytics
+- **Experiência do Cliente**: Interface responsiva e intuitiva com integração WhatsApp
+- **Analytics Avançado**: Sistema de métricas para decisões baseadas em dados
+- **Sistema de Sabores**: Gestão dinâmica de sabores com imagens individuais
 
-- **Vitrine Digital**: Showcase profissional dos produtos artesanais
-- **Sistema de Gestão**: Painel administrativo completo para controle do negócio
-- **Integração WhatsApp**: Conexão direta com clientes para facilitar pedidos
-- **Responsividade**: Experiência otimizada para todos os dispositivos
+### 👥 Público-Alvo
 
-### Público-Alvo
-
-- **Clientes Finais**: Consumidores interessados em doces artesanais premium
+- **Clientes**: Consumidores de doces artesanais premium
 - **Administradores**: Proprietários e funcionários da confeitaria
-- **Visitantes**: Potenciais clientes explorando o catálogo
+- **Visitantes**: Potenciais clientes explorando produtos
 
 ---
 
-## 🏗️ Arquitetura do Sistema
+## 🏗️ Arquitetura e Tecnologias
 
-### Componentes Principais
-
-**Frontend (React + TypeScript)**
-- **Páginas Públicas**: Home, Catálogo, Detalhes do Produto
-- **Sistema de Autenticação**: Login/Registro seguro
-- **Painel Administrativo**: Gestão completa de produtos, categorias e analytics
-- **Interface Responsiva**: Design adaptativo para mobile e desktop
-
-**Backend (Supabase)**
-- **Banco de Dados PostgreSQL**: Armazenamento estruturado de dados
-- **Autenticação**: Sistema seguro de usuários e permissões
-- **APIs RESTful**: Endpoints para todas as operações CRUD
-- **Row Level Security**: Políticas de segurança granulares
-
-**Sistema de Analytics**
-- **Tracking de Interações**: Visualizações, curtidas e cliques
-- **Métricas Agregadas**: Estatísticas de desempenho em tempo real
-- **Relatórios Visuais**: Gráficos e dashboards informativos
-
-### Fluxo de Dados e Interações
-
-1. **Visitante acessa o site** → Visualiza produtos → Sistema registra analytics
-2. **Cliente interessado** → Clica em produto → Redireciona para WhatsApp
-3. **Administrador** → Acessa painel → Gerencia produtos → Visualiza métricas
-4. **Sistema** → Coleta dados → Processa analytics → Apresenta insights
-
-### Tecnologias Utilizadas
+### Stack Principal
 
 **Frontend**
-- **React 18**: Biblioteca principal para interface de usuário
-- **TypeScript**: Tipagem estática para maior robustez
-- **Vite**: Build tool moderno e performático
-- **Tailwind CSS**: Framework CSS utilitário
-- **shadcn/ui**: Componentes UI modernos e acessíveis
-- **React Router**: Navegação entre páginas
-- **React Query**: Gerenciamento de estado servidor
+- **React 18** + **TypeScript** - Interface moderna e tipada
+- **Vite** - Build tool performático
+- **Tailwind CSS** + **shadcn/ui** - Design system consistente
+- **React Router** - Navegação SPA
+- **TanStack Query** - Gerenciamento de estado servidor
+- **React Hook Form** + **Zod** - Formulários e validação
 
 **Backend & Infraestrutura**
-- **Supabase**: Backend-as-a-Service completo
-- **PostgreSQL**: Banco de dados relacional
-- **Row Level Security**: Segurança a nível de linha
-- **Real-time subscriptions**: Atualizações em tempo real
+- **Supabase** - Backend-as-a-Service completo
+- **PostgreSQL** - Banco de dados relacional
+- **Row Level Security (RLS)** - Segurança granular
+- **Real-time subscriptions** - Atualizações em tempo real
+- **Storage** - Upload e gestão de imagens
 
-**Ferramentas de Desenvolvimento**
-- **ESLint**: Linting e qualidade de código
-- **PostCSS**: Processamento de CSS
-- **Git**: Controle de versão
+### 📁 Estrutura do Projeto
 
----
+```
+src/
+├── components/           # Componentes reutilizáveis
+│   ├── admin/           # Componentes do painel admin
+│   └── ui/              # Componentes base (shadcn/ui)
+├── pages/               # Páginas da aplicação
+├── hooks/               # Custom hooks
+├── integrations/        # Configurações externas (Supabase)
+├── lib/                 # Utilitários e configurações
+└── types/               # Definições de tipos TypeScript
 
-## 📋 Planejamento
-
-### Fases de Desenvolvimento
-
-**Fase 1: Fundação (Semanas 1-2)**
-- Configuração do ambiente de desenvolvimento
-- Estruturação do projeto e arquitetura base
-- Implementação do sistema de autenticação
-- Criação do banco de dados e migrações
-
-**Fase 2: Interface Pública (Semanas 3-4)**
-- Desenvolvimento da página inicial (Hero, About, Contact)
-- Implementação do catálogo de produtos
-- Criação da página de detalhes do produto
-- Integração com WhatsApp para pedidos
-
-**Fase 3: Painel Administrativo (Semanas 5-6)**
-- Sistema de gestão de produtos (CRUD completo)
-- Gerenciamento de categorias
-- Interface de configurações e perfil
-- Sistema de upload de imagens
-
-**Fase 4: Analytics e Otimização (Semanas 7-8)**
-- Implementação do sistema de tracking
-- Dashboard de analytics com métricas
-- Otimização de performance (lazy loading, caching)
-- Testes e refinamentos finais
-
-### Cronograma Resumido
-
-- **Duração Total**: 8 semanas
-- **Entrega MVP**: Semana 6
-- **Versão Completa**: Semana 8
-- **Testes e Deploy**: Semana 8
-
-### Metodologia Adotada
-
-**Desenvolvimento Ágil**
-- Iterações semanais com entregas incrementais
-- Feedback contínuo e ajustes baseados em necessidades
-- Priorização de funcionalidades por valor de negócio
-
-**Boas Práticas**
-- Código limpo e bem documentado
-- Testes de componentes críticos
-- Versionamento semântico
-- Code review e padrões de qualidade
+supabase/
+├── migrations/          # Migrações do banco de dados
+└── setups/             # Scripts de configuração
+```
 
 ---
 
-## ⚙️ Execução
+## ⚡ Funcionalidades Implementadas
 
-### Processo de Implementação
+### 🌐 Sistema Público
+- ✅ **Landing Page** com hero section atrativo
+- ✅ **Catálogo Completo** com filtros por categoria e busca
+- ✅ **Detalhes do Produto** com galeria de imagens e sabores
+- ✅ **Sistema de Sabores** com imagens individuais por sabor
+- ✅ **Integração WhatsApp** para pedidos diretos
+- ✅ **Sistema de Curtidas** e compartilhamento
+- ✅ **Design Responsivo** otimizado para mobile e desktop
 
-**1. Configuração Inicial**
+### 🔧 Painel Administrativo
+- ✅ **Gestão de Produtos** (CRUD completo)
+  - Upload de imagem principal
+  - Gestão dinâmica de sabores
+  - Upload individual de imagens por sabor
+  - Campos detalhados (ingredientes, validade, etc.)
+- ✅ **Gerenciamento de Categorias**
+- ✅ **Dashboard de Analytics** com métricas em tempo real
+- ✅ **Sistema de Configurações** (WhatsApp, site, etc.)
+- ✅ **Perfil de Usuário** personalizável
+- ✅ **Interface Mobile-Friendly**
+
+### 📊 Sistema de Analytics
+- ✅ **Tracking de Visualizações** por produto
+- ✅ **Sistema de Curtidas** e engajamento
+- ✅ **Métricas de Compartilhamento** (WhatsApp, redes sociais)
+- ✅ **Relatórios Visuais** com gráficos interativos
+- ✅ **Analytics Agregado** por categoria e período
+- ✅ **Produtos Mais Populares** baseado em métricas
+
+### 🔐 Sistema de Autenticação
+- ✅ **Login/Registro** seguro via Supabase Auth
+- ✅ **Controle de Acesso** baseado em roles (admin/user)
+- ✅ **Sessões Persistentes** e logout automático
+- ✅ **Recuperação de Senha** via email
+
+---
+
+## 🚀 Instalação e Execução
+
+### Pré-requisitos
+
+- **Node.js** 18+ e npm/yarn
+- **Conta Supabase** (gratuita)
+- **Git** para controle de versão
+
+### 1. Clonagem e Instalação
+
 ```bash
-# Clonagem e configuração do projeto
+# Clone o repositório
 git clone <repository-url>
-cd doce-conecta-digital
+cd acucarada-v2
+
+# Instale as dependências
 npm install
 ```
 
-**2. Configuração do Banco de Dados**
-- Setup do Supabase com PostgreSQL
-- Execução das migrações para criação das tabelas
-- Configuração das políticas de segurança (RLS)
-- População inicial com dados de exemplo
+### 2. Configuração do Ambiente
 
-**3. Desenvolvimento por Módulos**
-- Implementação incremental de funcionalidades
-- Testes contínuos durante o desenvolvimento
-- Integração progressiva entre frontend e backend
-
-### Dependências e Requisitos
-
-**Requisitos do Sistema**
-- Node.js 18+ e npm/yarn
-- Conta Supabase para backend
-- Navegador moderno com suporte a ES2020+
-
-**Dependências Principais**
-- React ecosystem (React, React Router, React Query)
-- UI Components (Radix UI, shadcn/ui)
-- Styling (Tailwind CSS, PostCSS)
-- Development tools (Vite, TypeScript, ESLint)
-
-### Orientações para Uso
-
-**Para Desenvolvedores**
 ```bash
-# Desenvolvimento local
-npm run dev          # Inicia servidor de desenvolvimento
-npm run build        # Build para produção
-npm run lint         # Verificação de código
-```
+# Copie o arquivo de exemplo
+cp .env.example .env
 
-**Para Administradores**
-1. Acesse `/auth` para fazer login
-2. Navegue para `/admin` após autenticação
-3. Use as abas para gerenciar produtos, categorias e visualizar analytics
-4. Configure preferências em "Configurações"
-
-**Para Clientes**
-1. Navegue pelo catálogo na página inicial ou `/catalog`
-2. Clique em produtos para ver detalhes
-3. Use o botão "Fazer Pedido" para contato via WhatsApp
-4. Curta produtos para demonstrar interesse
-
----
-
-## 🚀 Deploy e Configuração
-
-### Variáveis de Ambiente
-
-Configure as seguintes variáveis no arquivo `.env`:
-```
+# Configure as variáveis no .env
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-### Deploy
+### 3. Configuração do Banco de Dados
 
-O projeto pode ser facilmente deployado em:
-- **Vercel**: Deploy automático via Git
-- **Netlify**: Integração contínua
-- **Supabase Hosting**: Hospedagem integrada
+```bash
+# Execute as migrações no Supabase Dashboard ou CLI
+# Arquivos em: supabase/migrations/
 
----
+# Configure os buckets de storage:
+# - product-images (imagens principais)
+# - product-flavor-images (imagens de sabores)
+```
 
-## 📊 Funcionalidades Implementadas
+### 4. Execução
 
-### Sistema Público
-- ✅ Página inicial com hero section atrativo
-- ✅ Catálogo completo com filtros e busca
-- ✅ Páginas de detalhes de produtos
-- ✅ Integração WhatsApp para pedidos
-- ✅ Sistema de curtidas e visualizações
-- ✅ Design responsivo e otimizado
+```bash
+# Desenvolvimento
+npm run dev
 
-### Painel Administrativo
-- ✅ Gestão completa de produtos (CRUD)
-- ✅ Gerenciamento de categorias
-- ✅ Dashboard de analytics avançado
-- ✅ Sistema de configurações
-- ✅ Perfil de usuário personalizável
-- ✅ Interface mobile-friendly
+# Build para produção
+npm run build
 
-### Sistema de Analytics
-- ✅ Tracking de visualizações por produto
-- ✅ Sistema de curtidas e engajamento
-- ✅ Métricas agregadas em tempo real
-- ✅ Relatórios visuais e estatísticas
-- ✅ Análise de produtos mais populares
+# Preview da build
+npm run preview
+
+# Linting
+npm run lint
+```
 
 ---
 
-*Desenvolvido com ❤️ para modernizar confeitarias artesanais*
+## 📱 Como Usar
+
+### Para Clientes
+1. **Navegue** pelo catálogo na página inicial
+2. **Explore** produtos por categoria ou busca
+3. **Visualize** detalhes e sabores disponíveis
+4. **Faça pedidos** via botão WhatsApp
+5. **Curta** produtos favoritos
+
+### Para Administradores
+1. **Acesse** `/auth` para login
+2. **Navegue** para `/admin` após autenticação
+3. **Gerencie** produtos na aba "Produtos"
+4. **Adicione** sabores e imagens individuais
+5. **Monitore** performance na aba "Analytics"
+6. **Configure** WhatsApp e outras opções
+
+---
+
+## 🗄️ Estrutura do Banco de Dados
+
+### Tabelas Principais
+
+- **`products`** - Produtos com sabores e imagens
+- **`categories`** - Categorias de produtos
+- **`profiles`** - Perfis de usuários
+- **`product_analytics`** - Métricas agregadas
+- **`product_likes`** - Sistema de curtidas
+- **`product_shares`** - Tracking de compartilhamentos
+- **`app_settings`** - Configurações do sistema
+
+### Recursos Avançados
+
+- **Row Level Security (RLS)** para segurança granular
+- **Triggers** para atualização automática de analytics
+- **Views** para consultas otimizadas
+- **Functions** para operações complexas
+- **Storage Buckets** para gestão de imagens
+
+---
+
+## 🎨 Design e UX
+
+### Princípios de Design
+- **Mobile-First** - Responsividade prioritária
+- **Acessibilidade** - Componentes acessíveis (shadcn/ui)
+- **Performance** - Lazy loading e otimizações
+- **Consistência** - Design system unificado
+
+### Paleta de Cores
+- **Primária**: Tons de rosa/roxo (confeitaria)
+- **Secundária**: Verde (destaque/sucesso)
+- **Neutra**: Cinzas para textos e backgrounds
+
+---
+
+## 🔧 Scripts Disponíveis
+
+```bash
+npm run dev          # Servidor de desenvolvimento
+npm run build        # Build para produção
+npm run build:dev    # Build em modo desenvolvimento
+npm run preview      # Preview da build
+npm run lint         # Verificação de código
+npm run test         # Testes (TypeScript + lint)
+npm run type-check   # Verificação de tipos
+```
+
+---
+
+## 📈 Métricas e Analytics
+
+O sistema coleta automaticamente:
+- **Visualizações** de produtos
+- **Curtidas** e engajamento
+- **Cliques** em botões de ação
+- **Compartilhamentos** por tipo
+- **Sessões** de usuários
+
+Todas as métricas respeitam a privacidade e são agregadas para insights de negócio.
+
+---
+
+## 🚀 Deploy
+
+### Opções Recomendadas
+
+- **Vercel** - Deploy automático via Git
+- **Netlify** - Integração contínua
+- **Supabase Hosting** - Hospedagem integrada
+
+### Configuração de Produção
+
+1. Configure variáveis de ambiente na plataforma
+2. Execute build de produção
+3. Configure domínio personalizado
+4. Ative HTTPS e CDN
+
+---
+
+## 🤝 Contribuição
+
+Este projeto foi desenvolvido como demonstração de habilidades em desenvolvimento full-stack moderno, showcasing:
+
+- **Arquitetura Limpa** e organizada
+- **Boas Práticas** de desenvolvimento
+- **Tecnologias Modernas** e relevantes
+- **UX/UI** profissional
+- **Código Limpo** e documentado
+
+---
+
+## 📄 Licença
+
+Este projeto é uma demonstração educacional e portfólio de desenvolvimento.
+
+---
+
+**Desenvolvido com ❤️ para modernizar confeitarias artesanais**
+
+*Açucarada v2 - Onde tradição encontra inovação* 🍫✨
