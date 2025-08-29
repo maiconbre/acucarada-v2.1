@@ -94,21 +94,22 @@ export const Footer = () => {
                 <div className="bg-card/50 backdrop-blur-sm border border-border/30 rounded-xl p-3 md:p-4 hover:bg-card/80 transition-all duration-300">
                   <div className="flex items-center justify-center md:justify-end gap-2 md:gap-3 mb-1 md:mb-2">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                    <span className="text-xs md:text-sm font-medium text-foreground font-text">📱 (21) 99776-0398</span>
+                    <span className="text-xs md:text-sm font-medium text-foreground font-text">📱 (21) 97377-4279</span>
                   </div>
                   <p className="text-xs text-muted-foreground font-text">WhatsApp disponível</p>
                 </div>
                 <div className="bg-card/50 backdrop-blur-sm border border-border/30 rounded-xl p-3 md:p-4 hover:bg-card/80 transition-all duration-300">
                   <div className="flex items-center justify-center md:justify-end gap-2 md:gap-3 mb-1 md:mb-2">
-                    <span className="text-xs md:text-sm font-medium text-foreground font-text">📍 Rio de Janeiro - RJ</span>
+                    <span className="text-xs md:text-sm font-medium text-foreground font-text">📍 Est. Agua Branca, 4.296 - Bangu</span>
                   </div>
                   <p className="text-xs text-muted-foreground font-text">Entregamos em toda região</p>
                 </div>
               </div>
               {/* Mobile: 1 column for schedule */}
               <div className="bg-card/50 backdrop-blur-sm border border-border/30 rounded-xl p-3 md:p-4 hover:bg-card/80 transition-all duration-300">
-                <div className="flex items-center justify-center md:justify-end gap-2 md:gap-3 mb-1 md:mb-2">
-                  <span className="text-xs md:text-sm font-medium text-foreground font-text">🕒 Seg à Sáb: 9h às 18h</span>
+                <div className="flex flex-col items-center md:items-end gap-1 mb-1 md:mb-2">
+                  <span className="text-xs md:text-sm font-medium text-foreground font-text">🕒 Qua à Sex: 15h às 22h</span>
+                  <span className="text-xs md:text-sm font-medium text-foreground font-text">🕒 Sab e Dom: 13h às 23h</span>
                 </div>
                 <p className="text-xs text-muted-foreground font-text">Horário de atendimento</p>
               </div>
@@ -150,17 +151,6 @@ export const Footer = () => {
                   </svg>
                 </a>
                 
-                <a 
-                  href="https://tiktok.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-black transition-all duration-300 p-1 rounded-full hover:bg-gray-50"
-                  title="TikTok"
-                >
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                  </svg>
-                </a>
                 
                 <a 
                   href="https://wa.me/" 
