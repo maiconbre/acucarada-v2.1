@@ -39,6 +39,8 @@ interface Product {
   category: string;
   ingredientes?: string;
   validade_armazenamento_dias?: number;
+  sabores?: string[];
+  sabor_images?: Record<string, string>;
   is_featured: boolean;
   is_active: boolean;
 }
@@ -73,9 +75,15 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     category: "Outros",
     ingredientes: "",
     validade_armazenamento_dias: "",
+    sabores: "" as string,
+    sabor_images: {} as Record<string, string>,
     is_featured: false,
     is_active: true,
   });
+  
+  // Estado para gerenciar sabores dinamicamente
+  const [flavors, setFlavors] = useState<Array<{id: string, name: string, image: string}>>([]);
+  const [newFlavorName, setNewFlavorName] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -107,9 +115,13 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       category: "Outros",
       ingredientes: "",
       validade_armazenamento_dias: "",
+      sabores: "" as string,
+      sabor_images: {} as Record<string, string>,
       is_featured: false,
       is_active: true,
     });
+    setFlavors([]);
+    setNewFlavorName("");
     setEditingProduct(null);
   };
 
@@ -123,10 +135,46 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       category: product.category,
       ingredientes: product.ingredientes || "",
       validade_armazenamento_dias: product.validade_armazenamento_dias?.toString() || "",
+      sabores: product.sabores?.join(", ") || "",
+      sabor_images: product.sabor_images || {},
       is_featured: product.is_featured,
       is_active: product.is_active,
     });
+    
+    // Carregar sabores existentes
+    if (product.sabores && product.sabores.length > 0) {
+      const existingFlavors = product.sabores.map((flavor, index) => ({
+        id: `flavor-${index}`,
+        name: flavor,
+        image: product.sabor_images?.[flavor] || ""
+      }));
+      setFlavors(existingFlavors);
+    } else {
+      setFlavors([]);
+    }
+    
     setIsDialogOpen(true);
+  };
+
+  // Funções para gerenciar sabores
+  const addFlavor = () => {
+    if (newFlavorName.trim() && !flavors.some(f => f.name.toLowerCase() === newFlavorName.toLowerCase())) {
+      const newFlavor = {
+        id: `flavor-${Date.now()}`,
+        name: newFlavorName.trim(),
+        image: ""
+      };
+      setFlavors([...flavors, newFlavor]);
+      setNewFlavorName("");
+    }
+  };
+
+  const removeFlavor = (id: string) => {
+    setFlavors(flavors.filter(f => f.id !== id));
+  };
+
+  const updateFlavorImage = (id: string, imageUrl: string) => {
+    setFlavors(flavors.map(f => f.id === id ? { ...f, image: imageUrl } : f));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -134,6 +182,56 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     setLoading(true);
 
     try {
+      // Validação inteligente
+        if (flavors.length === 0) {
+          toast({
+            variant: "destructive",
+            title: "Erro de validação",
+            description: "Adicione pelo menos um sabor para o produto.",
+          });
+          setLoading(false);
+          return;
+        }
+ 
+        if (!formData.name.trim()) {
+          toast({
+            variant: "destructive",
+            title: "Erro de validação",
+            description: "Nome do produto é obrigatório.",
+          });
+          setLoading(false);
+          return;
+        }
+ 
+        if (!formData.price || parseFloat(formData.price) <= 0) {
+          toast({
+            variant: "destructive",
+            title: "Erro de validação",
+            description: "Preço deve ser maior que zero.",
+          });
+          setLoading(false);
+          return;
+        }
+ 
+        if (!formData.category || formData.category === "") {
+          toast({
+            variant: "destructive",
+            title: "Erro de validação",
+            description: "Selecione uma categoria.",
+          });
+          setLoading(false);
+          return;
+        }
+
+      // Preparar dados dos sabores
+      const saboresArray = flavors.map(f => f.name);
+      const saborImages = flavors.reduce((acc, flavor) => {
+        if (flavor.image) {
+          acc[flavor.name] = flavor.image;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+
       const productData = {
         name: formData.name,
         description: formData.description,
@@ -142,6 +240,8 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
         category: formData.category,
         ingredientes: formData.ingredientes || null,
         validade_armazenamento_dias: formData.validade_armazenamento_dias ? parseInt(formData.validade_armazenamento_dias) : null,
+        sabores: saboresArray.length > 0 ? saboresArray : null,
+        sabor_images: Object.keys(saborImages).length > 0 ? saborImages : null,
         is_featured: formData.is_featured,
         is_active: formData.is_active,
       };
@@ -460,6 +560,131 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                     onChange={(e) => setFormData({...formData, validade_armazenamento_dias: e.target.value})}
                     placeholder="Ex: 7, 15, 30..."
                   />
+                </div>
+                
+                {/* Seção de Sabores Dinâmica */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-base font-medium">Sabores disponíveis</Label>
+                    <Badge variant="secondary" className="text-xs">
+                      {flavors.length} {flavors.length === 1 ? 'sabor' : 'sabores'}
+                    </Badge>
+                  </div>
+                  
+                  {/* Adicionar novo sabor */}
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Input
+                      placeholder="Nome do sabor (ex: chocolate, morango)"
+                      value={newFlavorName}
+                      onChange={(e) => setNewFlavorName(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFlavor())}
+                      className="flex-1"
+                    />
+                    <Button 
+                      type="button" 
+                      onClick={addFlavor}
+                      disabled={!newFlavorName.trim()}
+                      size="sm"
+                      className="px-4 w-full sm:w-auto"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      <span className="sm:hidden">Adicionar Sabor</span>
+                    </Button>
+                  </div>
+                  
+                  {/* Preview compacto dos sabores */}
+                       {flavors.length > 0 && (
+                         <div className="space-y-4">
+                           {/* Galeria de preview */}
+                           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+                             {flavors.map((flavor) => (
+                               <div key={`preview-${flavor.id}`} className="relative group">
+                                 <div className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/20 overflow-hidden bg-muted/30">
+                                   {flavor.image ? (
+                                     <img 
+                                       src={flavor.image} 
+                                       alt={flavor.name}
+                                       className="w-full h-full object-cover"
+                                     />
+                                   ) : (
+                                     <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                                       <div className="text-center">
+                                         <Plus className="h-4 w-4 sm:h-6 sm:w-6 mx-auto mb-1" />
+                                         <p className="text-xs hidden sm:block">Sem imagem</p>
+                                       </div>
+                                     </div>
+                                   )}
+                                 </div>
+                                 <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 rounded-b-lg">
+                                   <p className="text-xs font-medium truncate text-center">{flavor.name}</p>
+                                 </div>
+                               </div>
+                             ))}
+                           </div>
+                       
+                       {/* Lista detalhada para edição */}
+                           <div className="space-y-3 max-h-80 overflow-y-auto">
+                             {flavors.map((flavor) => (
+                               <Card key={flavor.id} className="p-3">
+                                 <div className="space-y-3">
+                                   <div className="flex items-center justify-between">
+                                     <div className="flex items-center gap-2 flex-1 min-w-0">
+                                       <Badge variant="outline" className="font-medium text-xs">
+                                         {flavor.name}
+                                       </Badge>
+                                       {flavor.image && (
+                                         <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
+                                           📷 Com imagem
+                                         </Badge>
+                                       )}
+                                     </div>
+                                     <Button
+                                       type="button"
+                                       variant="ghost"
+                                       size="sm"
+                                       onClick={() => removeFlavor(flavor.id)}
+                                       className="h-8 w-8 p-0 text-destructive hover:text-destructive flex-shrink-0 mobile-touch-target"
+                                     >
+                                       <Trash2 className="h-4 w-4" />
+                                     </Button>
+                                   </div>
+                               
+                               {/* Upload de imagem para o sabor */}
+                                   <div className="space-y-2">
+                                     <Label className="text-sm text-muted-foreground">
+                                       Imagem do sabor {flavor.name}
+                                     </Label>
+                                     <div className="w-full">
+                                       <ImageUpload
+                                         value={flavor.image}
+                                         onChange={(url) => updateFlavorImage(flavor.id, url)}
+                                         bucketName="product-flavor-images"
+                                         folder={`flavors`}
+                                         showPreview={true}
+                                         showMetadata={false}
+                                         processingOptions={{
+                                           maxWidth: 800,
+                                           maxHeight: 800,
+                                           quality: 0.85,
+                                           generateThumbnail: true,
+                                           thumbnailSize: 200
+                                         }}
+                                       />
+                                     </div>
+                                   </div>
+                             </div>
+                           </Card>
+                         ))}
+                       </div>
+                     </div>
+                   )}
+                  
+                  {flavors.length === 0 && (
+                    <div className="text-center py-6 sm:py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                      <p className="text-sm">Nenhum sabor adicionado</p>
+                      <p className="text-xs mt-1 px-4">Use o campo acima para adicionar sabores</p>
+                    </div>
+                  )}
                 </div>
               </div>
 

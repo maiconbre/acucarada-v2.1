@@ -18,7 +18,10 @@ interface Product {
   category: string;
   ingredientes?: string;
   validade_armazenamento_dias?: number;
+  sabores?: string[];
+  sabor_images?: Record<string, string>;
   is_featured: boolean;
+  is_active: boolean;
 }
 
 interface Category {
@@ -131,12 +134,12 @@ const Catalog = () => {
       setHasMore(newProducts.length === pageSize);
       
       if (append) {
-        setProducts(prev => [...prev, ...newProducts]);
+        setProducts(prev => [...prev, ...newProducts.map(product => ({...product, is_active: true}))]);
       } else {
-        setProducts(newProducts);
+        setProducts(newProducts.map(product => ({...product, is_active: true})));
         // Update cache for initial load
         if (pageNum === 0) {
-          catalogCache.products.data = newProducts;
+          catalogCache.products.data = newProducts.map(product => ({...product, is_active: true}));
           catalogCache.products.timestamp = Date.now();
         }
       }

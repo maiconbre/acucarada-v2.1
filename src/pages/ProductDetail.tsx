@@ -20,6 +20,8 @@ interface Product {
   category: string;
   ingredientes?: string;
   validade_armazenamento_dias?: number;
+  sabores?: string[];
+  sabor_images?: Record<string, string>;
   is_featured: boolean;
   is_active: boolean;
 }
@@ -32,6 +34,8 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState(true);
+  const [selectedFlavor, setSelectedFlavor] = useState<string | null>(null);
+  const [activeImage, setActiveImage] = useState<string>('');
   const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id || '');
 
   useEffect(() => {
@@ -39,6 +43,13 @@ const ProductDetail = () => {
       fetchProduct();
     }
   }, [id]);
+
+  // Inicializar imagem ativa quando produto for carregado
+  useEffect(() => {
+    if (product) {
+      setActiveImage(product.image_url);
+    }
+  }, [product]);
 
   const fetchProduct = useCallback(async () => {
     try {
@@ -84,6 +95,20 @@ const ProductDetail = () => {
   const handleLikeClick = async () => {
     await toggleLike();
     trackClick('like', 'product_detail');
+  };
+
+  const handleFlavorClick = (flavor: string) => {
+    setSelectedFlavor(flavor);
+    
+    // Verificar se existe imagem específica para este sabor
+    if (product?.sabor_images && product.sabor_images[flavor]) {
+      setActiveImage(product.sabor_images[flavor]);
+    } else {
+      // Voltar para imagem principal se não houver imagem específica
+      setActiveImage(product?.image_url || '');
+    }
+    
+    trackClick('flavor_selection', 'product_detail');
   };
 
   const handleShare = async () => {
@@ -179,8 +204,8 @@ const ProductDetail = () => {
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse rounded-lg" />
                 )}
                 <img
-                  src={product.image_url}
-                  alt={product.name}
+                  src={activeImage || product.image_url}
+                  alt={`${product.name}${selectedFlavor ? ` - ${selectedFlavor}` : ''}`}
                   className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
                     imageLoading ? 'opacity-0' : 'opacity-100'
                   }`}
@@ -222,14 +247,49 @@ const ProductDetail = () => {
           {/* Informações do Produto */}
           <div className="space-y-4 lg:space-y-6 order-2 lg:order-2">
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs lg:text-sm font-semibold bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 border-rose-200">
-                  {product.category}
-                </Badge>
-                {product.is_featured && (
-                  <Badge className="text-xs bg-gradient-to-r from-green-500 to-emerald-600 text-white">
-                    Destaque
+              {/* Badges e Sabores - Layout Responsivo */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="secondary" className="text-xs lg:text-sm font-semibold bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 border-rose-200">
+                    {product.category}
                   </Badge>
+                  {product.is_featured && (
+                    <Badge className="text-xs bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+                      Destaque
+                    </Badge>
+                  )}
+                </div>
+                
+                {/* Sabores Compactos - Mobile */}
+                {product.sabores && product.sabores.length > 0 && (
+                  <div className="block lg:hidden">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="h-3 w-3 text-purple-600" />
+                      <span className="text-xs font-medium text-purple-700 font-text">
+                        {product.sabores.length} sabor{product.sabores.length > 1 ? 'es' : ''}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {product.sabores.map((sabor, index) => (
+                        <Button
+                          key={index}
+                          variant={selectedFlavor === sabor ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleFlavorClick(sabor)}
+                          className={`h-6 px-2 text-xs font-medium transition-all duration-200 ${
+                            selectedFlavor === sabor 
+                              ? 'bg-purple-600 text-white shadow-md scale-105 border-purple-600' 
+                              : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-200 hover:border-purple-300'
+                          }`}
+                        >
+                          {sabor}
+                          {product.sabor_images?.[sabor] && (
+                            <span className="ml-1 text-xs opacity-70">📸</span>
+                          )}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
               
@@ -244,15 +304,59 @@ const ProductDetail = () => {
 
             <div className="border-t border-gradient-to-r from-transparent via-gray-200 to-transparent pt-6">
               <div className="space-y-4 mb-6">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <span className="text-sm text-muted-foreground block font-text flex items-center gap-1">
                     <div className="h-1 w-1 rounded-full bg-rose-primary" />
                     Preço especial
                   </span>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent font-text">
-                      {formatPrice(product.price)}
-                    </span></div>
+                  
+                  {/* Preço e Sabores */}
+                  <div className="space-y-3">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent font-text">
+                        {formatPrice(product.price)}
+                      </span>
+                    </div>
+                    
+                    {/* Sabores Disponíveis - Desktop */}
+                    {product.sabores && product.sabores.length > 0 && (
+                      <div className="hidden lg:block space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Star className="h-3 w-3 text-purple-600" />
+                          <span className="text-xs font-medium text-purple-700 font-text">
+                            Sabores disponíveis ({product.sabores.length})
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                           {product.sabores.map((sabor, index) => (
+                             <Button
+                               key={index}
+                               variant={selectedFlavor === sabor ? "default" : "outline"}
+                               size="sm"
+                               onClick={() => handleFlavorClick(sabor)}
+                               className={`h-7 px-2.5 text-xs font-medium transition-all duration-200 ${
+                                 selectedFlavor === sabor 
+                                   ? 'bg-purple-600 text-white shadow-md scale-105 border-purple-600' 
+                                   : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-200 hover:border-purple-300'
+                               }`}
+                             >
+                               {sabor}
+                               {product.sabor_images?.[sabor] && (
+                                 <span className="ml-1 text-xs opacity-70">📸</span>
+                               )}
+                             </Button>
+                           ))}
+                         </div>
+                         {selectedFlavor && (
+                           <p className="text-xs text-purple-600 font-text mt-1">
+                             Visualizando: {selectedFlavor}
+                             {product.sabor_images?.[selectedFlavor] && " (com imagem específica)"}
+                           </p>
+                         )}
+                      </div>
+                    )}
+                  </div>
+                  
                   <p className="text-xs text-muted-foreground font-text">
                     Ou consulte condições via WhatsApp
                   </p>
@@ -399,6 +503,8 @@ const ProductDetail = () => {
                 </CardContent>
               </Card>
             )}
+
+
             
             {/* Seção de Avaliações Visuais */}
             <Card className="border-0 bg-muted/50">

@@ -24,6 +24,8 @@ interface Product {
   category: string;
   ingredientes?: string;
   validade_armazenamento_dias?: number;
+  sabores?: string[];
+  sabor_images?: Record<string, string>;
   is_featured: boolean;
   is_active: boolean;
 }

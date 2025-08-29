@@ -15,7 +15,10 @@ interface Product {
   category: string;
   ingredientes?: string;
   validade_armazenamento_dias?: number;
+  sabores?: string[];
+  sabor_images?: Record<string, string>;
   is_featured: boolean;
+  is_active: boolean;
 }
 
 // Simple cache for products
@@ -76,10 +79,16 @@ export const ProductGrid = () => {
       if (error) throw error;
       
       const productsData = data || [];
-      setProducts(productsData);
+      setProducts(productsData.map(product => ({
+        ...product,
+        is_active: true // Since we filtered for is_active: true in the query
+      })));
       
       // Update cache
-      productCache.data = productsData;
+      productCache.data = productsData.map(product => ({
+        ...product,
+        is_active: true // Since we filtered for is_active: true in the query
+      }));
       productCache.timestamp = now;
       
     } catch (error) {
