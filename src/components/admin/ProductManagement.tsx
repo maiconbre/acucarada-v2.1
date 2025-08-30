@@ -67,6 +67,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     type: 'toggle' | 'soft_delete' | 'hard_delete';
     product: Product | null;
   }>({ isOpen: false, type: 'toggle', product: null });
+  const [actionLoading, setActionLoading] = useState<string | null>(null); // ID do produto sendo processado
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -287,10 +288,11 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
   };
 
   /**
-   * Soft delete: Desativa o produto em vez de excluí-lo fisicamente
-   * Preserva os dados históricos e permite recuperação posterior
+   * Soft delete: Remove o produto da visualização do admin
+   * Preserva os dados históricos e permite recuperação posterior via banco
    */
   const handleSoftDelete = async (id: string) => {
+    setActionLoading(id);
     try {
       // Verificar se o usuário está autenticado
       const { data: { user } } = await supabase.auth.getUser();
@@ -298,27 +300,34 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
         throw new Error("Usuário não autenticado");
       }
 
-      console.log('Desativando produto (soft delete):', id);
+      console.log('Movendo produto para lixeira (soft delete):', id);
       
-      // Soft delete: apenas marcar como inativo
+      // Soft delete: marcar como deletado e inativo
       const { error } = await supabase
         .from("products")
-        .update({ is_active: false })
-        .eq("id", id);
+        .update({ 
+          is_active: false,
+          deleted_at: new Date().toISOString()
+        })
+        .eq("id", id)
+        .select(); // Adicionar select para melhor performance
 
       if (error) {
-        console.error('Erro ao desativar produto:', error);
+        console.error('Erro ao mover produto para lixeira:', error);
         throw error;
       }
 
       toast({
-        title: "Produto desativado!",
-        description: "O produto foi removido do catálogo público, mas os dados foram preservados.",
+        title: "Produto movido para lixeira!",
+        description: "O produto foi removido do painel admin, mas pode ser recuperado via banco de dados.",
       });
       
-      onProductsChange();
+      // Atualizar estado local com um pequeno delay para melhor UX
+      setTimeout(() => {
+        onProductsChange();
+      }, 100);
     } catch (error: unknown) {
-      console.error('Erro ao desativar produto:', error);
+      console.error('Erro ao mover produto para lixeira:', error);
       let errorMessage = "Erro desconhecido";
       
       if (error instanceof Error) {
@@ -326,15 +335,17 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
         
         // Verificar tipos específicos de erro
         if (error.message.includes('permission') || error.message.includes('policy')) {
-          errorMessage = "Você não tem permissão para desativar este produto.";
+          errorMessage = "Você não tem permissão para mover este produto para lixeira.";
         }
       }
       
       toast({
         variant: "destructive",
-        title: "Erro ao desativar produto",
+        title: "Erro ao mover produto para lixeira",
         description: errorMessage,
       });
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -393,20 +404,25 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
   };
 
   const toggleActive = async (product: Product) => {
+    setActionLoading(product.id);
     try {
       const { error } = await supabase
         .from("products")
         .update({ is_active: !product.is_active })
-        .eq("id", product.id);
+        .eq("id", product.id)
+        .select(); // Adicionar select para melhor performance
 
       if (error) throw error;
 
       toast({
-        title: product.is_active ? "Produto desativado" : "Produto ativado",
-        description: `O produto foi ${product.is_active ? "removido" : "adicionado"} ao catálogo público.`,
+        title: product.is_active ? "Produto ocultado" : "Produto exibido",
+        description: `O produto foi ${product.is_active ? "ocultado do" : "exibido no"} catálogo público.`,
       });
       
-      onProductsChange();
+      // Atualizar estado local com um pequeno delay para melhor UX
+      setTimeout(() => {
+        onProductsChange();
+      }, 100);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
       toast({
@@ -414,25 +430,33 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
         title: "Erro",
         description: errorMessage,
       });
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const openConfirmDialog = (type: 'toggle' | 'soft_delete' | 'hard_delete', product: Product) => {
+    // Prevenir múltiplos cliques se já estiver processando este produto
+    if (actionLoading === product.id) return;
+    
     setConfirmDialog({ isOpen: true, type, product });
   };
 
   const handleConfirmAction = async () => {
     if (!confirmDialog.product) return;
-    
-    if (confirmDialog.type === 'toggle') {
-      await toggleActive(confirmDialog.product);
-    } else if (confirmDialog.type === 'soft_delete') {
-      await handleSoftDelete(confirmDialog.product.id);
-    } else if (confirmDialog.type === 'hard_delete') {
-      await handleHardDelete(confirmDialog.product.id);
-    }
-    
+
+    // Fechar modal imediatamente para melhor UX
+    const product = confirmDialog.product;
+    const actionType = confirmDialog.type;
     setConfirmDialog({ isOpen: false, type: 'toggle', product: null });
+
+    if (actionType === 'toggle') {
+      await toggleActive(product);
+    } else if (actionType === 'soft_delete') {
+      await handleSoftDelete(product.id);
+    } else if (actionType === 'hard_delete') {
+      await handleHardDelete(product.id);
+    }
   };
 
   return (
@@ -799,8 +823,11 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                             size="sm"
                             onClick={() => openConfirmDialog('toggle', product)}
                             className="h-8 w-8 p-0 mobile-touch-target"
+                            disabled={actionLoading === product.id}
                           >
-                            {product.is_active ? (
+                            {actionLoading ? (
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                            ) : product.is_active ? (
                               <EyeOff className="h-4 w-4" />
                             ) : (
                               <Eye className="h-4 w-4" />
@@ -819,8 +846,13 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                             size="sm"
                             onClick={() => openConfirmDialog('soft_delete', product)}
                             className="text-destructive hover:text-destructive h-8 w-8 p-0 mobile-touch-target"
-                          >
-                            <Trash2 className="h-4 w-4" />
+                            disabled={actionLoading === product.id}
+                           >
+                             {actionLoading === product.id ? (
+                               <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                             ) : (
+                               <Trash2 className="h-4 w-4" />
+                             )}
                           </Button>
                         </div>
                       </div>
@@ -866,12 +898,15 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                           size="sm"
                           onClick={() => openConfirmDialog('toggle', product)}
                           className="h-7 w-7 p-0 mobile-touch-target"
-                        >
-                          {product.is_active ? (
-                            <EyeOff className="h-3 w-3" />
-                          ) : (
-                            <Eye className="h-3 w-3" />
-                          )}
+                          disabled={actionLoading === product.id}
+                         >
+                           {actionLoading === product.id ? (
+                             <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                           ) : product.is_active ? (
+                             <EyeOff className="h-3 w-3" />
+                           ) : (
+                             <Eye className="h-3 w-3" />
+                           )}
                         </Button>
                         <Button
                           variant="ghost"
@@ -886,8 +921,13 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                           size="sm"
                           onClick={() => openConfirmDialog('soft_delete', product)}
                           className="text-destructive hover:text-destructive h-7 w-7 p-0 mobile-touch-target"
-                        >
-                          <Trash2 className="h-3 w-3" />
+                          disabled={actionLoading === product.id}
+                         >
+                           {actionLoading === product.id ? (
+                             <div className="h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                           ) : (
+                             <Trash2 className="h-3 w-3" />
+                           )}
                         </Button>
                       </div>
                     </div>
@@ -944,12 +984,15 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                           variant="ghost"
                           size="sm"
                           onClick={() => openConfirmDialog('toggle', product)}
-                        >
-                          {product.is_active ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
+                          disabled={actionLoading === product.id}
+                      >
+                        {actionLoading === product.id ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                        ) : product.is_active ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                         </Button>
                         <Button
                           variant="ghost"
@@ -963,8 +1006,13 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                           size="sm"
                           onClick={() => openConfirmDialog('soft_delete', product)}
                           className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
+                          disabled={actionLoading === product.id}
+                         >
+                           {actionLoading === product.id ? (
+                             <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                           ) : (
+                             <Trash2 className="h-4 w-4" />
+                           )}
                         </Button>
                       </div>
                     </TableCell>
@@ -984,7 +1032,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
               {confirmDialog.type === 'soft_delete' ? (
                 <>
                   <Trash2 className="h-5 w-5 text-destructive" />
-                  Excluir Produto
+                  Mover para Lixeira
                 </>
               ) : confirmDialog.type === 'hard_delete' ? (
                 <>
@@ -1028,13 +1076,13 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
             
             <p className="text-sm text-muted-foreground">
               {confirmDialog.type === 'soft_delete' ? (
-                "Este item está sendo excluído, mas não se preocupe os dados podem ser recuperados se necessário! ✨"
+                "O produto será movido para a lixeira e removido do painel admin. Os dados podem ser recuperados via banco de dados se necessário! 🗑️"
               ) : confirmDialog.type === 'hard_delete' ? (
                 "Esta ação não pode ser desfeita. O produto será permanentemente removido do catálogo e todos os dados relacionados serão excluídos."
               ) : confirmDialog.product?.is_active ? (
-                "O produto será removido do catálogo público e não ficará visível para os clientes."
+                "O produto será ocultado do catálogo público, mas continuará visível no painel admin."
               ) : (
-                "O produto será adicionado ao catálogo público e ficará visível para os clientes."
+                "O produto será exibido no catálogo público e ficará visível para os clientes."
               )}
             </p>
           </div>
@@ -1050,9 +1098,13 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
               variant={confirmDialog.type === 'hard_delete' ? 'destructive' : 'default'}
               onClick={handleConfirmAction}
               className={confirmDialog.type === 'toggle' && !confirmDialog.product?.is_active ? 'bg-green-600 hover:bg-green-700' : ''}
-            >
+              disabled={actionLoading !== null}
+             >
+               {actionLoading !== null ? (
+                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2"></div>
+               ) : null}
               {confirmDialog.type === 'soft_delete' ? (
-                'Excluir'
+                'Mover para Lixeira'
               ) : confirmDialog.type === 'hard_delete' ? (
                 'Excluir Permanentemente'
               ) : confirmDialog.product?.is_active ? (
