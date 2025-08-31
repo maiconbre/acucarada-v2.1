@@ -146,7 +146,7 @@ const Settings = () => {
 
 
   const handlePasswordChange = async () => {
-    if (!passwordForm.newPassword || !passwordForm.confirmPassword) {
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
       toast({
         variant: "destructive",
         title: "Erro",
@@ -175,11 +175,28 @@ const Settings = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
+      // Verify current password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user!.email!,
+        password: passwordForm.currentPassword,
+      });
+
+      if (signInError) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Sua senha atual está incorreta."
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Update to new password
+      const { error: updateError } = await supabase.auth.updateUser({
         password: passwordForm.newPassword
       });
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
       setPasswordForm({
         currentPassword: '',
@@ -291,7 +308,7 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-1 p-1 h-auto">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-3 gap-1 p-1 h-auto">
           <TabsTrigger value="profile" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Perfil</span>
@@ -303,11 +320,6 @@ const Settings = () => {
           <TabsTrigger value="whatsapp" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
             <MessageCircle className="h-4 w-4" />
             <span className="hidden sm:inline">WhatsApp</span>
-          </TabsTrigger>
-
-          <TabsTrigger value="system" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
-            <Database className="h-4 w-4" />
-            <span className="hidden sm:inline">Sistema</span>
           </TabsTrigger>
         </TabsList>
 
@@ -394,6 +406,32 @@ const Settings = () => {
               </Alert>
               
               <div className="space-y-6">
+                <div className="space-y-3">
+                  <Label htmlFor="currentPassword">Senha Atual *</Label>
+                  <div className="relative">
+                    <Input
+                      id="currentPassword"
+                      type={passwordForm.showCurrentPassword ? "text" : "password"}
+                      value={passwordForm.currentPassword}
+                      onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                      placeholder="Digite sua senha atual"
+                      className="text-lg py-3 pr-12"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setPasswordForm(prev => ({ ...prev, showCurrentPassword: !prev.showCurrentPassword }))}
+                    >
+                      {passwordForm.showCurrentPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
                 <div className="space-y-3">
                   <Label htmlFor="newPassword">Nova Senha *</Label>
                   <div className="relative">
@@ -545,128 +583,7 @@ const Settings = () => {
 
 
 
-        {/* Aba Sistema */}
-        <TabsContent value="system" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                Configurações do Sistema
-              </CardTitle>
-              <CardDescription>
-                Gerencie dados e configurações avançadas
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="p-6 border-2 hover:border-orange-200 hover:shadow-lg transition-all duration-200 cursor-pointer bg-gradient-to-br from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100" onClick={handleClearCache}>
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-bold flex items-center gap-3">
-                      <RefreshCw className="h-6 w-6 text-orange-600" />
-                      Limpar Cache
-                    </h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Remove dados temporários armazenados localmente
-                    </p>
-                    <Button 
-                      variant="outline" 
-                      onClick={handleClearCache} 
-                      className="w-full h-12 text-base font-semibold border-2 border-orange-300 text-orange-700 hover:bg-orange-100 hover:border-orange-400 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
-                      size="lg"
-                    >
-                      <RefreshCw className="h-5 w-5 mr-2" />
-                      Limpar Cache
-                    </Button>
-                  </div>
-                </Card>
-                
-                <Card className="p-6 border-2 hover:border-blue-200 hover:shadow-lg transition-all duration-200 cursor-pointer bg-gradient-to-br from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100" onClick={handleExportData}>
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-bold flex items-center gap-3">
-                      <Database className="h-6 w-6 text-blue-600" />
-                      Exportar Dados
-                    </h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Baixe um backup dos seus dados
-                    </p>
-                    <Button 
-                      variant="outline" 
-                      onClick={handleExportData} 
-                      className="w-full h-12 text-base font-semibold border-2 border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
-                      size="lg"
-                    >
-                      <Database className="h-5 w-5 mr-2" />
-                      Exportar Dados
-                    </Button>
-                  </div>
-                </Card>
-              </div>
-              
-              <Separator />
-              
-              <Card className="p-6 border-2 hover:border-red-200 hover:shadow-md transition-all duration-200 cursor-pointer bg-gradient-to-r from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100" onClick={() => saveAppSettings({ ...appSettings, maintenance_mode: !appSettings.maintenance_mode })}>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <Label className="text-lg font-semibold flex items-center gap-3">
-                      <AlertTriangle className="h-6 w-6 text-red-600" />
-                      Modo Manutenção
-                    </Label>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Ativar modo de manutenção para o catálogo público
-                    </p>
-                  </div>
-                  <Switch
-                    checked={appSettings.maintenance_mode}
-                    onCheckedChange={(checked) => 
-                      saveAppSettings({ ...appSettings, maintenance_mode: checked })
-                    }
-                    className="scale-125"
-                  />
-                </div>
-              </Card>
-              
-              {appSettings.maintenance_mode && (
-                <Alert>
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    O modo de manutenção está ativo. O catálogo público não estará acessível para visitantes.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                Informações do Sistema
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <Label className="font-semibold">Usuário:</Label>
-                  <p className="text-muted-foreground">{user?.email}</p>
-                </div>
-                <div>
-                  <Label className="font-semibold">Conta criada em:</Label>
-                  <p className="text-muted-foreground">
-                    {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('pt-BR') : 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <Label className="font-semibold">Versão:</Label>
-                  <p className="text-muted-foreground">Doce Conecta v1.0.0</p>
-                </div>
-                <div>
-                  <Label className="font-semibold">Última atualização:</Label>
-                  <p className="text-muted-foreground">{new Date().toLocaleDateString('pt-BR')}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        
       </Tabs>
     </div>
   );
