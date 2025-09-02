@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, Star, ChefHat } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppSettings } from "@/hooks/useAppSettings";
-import heroImage from "@/assets/hero-sweets.jpg";
+import heroImage from "@/assets/hero-sweetsweb.webp";
 import logoImage from "@/assets/Fundo Transparente PNGPrancheta 1.png";
 
 
@@ -29,6 +29,8 @@ export const Hero = () => {
           alt="Doces artesanais da Açucarada"
           className="w-full h-full object-cover object-center"
           loading="eager"
+          fetchPriority="high"
+          decoding="sync"
         />
         <div className="absolute inset-0 bg-background/85" />
       </div>
