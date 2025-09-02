@@ -198,7 +198,14 @@ const ProductDetail = () => {
             Voltar
           </Button>
           <span>/</span>
-          <span>Catálogo</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/catalog')}
+            className="p-0 h-auto font-normal hover:text-rose-primary"
+          >
+            Catálogo
+          </Button>
           <span>/</span>
           <span className="text-foreground font-medium font-text">{product.name}</span>
         </div>
@@ -218,6 +225,10 @@ const ProductDetail = () => {
                   className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
                     imageLoading ? 'opacity-0' : 'opacity-100'
                   }`}
+                  width="600"
+                  height="600"
+                  loading="eager"
+                  decoding="async"
                   onLoad={() => setImageLoading(false)}
                   onError={() => setImageLoading(false)}
                 />
@@ -425,7 +436,7 @@ const ProductDetail = () => {
                       <MessageCircle className="h-5 w-5 lg:h-6 lg:w-6 mx-auto mb-2 text-blue-600" />
                       <div className="flex flex-col items-center">
                         <span className="text-xs lg:text-sm font-semibold text-blue-700">Comentar</span>
-                        <span className="text-xs text-blue-600 font-bold">{analytics.total_comments || 0}</span>
+                        <span className="text-xs text-blue-600 font-bold">0</span>
                       </div>
                     </CardContent>
                   </Card>

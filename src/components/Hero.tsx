@@ -28,9 +28,11 @@ export const Hero = () => {
           src={heroImage}
           alt="Doces artesanais da Açucarada"
           className="w-full h-full object-cover object-center"
+          width="1920"
+          height="1080"
           loading="eager"
           fetchPriority="high"
-          decoding="sync"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-background/85" />
       </div>
@@ -46,7 +48,10 @@ export const Hero = () => {
           src={logoImage}
           alt="Açucarada"
           className="h-auto object-contain m-0 p-0 w-[155%] max-w-2xl md:max-w-3xl lg:max-w-4xl md:-ml-52"
+          width="800"
+          height="400"
           loading="eager"
+          decoding="async"
         />
           </div>
 

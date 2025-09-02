@@ -125,7 +125,7 @@ const CommentManagement = () => {
           <p className="text-sm mb-3">{comment.comment}</p>
           {comment.image_url && (
             <a href={comment.image_url} target="_blank" rel="noopener noreferrer">
-              <img src={comment.image_url} alt="Imagem do Comentário" className="rounded-lg max-w-xs w-full h-auto" />
+              <img src={comment.image_url} alt="Imagem do Comentário" className="rounded-lg max-w-xs w-full h-auto" width="320" height="240" loading="lazy" decoding="async" />
             </a>
           )}
         </div>

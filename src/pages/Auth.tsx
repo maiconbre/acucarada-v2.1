@@ -75,6 +75,10 @@ const Auth = () => {
               src={logoImage} 
               alt="Açucarada Logo" 
               className="h-12 w-12 object-contain transition-transform hover:scale-105"
+              width="48"
+              height="48"
+              loading="lazy"
+              decoding="async"
             />
             <CardTitle className="text-2xl font-display gradient-primary bg-clip-text text-transparent">
               Açucarada Admin

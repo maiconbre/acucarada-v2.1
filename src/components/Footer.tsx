@@ -32,7 +32,10 @@ export const Footer = () => {
                   src={footerLogoImage} 
                   alt="Açucarada" 
                   className="w-full h-auto object-contain"
+                  width="288"
+                  height="144"
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>

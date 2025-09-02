@@ -359,6 +359,10 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                   src={value || uploadState.processedImage?.dataUrl}
                   alt="Preview"
                   className="w-full h-32 sm:h-48 object-cover rounded-lg border"
+                  width="400"
+                  height="192"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>

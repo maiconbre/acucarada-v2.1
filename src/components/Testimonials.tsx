@@ -125,7 +125,10 @@ export function Testimonials() {
                     src={testimonial.postImage}
                     alt={`Post by ${testimonial.username}`}
                     className="absolute inset-0 w-full h-full object-cover rounded-xl"
+                    width="400"
+                    height="384"
                     loading="lazy"
+                    decoding="async"
                   />
 
                   {/* Overlay Content */}
@@ -136,6 +139,10 @@ export function Testimonials() {
                         src={testimonial.userImage}
                         alt={testimonial.name}
                         className="w-8 h-8 rounded-full object-cover border-2 border-white"
+                        width="32"
+                        height="32"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="ml-2">
                         <p className="font-semibold text-sm">

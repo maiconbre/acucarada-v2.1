@@ -72,6 +72,10 @@ const ProductCard = ({ id, name, description, price, image_url, category, is_fea
           src={image_url}
           alt={name}
           className="w-full h-48 md:h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+          width="400"
+          height="256"
+          loading="lazy"
+          decoding="async"
         />
         <div className="absolute top-3 left-3">
           <span className="bg-primary-soft/90 backdrop-blur-sm text-primary text-xs px-3 py-1 rounded-full font-medium">

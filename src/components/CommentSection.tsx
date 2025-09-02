@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
-import { Instagram, Paperclip, User, Star } from 'lucide-react';
+import { Instagram, User, Star } from 'lucide-react';
 
 interface Comment {
   id: string;
@@ -15,7 +15,6 @@ interface Comment {
   created_at: string;
   author_name?: string;
   instagram_handle?: string;
-  image_url?: string;
   rating: number; // Adicionado
 }
 
@@ -30,7 +29,7 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
   const [newComment, setNewComment] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [instagramHandle, setInstagramHandle] = useState('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [selectedRating, setSelectedRating] = useState(5); // Inicializado com 5 estrelas
   const [hoverRating, setHoverRating] = useState(0); // Novo estado para o efeito de hover
@@ -51,7 +50,6 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
         created_at,
         author_name,
         instagram_handle,
-        image_url,
         rating
       `)
       .eq('product_id', productId)
@@ -71,11 +69,7 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
     fetchComments();
   }, [fetchComments]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
-    }
-  };
+
 
   const handleSubmitComment = async () => {
     if (newComment.trim() === '') {
@@ -88,27 +82,6 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
     }
 
     setLoading(true);
-    let imageUrl = null;
-
-    if (selectedFile) {
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('comment_images')
-        .upload(fileName, selectedFile);
-
-      if (uploadError) {
-        console.error('Error uploading image:', uploadError);
-        toast({ variant: 'destructive', title: 'Erro ao enviar imagem.' });
-        setLoading(false);
-        return;
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from('comment_images')
-        .getPublicUrl(uploadData.path);
-      imageUrl = publicUrlData.publicUrl;
-    }
 
     const { error } = await supabase.from('comments').insert([
       {
@@ -116,7 +89,7 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
         comment: newComment,
         author_name: authorName,
         instagram_handle: instagramHandle,
-        image_url: imageUrl,
+        image_url: null,
         rating: selectedRating, // Adicionado
       },
     ]);
@@ -127,7 +100,7 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
     } else {
       setNewComment('');
       setInstagramHandle('');
-      setSelectedFile(null);
+
       setSelectedRating(5); // Resetar para 5 estrelas
       if (!user) setAuthorName('');
       toast({ title: 'Comentário enviado!', description: 'Seu comentário está aguardando aprovação.' });
@@ -199,15 +172,7 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
                       )}
                   </div>
               </div>
-              <div className="relative md:col-span-2">
-                  <label htmlFor="file-upload" className="flex items-center justify-center w-full h-10 px-4 bg-white border rounded-md cursor-pointer hover:bg-gray-50">
-                      <Paperclip className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                          {selectedFile ? selectedFile.name : 'Enviar foto (opcional)'}
-                      </span>
-                  </label>
-                  <input id="file-upload" type="file" className="hidden" onChange={handleFileChange} disabled={loading} accept="image/*" />
-              </div>
+
             </div>
             <Button onClick={handleSubmitComment} disabled={loading} className="w-full">
               {loading ? 'Enviando...' : 'Enviar Comentário'}
@@ -247,9 +212,6 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
                   </p>
                 </div>
                 <p className="text-sm mt-2">{comment.comment}</p>
-                {comment.image_url && (
-                  <img src={comment.image_url} alt="Comentário" className="mt-2 rounded-lg w-full max-w-xs" />
-                )}
               </div>
             </CardContent>
           </Card>
