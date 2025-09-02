@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Instagram, User, Star } from 'lucide-react';
 
@@ -137,12 +137,16 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
               )}
               <div className="relative">
                   <Instagram className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <div className="absolute left-10 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none">@</div>
                   <Input
-                  placeholder="@seu_instagram"
+                  placeholder="seu_instagram"
                   value={instagramHandle}
-                  onChange={(e) => setInstagramHandle(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/@/g, ''); // Remove qualquer @ digitado
+                    setInstagramHandle(value);
+                  }}
                   disabled={loading}
-                  className="pl-10 bg-white"
+                  className="pl-14 bg-white"
                   />
               </div>
               {/* Seletor de Avaliação (Estrelas Clicáveis) */}

@@ -436,7 +436,6 @@ const ProductDetail = () => {
                       <MessageCircle className="h-5 w-5 lg:h-6 lg:w-6 mx-auto mb-2 text-blue-600" />
                       <div className="flex flex-col items-center">
                         <span className="text-xs lg:text-sm font-semibold text-blue-700">Comentar</span>
-                        <span className="text-xs text-blue-600 font-bold">0</span>
                       </div>
                     </CardContent>
                   </Card>
