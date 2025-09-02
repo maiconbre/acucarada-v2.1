@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -16,352 +17,559 @@ export type Database = {
     Tables: {
       app_settings: {
         Row: {
-          id: string
-          key: string
-          value: string
+          category: string | null
+          created_at: string | null
           description: string | null
-          category: string
-          is_public: boolean
-          created_at: string
-          updated_at: string
+          id: string
+          is_public: boolean | null
+          key: string
+          updated_at: string | null
+          value: string
         }
         Insert: {
-          id?: string
-          key: string
-          value: string
+          category?: string | null
+          created_at?: string | null
           description?: string | null
-          category?: string
-          is_public?: boolean
-          created_at?: string
-          updated_at?: string
+          id?: string
+          is_public?: boolean | null
+          key: string
+          updated_at?: string | null
+          value: string
         }
         Update: {
-          id?: string
-          key?: string
-          value?: string
+          category?: string | null
+          created_at?: string | null
           description?: string | null
-          category?: string
-          is_public?: boolean
-          created_at?: string
-          updated_at?: string
+          id?: string
+          is_public?: boolean | null
+          key?: string
+          updated_at?: string | null
+          value?: string
         }
         Relationships: []
       }
       categories: {
         Row: {
-          id: string
-          name: string
-          description: string | null
-          is_active: boolean
           created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          is_active?: boolean
           created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          is_active?: boolean
           created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
           updated_at?: string
         }
         Relationships: []
       }
+      comments: {
+        Row: {
+          author_name: string | null
+          comment: string
+          created_at: string
+          id: string
+          image_url: string | null
+          instagram_handle: string | null
+          is_approved: boolean | null
+          product_id: string
+          rating: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          author_name?: string | null
+          comment: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          instagram_handle?: string | null
+          is_approved?: boolean | null
+          product_id: string
+          rating?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          author_name?: string | null
+          comment?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          instagram_handle?: string | null
+          is_approved?: boolean | null
+          product_id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_analytics_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_analytics: {
         Row: {
           id: string
-          product_id: string
-          total_likes: number
-          total_clicks: number
-          total_shares: number
           last_updated: string
-          updated_at: string
+          product_id: string
+          total_clicks: number | null
+          total_likes: number | null
+          total_shares: number | null
         }
         Insert: {
           id?: string
-          product_id: string
-          total_likes?: number
-          total_clicks?: number
-          total_shares?: number
           last_updated?: string
-          updated_at?: string
+          product_id: string
+          total_clicks?: number | null
+          total_likes?: number | null
+          total_shares?: number | null
         }
         Update: {
           id?: string
-          product_id?: string
-          total_likes?: number
-          total_clicks?: number
-          total_shares?: number
           last_updated?: string
-          updated_at?: string
+          product_id?: string
+          total_clicks?: number | null
+          total_likes?: number | null
+          total_shares?: number | null
         }
         Relationships: [
           {
             foreignKeyName: "product_analytics_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: true
-            referencedRelation: "products"
+            referencedRelation: "product_analytics_summary"
             referencedColumns: ["id"]
-          }
-        ]
-      }
-      product_shares: {
-        Row: {
-          id: string
-          product_id: string
-          share_type: string
-          page_source: string | null
-          user_id: string | null
-          session_id: string | null
-          ip_address: string | null
-          user_agent: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          product_id: string
-          share_type: string
-          page_source?: string | null
-          user_id?: string | null
-          session_id?: string | null
-          ip_address?: string | null
-          user_agent?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          product_id?: string
-          share_type?: string
-          page_source?: string | null
-          user_id?: string | null
-          session_id?: string | null
-          ip_address?: string | null
-          user_agent?: string | null
-          created_at?: string
-        }
-        Relationships: [
+          },
           {
-            foreignKeyName: "product_shares_product_id_fkey"
+            foreignKeyName: "product_analytics_product_id_fkey"
             columns: ["product_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "products"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       product_clicks: {
         Row: {
-          id: string
-          product_id: string
-          user_id: string | null
-          session_id: string | null
-          ip_address: string | null
           click_type: string
-          page_source: string | null
-          user_agent: string | null
           created_at: string
+          id: string
+          ip_address: unknown | null
+          page_source: string | null
+          product_id: string
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
         }
         Insert: {
-          id?: string
-          product_id: string
-          user_id?: string | null
-          session_id?: string | null
-          ip_address?: string | null
           click_type: string
-          page_source?: string | null
-          user_agent?: string | null
           created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          page_source?: string | null
+          product_id: string
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Update: {
-          id?: string
-          product_id?: string
-          user_id?: string | null
-          session_id?: string | null
-          ip_address?: string | null
           click_type?: string
-          page_source?: string | null
-          user_agent?: string | null
           created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          page_source?: string | null
+          product_id?: string
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "product_clicks_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
+            referencedRelation: "product_analytics_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_clicks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       product_likes: {
         Row: {
-          id: string
-          product_id: string
-          user_id: string | null
-          session_id: string | null
-          ip_address: string | null
           created_at: string
+          id: string
+          ip_address: unknown | null
+          product_id: string
+          session_id: string | null
+          user_id: string | null
         }
         Insert: {
-          id?: string
-          product_id: string
-          user_id?: string | null
-          session_id?: string | null
-          ip_address?: string | null
           created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          product_id: string
+          session_id?: string | null
+          user_id?: string | null
         }
         Update: {
-          id?: string
-          product_id?: string
-          user_id?: string | null
-          session_id?: string | null
-          ip_address?: string | null
           created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          product_id?: string
+          session_id?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "product_likes_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
+            referencedRelation: "product_analytics_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_likes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
-
+      product_shares: {
+        Row: {
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          page_source: string | null
+          product_id: string
+          session_id: string | null
+          share_type: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          page_source?: string | null
+          product_id: string
+          session_id?: string | null
+          share_type: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          page_source?: string | null
+          product_id?: string
+          session_id?: string | null
+          share_type?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_shares_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_analytics_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_shares_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category: string
           created_at: string
+          deleted_at: string | null
           description: string | null
           id: string
           image_url: string | null
+          ingredientes: string | null
           is_active: boolean | null
           is_featured: boolean | null
           name: string
           price: number
+          sabor_images: Json | null
+          sabores: string[] | null
           updated_at: string
+          validade_armazenamento_dias: number | null
         }
         Insert: {
           category?: string
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
+          ingredientes?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           name: string
           price: number
+          sabor_images?: Json | null
+          sabores?: string[] | null
           updated_at?: string
+          validade_armazenamento_dias?: number | null
         }
         Update: {
           category?: string
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
+          ingredientes?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           name?: string
           price?: number
+          sabor_images?: Json | null
+          sabores?: string[] | null
           updated_at?: string
+          validade_armazenamento_dias?: number | null
         }
         Relationships: []
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
           email: string
+          full_name: string | null
           id: string
           role: string
           updated_at: string
           user_id: string
+          username: string | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           email: string
+          full_name?: string | null
           id?: string
           role?: string
           updated_at?: string
           user_id: string
+          username?: string | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           email?: string
+          full_name?: string | null
           id?: string
           role?: string
           updated_at?: string
           user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      storage_logs: {
+        Row: {
+          action: string
+          bucket_id: string
+          created_at: string | null
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          object_name: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          bucket_id: string
+          created_at?: string | null
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          object_name: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          bucket_id?: string
+          created_at?: string | null
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          object_name?: string
+          user_id?: string | null
         }
         Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      product_analytics_summary: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          image_url: string | null
+          ingredientes: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          name: string | null
+          price: number | null
+          sabor_images: Json | null
+          sabores: string[] | null
+          total_clicks: number | null
+          total_likes: number | null
+          total_shares: number | null
+          unique_viewers: number | null
+          updated_at: string | null
+          validade_armazenamento_dias: number | null
+        }
+        Relationships: []
+      }
+      storage_statistics: {
+        Row: {
+          avg_file_size_kb: number | null
+          bucket_id: string | null
+          newest_file: string | null
+          oldest_file: string | null
+          total_files: number | null
+          total_size_mb: number | null
+          unique_uploaders: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      cleanup_orphaned_images: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          deleted_count: number
+          deleted_files: string[]
+        }[]
+      }
       get_email_by_username: {
-        Args: {
-          input_username: string
-        }
+        Args: { input_username: string }
         Returns: string
+      }
+      get_product_complete_info: {
+        Args: { product_id_param: string }
+        Returns: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string
+          ingredientes: string
+          is_active: boolean
+          is_featured: boolean
+          name: string
+          price: number
+          sabor_images: Json
+          sabores: string[]
+          total_clicks: number
+          total_likes: number
+          total_shares: number
+          updated_at: string
+          validade_armazenamento_dias: number
+        }[]
       }
       get_public_settings: {
         Args: Record<PropertyKey, never>
         Returns: {
+          category: string
+          description: string
           key: string
           value: string
-          description: string
-          category: string
         }[]
       }
-      update_app_setting: {
-        Args: {
-          setting_key: string
-          setting_value: string
-        }
-        Returns: boolean
+      optimize_storage_usage: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          folders_info: Json
+          total_files: number
+          total_size_mb: number
+        }[]
       }
       toggle_product_like: {
         Args: {
+          p_ip_address?: unknown
           p_product_id: string
-          p_user_id: string | null
-          p_session_id: string | null
-          p_ip_address: string | null
+          p_session_id?: string
+          p_user_id?: string
         }
         Returns: boolean
       }
-
       track_product_click: {
         Args: {
-          p_product_id: string
           p_click_type: string
-          p_page_source: string | null
-          p_user_id: string | null
-          p_session_id: string | null
-          p_ip_address: string | null
-          p_user_agent: string | null
+          p_ip_address?: unknown
+          p_page_source?: string
+          p_product_id: string
+          p_session_id?: string
+          p_user_agent?: string
+          p_user_id?: string
         }
-        Returns: void
+        Returns: boolean
       }
       track_product_share: {
         Args: {
+          p_ip_address?: unknown
+          p_page_source?: string
           p_product_id: string
+          p_session_id?: string
           p_share_type: string
-          p_page_source: string | null
-          p_user_id: string | null
-          p_session_id: string | null
-          p_ip_address: string | null
-          p_user_agent: string | null
+          p_user_agent?: string
+          p_user_id?: string
         }
-        Returns: void
+        Returns: boolean
+      }
+      update_app_setting: {
+        Args: { setting_key: string; setting_value: string }
+        Returns: boolean
+      }
+      update_product_analytics: {
+        Args: { p_product_id: string }
+        Returns: undefined
       }
     }
     Enums: {

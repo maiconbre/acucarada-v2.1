@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSettings } from "@/hooks/useAppSettings";
+import CommentManagement from './CommentManagement'; // Import the new component
 import { 
   User, 
   Lock, 
@@ -27,7 +28,8 @@ import {
   CheckCircle,
   MessageCircle,
   Phone,
-  BarChart
+  BarChart,
+  ThumbsUp // Import the icon
 } from "lucide-react";
 
 interface AppSettings {
@@ -308,7 +310,7 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-3 gap-1 p-1 h-auto">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 p-1 h-auto">
           <TabsTrigger value="profile" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Perfil</span>
@@ -320,6 +322,10 @@ const Settings = () => {
           <TabsTrigger value="whatsapp" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
             <MessageCircle className="h-4 w-4" />
             <span className="hidden sm:inline">WhatsApp</span>
+          </TabsTrigger>
+          <TabsTrigger value="comments" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
+            <ThumbsUp className="h-4 w-4" />
+            <span className="hidden sm:inline">Comentários</span>
           </TabsTrigger>
         </TabsList>
 
@@ -581,8 +587,10 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-
-
+        {/* Aba Comentários */}
+        <TabsContent value="comments" className="space-y-6">
+          <CommentManagement />
+        </TabsContent>
         
       </Tabs>
     </div>
