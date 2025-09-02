@@ -16,15 +16,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (initialSession) {
         setSession(initialSession);
         setUser(initialSession.user);
-      } else {
-        // 2. If no session, sign in anonymously
-        const { data: anonData, error: anonError } = await supabase.auth.signInAnonymously();
-        if (anonError) {
-          console.error("Erro ao iniciar sessão anônima:", anonError);
-        } else if (anonData.session) {
-          setSession(anonData.session);
-          setUser(anonData.session.user);
-        }
       }
       setLoading(false);
     };
@@ -37,10 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // If user signs out, we might want to re-establish an anonymous session
-        if (_event === 'SIGNED_OUT') {
-          supabase.auth.signInAnonymously();
-        }
+        // User signed out - no need for anonymous session
       }
     );
 

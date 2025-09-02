@@ -110,11 +110,20 @@ const ProductDetail = () => {
   const handleFlavorClick = (flavor: string) => {
     setSelectedFlavor(flavor);
     
+    // Debug: verificar estrutura dos dados
+    console.log('Flavor clicked:', flavor);
+    console.log('Product sabor_images:', product?.sabor_images);
+    console.log('Type of sabor_images:', typeof product?.sabor_images);
+    
     // Verificar se existe imagem específica para este sabor
     const saborImages = product?.sabor_images as Record<string, string> | null;
+    console.log('Parsed saborImages:', saborImages);
+    
     if (saborImages && saborImages[flavor]) {
+      console.log('Setting flavor image:', saborImages[flavor]);
       setActiveImage(saborImages[flavor]);
     } else {
+      console.log('No specific image found, using main image:', product?.image_url);
       // Voltar para imagem principal se não houver imagem específica
       setActiveImage(product?.image_url || '');
     }
@@ -305,9 +314,6 @@ const ProductDetail = () => {
                           }`}
                         >
                           {sabor}
-                          {(product.sabor_images as Record<string, string> | null)?.[sabor] && (
-                            <span className="ml-1 text-xs opacity-70">📸</span>
-                          )}
                         </Button>
                       ))}
                     </div>
@@ -363,9 +369,6 @@ const ProductDetail = () => {
                                }`}
                              >
                                {sabor}
-                               {(product.sabor_images as Record<string, string> | null)?.[sabor] && (
-                                 <span className="ml-1 text-xs opacity-70">📸</span>
-                               )}
                              </Button>
                            ))}
                          </div>
