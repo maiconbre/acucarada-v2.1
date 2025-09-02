@@ -29,6 +29,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Edit, Trash2, Eye, EyeOff, Grid3X3, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { Json } from "@/integrations/supabase/types";
 
 interface Product {
   id: string;
@@ -40,7 +41,7 @@ interface Product {
   ingredientes?: string;
   validade_armazenamento_dias?: number;
   sabores?: string[];
-  sabor_images?: Record<string, string>;
+  sabor_images?: Json;
   is_featured: boolean;
   is_active: boolean;
 }
@@ -77,7 +78,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     ingredientes: "",
     validade_armazenamento_dias: "",
     sabores: "" as string,
-    sabor_images: {} as Record<string, string>,
+    sabor_images: {} as Json,
     is_featured: false,
     is_active: true,
   });
@@ -117,7 +118,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       ingredientes: "",
       validade_armazenamento_dias: "",
       sabores: "" as string,
-      sabor_images: {} as Record<string, string>,
+      sabor_images: {} as Json,
       is_featured: false,
       is_active: true,
     });
@@ -147,7 +148,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       const existingFlavors = product.sabores.map((flavor, index) => ({
         id: `flavor-${index}`,
         name: flavor,
-        image: product.sabor_images?.[flavor] || ""
+        image: (product.sabor_images as Record<string, string> | null)?.[flavor] || ""
       }));
       setFlavors(existingFlavors);
     } else {
@@ -629,6 +630,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                                        src={flavor.image} 
                                        alt={flavor.name}
                                        className="w-full h-full object-cover"
+                                       width="200"
+                                       height="200"
+                                       loading="lazy"
+                                       decoding="async"
                                      />
                                    ) : (
                                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -793,6 +798,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                           src={product.image_url} 
                           alt={product.name}
                           className="h-20 w-20 rounded-lg object-cover flex-shrink-0"
+                          width="80"
+                          height="80"
+                          loading="lazy"
+                          decoding="async"
                         />
                       )}
                       <div className="flex-1 min-w-0">
@@ -871,6 +880,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                           src={product.image_url} 
                           alt={product.name}
                           className="w-full h-24 rounded-lg object-cover"
+                          width="120"
+                          height="96"
+                          loading="lazy"
+                          decoding="async"
                         />
                       )}
                       <div className="space-y-1">
@@ -959,6 +972,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                             src={product.image_url} 
                             alt={product.name}
                             className="h-10 w-10 rounded object-cover"
+                            width="40"
+                            height="40"
+                            loading="lazy"
+                            decoding="async"
                           />
                         )}
                         <div>
@@ -1064,6 +1081,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                   src={confirmDialog.product.image_url || "/placeholder.svg"}
                   alt={confirmDialog.product.name}
                   className="h-12 w-12 rounded-md object-cover"
+                  width="48"
+                  height="48"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div>
                   <p className="font-medium">{confirmDialog.product.name}</p>

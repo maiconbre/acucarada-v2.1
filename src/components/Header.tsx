@@ -108,6 +108,10 @@ export const Header = () => {
               src={logoImage} 
               alt="Açucarada Logo" 
               className="h-20 w-20 object-contain transition-transform hover:scale-105"
+              width="80"
+              height="80"
+              loading="lazy"
+              decoding="async"
             />
             </Link>
             
@@ -155,6 +159,10 @@ export const Header = () => {
                 src={logoImage} 
                 alt="Açucarada Logo" 
                 className="h-16 lg:h-20 w-auto object-contain transition-transform hover:scale-105"
+                width="80"
+                height="80"
+                loading="lazy"
+                decoding="async"
               />
             </Link>
             {/* Badge ao lado do logo */}

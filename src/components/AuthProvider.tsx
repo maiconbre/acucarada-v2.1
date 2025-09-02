@@ -9,23 +9,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
+    const initializeAuth = async () => {
+      // 1. Check for an existing session
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+
+      if (initialSession) {
+        setSession(initialSession);
+        setUser(initialSession.user);
+      } else {
+        // 2. If no session, sign in anonymously
+        const { data: anonData, error: anonError } = await supabase.auth.signInAnonymously();
+        if (anonError) {
+          console.error("Erro ao iniciar sessão anônima:", anonError);
+        } else if (anonData.session) {
+          setSession(anonData.session);
+          setUser(anonData.session.user);
+        }
+      }
+      setLoading(false);
+    };
+
+    initializeAuth();
+
+    // 3. Listen for auth state changes (e.g., sign in, sign out)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
+        
+        // If user signs out, we might want to re-establish an anonymous session
+        if (_event === 'SIGNED_OUT') {
+          supabase.auth.signInAnonymously();
+        }
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (emailOrUsername: string, password: string) => {

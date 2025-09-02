@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -6,10 +6,12 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MessageCircle, Heart, Share2, Eye, Star, MessageSquare, Clock, ChefHat, Calendar, Info } from "lucide-react";
+import { ArrowLeft, MessageCircle, Heart, Share2, Eye, Star, ChefHat, Calendar, Info } from "lucide-react";
+import { CommentSection } from "@/components/CommentSection";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSettings } from "@/hooks/useAppSettings";
 import { useProductAnalytics } from "@/hooks/useProductAnalytics";
+import { Json } from "@/integrations/supabase/types";
 
 interface Product {
   id: string;
@@ -21,7 +23,7 @@ interface Product {
   ingredientes?: string;
   validade_armazenamento_dias?: number;
   sabores?: string[];
-  sabor_images?: Record<string, string>;
+  sabor_images?: Json;
   is_featured: boolean;
   is_active: boolean;
 }
@@ -37,19 +39,14 @@ const ProductDetail = () => {
   const [selectedFlavor, setSelectedFlavor] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState<string>('');
   const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id || '');
+  const commentSectionRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (id) {
-      fetchProduct();
-    }
-  }, [id]);
-
-  // Inicializar imagem ativa quando produto for carregado
-  useEffect(() => {
-    if (product) {
-      setActiveImage(product.image_url);
-    }
-  }, [product]);
+  const handleCommentClick = () => {
+    commentSectionRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
 
   const fetchProduct = useCallback(async () => {
     try {
@@ -83,6 +80,19 @@ const ProductDetail = () => {
     }
   }, [id, navigate, toast]);
 
+  useEffect(() => {
+    if (id) {
+      fetchProduct();
+    }
+  }, [id, fetchProduct]);
+
+  // Inicializar imagem ativa quando produto for carregado
+  useEffect(() => {
+    if (product) {
+      setActiveImage(product.image_url);
+    }
+  }, [product]);
+
   const handleWhatsAppOrder = () => {
     if (!product) return;
     
@@ -101,8 +111,9 @@ const ProductDetail = () => {
     setSelectedFlavor(flavor);
     
     // Verificar se existe imagem específica para este sabor
-    if (product?.sabor_images && product.sabor_images[flavor]) {
-      setActiveImage(product.sabor_images[flavor]);
+    const saborImages = product?.sabor_images as Record<string, string> | null;
+    if (saborImages && saborImages[flavor]) {
+      setActiveImage(saborImages[flavor]);
     } else {
       // Voltar para imagem principal se não houver imagem específica
       setActiveImage(product?.image_url || '');
@@ -189,7 +200,14 @@ const ProductDetail = () => {
             Voltar
           </Button>
           <span>/</span>
-          <span>Catálogo</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/catalog')}
+            className="p-0 h-auto font-normal hover:text-rose-primary"
+          >
+            Catálogo
+          </Button>
           <span>/</span>
           <span className="text-foreground font-medium font-text">{product.name}</span>
         </div>
@@ -209,6 +227,10 @@ const ProductDetail = () => {
                   className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
                     imageLoading ? 'opacity-0' : 'opacity-100'
                   }`}
+                  width="600"
+                  height="600"
+                  loading="eager"
+                  decoding="async"
                   onLoad={() => setImageLoading(false)}
                   onError={() => setImageLoading(false)}
                 />
@@ -283,7 +305,7 @@ const ProductDetail = () => {
                           }`}
                         >
                           {sabor}
-                          {product.sabor_images?.[sabor] && (
+                          {(product.sabor_images as Record<string, string> | null)?.[sabor] && (
                             <span className="ml-1 text-xs opacity-70">📸</span>
                           )}
                         </Button>
@@ -341,7 +363,7 @@ const ProductDetail = () => {
                                }`}
                              >
                                {sabor}
-                               {product.sabor_images?.[sabor] && (
+                               {(product.sabor_images as Record<string, string> | null)?.[sabor] && (
                                  <span className="ml-1 text-xs opacity-70">📸</span>
                                )}
                              </Button>
@@ -350,7 +372,7 @@ const ProductDetail = () => {
                          {selectedFlavor && (
                            <p className="text-xs text-purple-600 font-text mt-1">
                              Visualizando: {selectedFlavor}
-                             {product.sabor_images?.[selectedFlavor] && " (com imagem específica)"}
+                             {(product.sabor_images as Record<string, string> | null)?.[selectedFlavor] && " (com imagem específica)"}
                            </p>
                          )}
                       </div>
@@ -377,23 +399,7 @@ const ProductDetail = () => {
                 </Button>
                 
                 <div className="grid grid-cols-3 gap-3">
-                  <Card className="border-0 bg-gradient-to-br from-blue-50/80 to-cyan-50/80 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
-                    onClick={() => {
-                      trackClick('comments', 'product_detail');
-                      toast({
-                        title: "Em breve!",
-                        description: "Sistema de comentários e avaliações em desenvolvimento.",
-                      });
-                    }}
-                  >
-                    <CardContent className="p-3 lg:p-4 text-center">
-                      <MessageSquare className="h-5 w-5 lg:h-6 lg:w-6 mx-auto mb-2 text-blue-600" />
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs lg:text-sm font-semibold text-blue-700">Comentar</span>
-                        <span className="text-xs text-blue-600 font-bold">★ 4.8</span>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  
                   
                   <Card className="border-0 bg-gradient-to-br from-purple-50/80 to-indigo-50/80 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
                     onClick={handleShare}
@@ -421,6 +427,17 @@ const ProductDetail = () => {
                       <div className="flex flex-col items-center">
                         <span className="text-xs lg:text-sm font-semibold text-red-700">Curtir</span>
                         <span className="text-xs text-red-600 font-bold">{analytics.total_likes}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-0 bg-gradient-to-br from-blue-50/80 to-cyan-50/80 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                    onClick={handleCommentClick}
+                  >
+                    <CardContent className="p-3 lg:p-4 text-center">
+                      <MessageCircle className="h-5 w-5 lg:h-6 lg:w-6 mx-auto mb-2 text-blue-600" />
+                      <div className="flex flex-col items-center">
+                        <span className="text-xs lg:text-sm font-semibold text-blue-700">Comentar</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -506,55 +523,7 @@ const ProductDetail = () => {
 
 
             
-            {/* Seção de Avaliações Visuais */}
-            <Card className="border-0 bg-muted/50">
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold font-title text-sm lg:text-base">Avaliações dos Clientes</h3>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold text-sm">4.8</span>
-                    <span className="text-xs text-muted-foreground">(24 avaliações)</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  {/* Barra de avaliações */}
-                  <div className="space-y-2">
-                    {[5, 4, 3, 2, 1].map((stars) => (
-                      <div key={stars} className="flex items-center gap-2 text-xs">
-                        <span className="w-3">{stars}</span>
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-yellow-400 h-2 rounded-full" 
-                            style={{ width: `${stars === 5 ? 70 : stars === 4 ? 20 : stars === 3 ? 8 : stars === 2 ? 2 : 0}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-muted-foreground w-8 text-right">
-                          {stars === 5 ? '17' : stars === 4 ? '5' : stars === 3 ? '2' : stars === 2 ? '0' : '0'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full mt-3 text-rose-primary hover:text-rose-primary hover:bg-rose-primary/10"
-                    onClick={() => {
-                      trackClick('view_all_reviews', 'product_detail');
-                      toast({
-                        title: "Em breve!",
-                        description: "Visualização completa de avaliações em desenvolvimento.",
-                      });
-                    }}
-                  >
-                    Ver todas as avaliações
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <CommentSection productId={product.id} ref={commentSectionRef} />
           </div>
         </div>
       </div>
