@@ -48,19 +48,6 @@ const ProductDetail = () => {
     });
   };
 
-  useEffect(() => {
-    if (id) {
-      fetchProduct();
-    }
-  }, [id, fetchProduct]);
-
-  // Inicializar imagem ativa quando produto for carregado
-  useEffect(() => {
-    if (product) {
-      setActiveImage(product.image_url);
-    }
-  }, [product]);
-
   const fetchProduct = useCallback(async () => {
     try {
       const { data, error } = await supabase
@@ -92,6 +79,19 @@ const ProductDetail = () => {
       setLoading(false);
     }
   }, [id, navigate, toast]);
+
+  useEffect(() => {
+    if (id) {
+      fetchProduct();
+    }
+  }, [id, fetchProduct]);
+
+  // Inicializar imagem ativa quando produto for carregado
+  useEffect(() => {
+    if (product) {
+      setActiveImage(product.image_url);
+    }
+  }, [product]);
 
   const handleWhatsAppOrder = () => {
     if (!product) return;

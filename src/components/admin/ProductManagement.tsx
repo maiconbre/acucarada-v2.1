@@ -29,6 +29,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Edit, Trash2, Eye, EyeOff, Grid3X3, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { Json } from "@/integrations/supabase/types";
 
 interface Product {
   id: string;
@@ -40,7 +41,7 @@ interface Product {
   ingredientes?: string;
   validade_armazenamento_dias?: number;
   sabores?: string[];
-  sabor_images?: Record<string, string>;
+  sabor_images?: Json;
   is_featured: boolean;
   is_active: boolean;
 }
@@ -77,7 +78,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     ingredientes: "",
     validade_armazenamento_dias: "",
     sabores: "" as string,
-    sabor_images: {} as Record<string, string>,
+    sabor_images: {} as Json,
     is_featured: false,
     is_active: true,
   });
@@ -117,7 +118,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       ingredientes: "",
       validade_armazenamento_dias: "",
       sabores: "" as string,
-      sabor_images: {} as Record<string, string>,
+      sabor_images: {} as Json,
       is_featured: false,
       is_active: true,
     });
@@ -147,7 +148,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       const existingFlavors = product.sabores.map((flavor, index) => ({
         id: `flavor-${index}`,
         name: flavor,
-        image: product.sabor_images?.[flavor] || ""
+        image: (product.sabor_images as Record<string, string> | null)?.[flavor] || ""
       }));
       setFlavors(existingFlavors);
     } else {

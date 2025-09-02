@@ -63,85 +63,6 @@ const AnalyticsPanel = () => {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'likes' | 'clicks'>('likes');
 
-  useEffect(() => {
-    fetchAnalytics();
-
-    // Set up real-time subscriptions for analytics updates
-    const analyticsSubscription = supabase
-      .channel('admin_analytics')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'product_analytics',
-        },
-        (payload) => {
-          console.log('Admin analytics updated:', payload);
-          fetchAnalytics();
-        }
-      )
-      .subscribe();
-
-    const likesSubscription = supabase
-      .channel('admin_likes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'product_likes',
-        },
-        (payload) => {
-          console.log('Admin likes updated:', payload);
-          fetchAnalytics();
-        }
-      )
-      .subscribe();
-
-    // Views subscription removido - tracking de views foi eliminado
-
-    const clicksSubscription = supabase
-      .channel('admin_clicks')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'product_clicks',
-        },
-        (payload) => {
-          console.log('Admin clicks updated:', payload);
-          fetchAnalytics();
-        }
-      )
-      .subscribe();
-
-    const sharesSubscription = supabase
-      .channel('admin_shares')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'product_shares',
-        },
-        (payload) => {
-          console.log('Admin shares updated:', payload);
-          fetchAnalytics();
-        }
-      )
-      .subscribe();
-
-    // Cleanup subscriptions
-    return () => {
-      analyticsSubscription.unsubscribe();
-      likesSubscription.unsubscribe();
-      clicksSubscription.unsubscribe();
-      sharesSubscription.unsubscribe();
-    };
-  }, [sortBy, fetchAnalytics]);
-
   const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
@@ -220,6 +141,85 @@ const AnalyticsPanel = () => {
       setLoading(false);
     }
   }, [sortBy, toast]);
+
+  useEffect(() => {
+    fetchAnalytics();
+
+    // Set up real-time subscriptions for analytics updates
+    const analyticsSubscription = supabase
+      .channel('admin_analytics')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'product_analytics',
+        },
+        (payload) => {
+          console.log('Admin analytics updated:', payload);
+          fetchAnalytics();
+        }
+      )
+      .subscribe();
+
+    const likesSubscription = supabase
+      .channel('admin_likes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'product_likes',
+        },
+        (payload) => {
+          console.log('Admin likes updated:', payload);
+          fetchAnalytics();
+        }
+      )
+      .subscribe();
+
+    // Views subscription removido - tracking de views foi eliminado
+
+    const clicksSubscription = supabase
+      .channel('admin_clicks')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'product_clicks',
+        },
+        (payload) => {
+          console.log('Admin clicks updated:', payload);
+          fetchAnalytics();
+        }
+      )
+      .subscribe();
+
+    const sharesSubscription = supabase
+      .channel('admin_shares')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'product_shares',
+        },
+        (payload) => {
+          console.log('Admin shares updated:', payload);
+          fetchAnalytics();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscriptions
+    return () => {
+      analyticsSubscription.unsubscribe();
+      likesSubscription.unsubscribe();
+      clicksSubscription.unsubscribe();
+      sharesSubscription.unsubscribe();
+    };
+  }, [fetchAnalytics]);
 
   const fetchClickStats = async () => {
     try {
