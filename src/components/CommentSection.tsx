@@ -33,6 +33,11 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
   const [loading, setLoading] = useState(false);
   const [selectedRating, setSelectedRating] = useState(5); // Inicializado com 5 estrelas
   const [hoverRating, setHoverRating] = useState(0); // Novo estado para o efeito de hover
+  
+  // Paginação para otimizar performance
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalComments, setTotalComments] = useState(0);
+  const commentsPerPage = 5; // Limitar a 5 comentários por página
 
   useEffect(() => {
     if (user?.user_metadata.username) {
@@ -40,8 +45,22 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
     }
   }, [user]);
 
-  const fetchComments = useCallback(async () => {
+  const fetchComments = useCallback(async (page = 1) => {
     setLoading(true);
+    
+    // Primeiro, buscar o total de comentários
+    const { count } = await supabase
+      .from('comments')
+      .select('*', { count: 'exact', head: true })
+      .eq('product_id', productId)
+      .eq('is_approved', true);
+    
+    setTotalComments(count || 0);
+    
+    // Depois buscar os comentários paginados
+    const from = (page - 1) * commentsPerPage;
+    const to = from + commentsPerPage - 1;
+    
     const { data, error } = await supabase
       .from('comments')
       .select(`
@@ -54,16 +73,22 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
       `)
       .eq('product_id', productId)
       .eq('is_approved', true)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(from, to);
 
     if (error) {
       console.error('Error fetching comments:', error);
       toast({ variant: 'destructive', title: 'Erro ao carregar comentários.' });
     } else {
-      setComments(data as Comment[]);
+      if (page === 1) {
+        setComments(data as Comment[]);
+      } else {
+        // Para páginas subsequentes, adicionar aos comentários existentes
+        setComments(prev => [...prev, ...(data as Comment[])]);
+      }
     }
     setLoading(false);
-  }, [productId, toast]);
+  }, [productId, toast, commentsPerPage]);
 
   useEffect(() => {
     fetchComments();
@@ -104,10 +129,20 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
       setSelectedRating(5); // Resetar para 5 estrelas
       if (!user) setAuthorName('');
       toast({ title: 'Comentário enviado!', description: 'Seu comentário está aguardando aprovação.' });
-      fetchComments(); 
+      // Resetar para primeira página e recarregar
+      setCurrentPage(1);
+      fetchComments(1); 
     }
     setLoading(false);
   };
+
+  const loadMoreComments = () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    fetchComments(nextPage);
+  };
+
+  const hasMoreComments = comments.length < totalComments;
 
   return (
     <div ref={ref} className="space-y-6">
@@ -222,6 +257,20 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
         ))}
         {comments.length === 0 && !loading && (
           <p className="text-sm text-muted-foreground">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
+        )}
+        
+        {/* Botão Carregar Mais */}
+        {hasMoreComments && comments.length > 0 && (
+          <div className="text-center pt-4">
+            <Button 
+              variant="outline" 
+              onClick={loadMoreComments}
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
+              {loading ? 'Carregando...' : `Carregar mais comentários (${totalComments - comments.length} restantes)`}
+            </Button>
+          </div>
         )}
       </div>
     </div>

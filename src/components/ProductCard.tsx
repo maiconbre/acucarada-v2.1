@@ -1,9 +1,11 @@
+import React, { memo, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProductAnalytics } from "@/hooks/useProductAnalytics";
 import { useToast } from "@/hooks/use-toast";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import type { Json } from '@/integrations/supabase/types';
 
 interface ProductCardProps {
@@ -20,28 +22,28 @@ interface ProductCardProps {
   is_featured: boolean;
 }
 
-const ProductCard = ({ id, name, description, price, image_url, category, is_featured }: ProductCardProps) => {
+const ProductCard = memo(({ id, name, description, price, image_url, category, is_featured }: ProductCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id);
 
-  const handleCardClick = () => {
+  const handleCardClick = useCallback(() => {
     trackClick('view_details', 'catalog');
     navigate(`/produto/${id}`);
-  };
+  }, [id, navigate, trackClick]);
 
-  const handleLikeClick = async (e: React.MouseEvent) => {
+  const handleLikeClick = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     await toggleLike();
     trackClick('like', 'catalog');
-  };
+  }, [toggleLike, trackClick]);
 
-  const handleShareClick = async (e: React.MouseEvent) => {
+  const handleShareClick = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     
     const shareData = {
       title: name,
-      text: `Confira este delicioso ${name} - ${price}`,
+      text: `Confira este delicioso ${name} - R$ ${price.toFixed(2)}`,
       url: `${window.location.origin}/produto/${id}`,
     };
 
@@ -61,7 +63,7 @@ const ProductCard = ({ id, name, description, price, image_url, category, is_fea
     } catch (error) {
       console.error("Erro ao compartilhar:", error);
     }
-  };
+  }, [id, name, price, trackShare, toast]);
 
   return (
     <Card 
@@ -69,14 +71,14 @@ const ProductCard = ({ id, name, description, price, image_url, category, is_fea
       onClick={handleCardClick}
     >
       <div className="relative overflow-hidden">
-        <img
+        <OptimizedImage
           src={image_url}
           alt={name}
           className="w-full h-48 md:h-64 object-cover transition-transform duration-300 group-hover:scale-105"
-          width="400"
-          height="256"
-          loading="lazy"
-          decoding="async"
+          containerClassName="w-full h-48 md:h-64"
+          width={400}
+          height={256}
+          lazy={true}
         />
         <div className="absolute top-3 left-3">
           <span className="bg-primary-soft/90 backdrop-blur-sm text-primary text-xs px-3 py-1 rounded-full font-medium">
@@ -127,6 +129,8 @@ const ProductCard = ({ id, name, description, price, image_url, category, is_fea
       </CardContent>
     </Card>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

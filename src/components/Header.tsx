@@ -1,7 +1,7 @@
 import { MessageCircle, Menu, X, Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppSettings } from "@/hooks/useAppSettings";
 import logoImage from "@/assets/morigote.png";
@@ -12,7 +12,7 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 
-export const Header = () => {
+export const Header = memo(() => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -21,26 +21,26 @@ export const Header = () => {
   const navigate = useNavigate();
   const { getWhatsAppLink } = useAppSettings();
 
-  const handleWhatsAppClick = () => {
+  const handleWhatsAppClick = useCallback(() => {
     const customMessage = "Olá! Gostaria de saber mais sobre os doces da Açucarada 🍫";
     const link = getWhatsAppLink(customMessage);
     window.open(link, '_blank');
     setIsMobileMenuOpen(false);
-  };
+  }, [getWhatsAppLink]);
 
-  const handleMenuItemClick = () => {
+  const handleMenuItemClick = useCallback(() => {
     setIsMobileMenuOpen(false);
-  };
+  }, []);
 
-  const handleSectionClick = (sectionId: string) => {
+  const handleSectionClick = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
     setIsMobileMenuOpen(false);
-  };
+  }, []);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
       navigate(`/catalog?search=${encodeURIComponent(searchTerm.trim())}`);
@@ -48,14 +48,14 @@ export const Header = () => {
       setSearchTerm("");
       setIsMobileMenuOpen(false);
     }
-  };
+  }, [searchTerm, navigate]);
 
-  const handleSearchToggle = () => {
+  const handleSearchToggle = useCallback(() => {
     setIsSearchOpen(!isSearchOpen);
     if (isSearchOpen) {
       setSearchTerm("");
     }
-  };
+  }, [isSearchOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -340,4 +340,6 @@ export const Header = () => {
       </div>
     </header>
   );
-};
+});
+
+Header.displayName = 'Header';
