@@ -4,6 +4,7 @@ import { Heart, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProductAnalytics } from "@/hooks/useProductAnalytics";
 import { useToast } from "@/hooks/use-toast";
+import type { Json } from '@/integrations/supabase/types';
 
 interface ProductCardProps {
   id: string;
@@ -15,7 +16,7 @@ interface ProductCardProps {
   ingredientes?: string;
   validade_armazenamento_dias?: number;
   sabores?: string[];
-  sabor_images?: Record<string, string>;
+  sabor_images?: Json;
   is_featured: boolean;
 }
 

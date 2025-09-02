@@ -11,6 +11,7 @@ import { CommentSection } from "@/components/CommentSection";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSettings } from "@/hooks/useAppSettings";
 import { useProductAnalytics } from "@/hooks/useProductAnalytics";
+import { Json } from "@/integrations/supabase/types";
 
 interface Product {
   id: string;
@@ -22,7 +23,7 @@ interface Product {
   ingredientes?: string;
   validade_armazenamento_dias?: number;
   sabores?: string[];
-  sabor_images?: Record<string, string>;
+  sabor_images?: Json;
   is_featured: boolean;
   is_active: boolean;
 }
@@ -51,7 +52,7 @@ const ProductDetail = () => {
     if (id) {
       fetchProduct();
     }
-  }, [id]);
+  }, [id, fetchProduct]);
 
   // Inicializar imagem ativa quando produto for carregado
   useEffect(() => {
@@ -110,8 +111,9 @@ const ProductDetail = () => {
     setSelectedFlavor(flavor);
     
     // Verificar se existe imagem específica para este sabor
-    if (product?.sabor_images && product.sabor_images[flavor]) {
-      setActiveImage(product.sabor_images[flavor]);
+    const saborImages = product?.sabor_images as Record<string, string> | null;
+    if (saborImages && saborImages[flavor]) {
+      setActiveImage(saborImages[flavor]);
     } else {
       // Voltar para imagem principal se não houver imagem específica
       setActiveImage(product?.image_url || '');
@@ -303,7 +305,7 @@ const ProductDetail = () => {
                           }`}
                         >
                           {sabor}
-                          {product.sabor_images?.[sabor] && (
+                          {(product.sabor_images as Record<string, string> | null)?.[sabor] && (
                             <span className="ml-1 text-xs opacity-70">📸</span>
                           )}
                         </Button>
@@ -361,7 +363,7 @@ const ProductDetail = () => {
                                }`}
                              >
                                {sabor}
-                               {product.sabor_images?.[sabor] && (
+                               {(product.sabor_images as Record<string, string> | null)?.[sabor] && (
                                  <span className="ml-1 text-xs opacity-70">📸</span>
                                )}
                              </Button>
@@ -370,7 +372,7 @@ const ProductDetail = () => {
                          {selectedFlavor && (
                            <p className="text-xs text-purple-600 font-text mt-1">
                              Visualizando: {selectedFlavor}
-                             {product.sabor_images?.[selectedFlavor] && " (com imagem específica)"}
+                             {(product.sabor_images as Record<string, string> | null)?.[selectedFlavor] && " (com imagem específica)"}
                            </p>
                          )}
                       </div>

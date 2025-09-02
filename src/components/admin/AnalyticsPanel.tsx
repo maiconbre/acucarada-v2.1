@@ -140,7 +140,7 @@ const AnalyticsPanel = () => {
       clicksSubscription.unsubscribe();
       sharesSubscription.unsubscribe();
     };
-  }, [sortBy]);
+  }, [sortBy, fetchAnalytics]);
 
   const fetchAnalytics = useCallback(async () => {
     try {

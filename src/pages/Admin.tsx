@@ -14,6 +14,7 @@ import MobileDashboard from "@/components/admin/MobileDashboard";
 import { LogOut, Package, BarChart, Tag, TrendingUp, Settings as SettingsIcon, Menu, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Json } from "@/integrations/supabase/types";
 
 interface Product {
   id: string;
@@ -25,7 +26,7 @@ interface Product {
   ingredientes?: string;
   validade_armazenamento_dias?: number;
   sabores?: string[];
-  sabor_images?: Record<string, string>;
+  sabor_images?: Json;
   is_featured: boolean;
   is_active: boolean;
 }
@@ -49,18 +50,6 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (user) {
-      Promise.all([fetchProducts(), fetchCategories()]).finally(() => setLoading(false));
-    }
-  }, [user]);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -103,6 +92,18 @@ const Admin = () => {
       });
     }
   }, [toast]);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      Promise.all([fetchProducts(), fetchCategories()]).finally(() => setLoading(false));
+    }
+  }, [user, fetchProducts, fetchCategories]);
 
   const handleSignOut = async () => {
     await signOut();
