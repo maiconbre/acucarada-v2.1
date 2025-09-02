@@ -31,7 +31,6 @@ export const Hero = () => {
           width="1920"
           height="1080"
           loading="eager"
-          fetchPriority="high"
           decoding="async"
         />
         <div className="absolute inset-0 bg-background/85" />

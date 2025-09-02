@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "./ProductCard";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ export const ProductGrid = () => {
     fetchFeaturedProducts();
   }, []);
 
-  const fetchFeaturedProducts = async () => {
+  const fetchFeaturedProducts = useCallback(async () => {
     try {
       setError(null);
       
@@ -101,7 +101,32 @@ export const ProductGrid = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const handleGridMode = useCallback(() => setViewMode('grid'), []);
+  const handleListMode = useCallback(() => setViewMode('list'), []);
+
+  // Memoize the products rendering to prevent hooks issues
+  const renderedProducts = useMemo(() => 
+    products.map((product, index) => (
+      <div 
+        key={product.id} 
+        className={`animate-fade-in transition-all duration-300 ${
+          viewMode === 'grid' ? 'hover:scale-105' : 'hover:shadow-lg'
+        }`}
+        style={{animationDelay: `${index * 0.1}s`}}
+      >
+        <ProductCard
+          id={product.id}
+          name={product.name}
+          description={product.description || ""}
+          price={product.price}
+          image_url={product.image_url || ""}
+          category={product.category}
+          is_featured={product.is_featured}
+        />
+      </div>
+    )), [products, viewMode]);
 
   if (loading) {
     return (
@@ -185,7 +210,7 @@ export const ProductGrid = () => {
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setViewMode('grid')}
+                onClick={handleGridMode}
                 className="px-2 md:px-3 order-2 md:order-1 transition-all duration-300 ease-in-out hover:scale-105"
               >
                 <Grid3X3 className="h-3 w-3 md:h-4 md:w-4 transition-transform duration-300 ease-in-out" />
@@ -193,7 +218,7 @@ export const ProductGrid = () => {
               <Button
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setViewMode('list')}
+                onClick={handleListMode}
                 className="px-2 md:px-3 order-1 md:order-2 transition-all duration-300 ease-in-out hover:scale-105"
               >
                 <List className="h-3 w-3 md:h-4 md:w-4 transition-transform duration-300 ease-in-out" />
@@ -208,25 +233,7 @@ export const ProductGrid = () => {
             ? 'grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8' 
             : 'flex flex-col gap-4 max-w-2xl mx-auto'
         }`}>
-          {products.map((product, index) => (
-            <div 
-              key={product.id} 
-              className={`animate-fade-in transition-all duration-300 ${
-                viewMode === 'grid' ? 'hover:scale-105' : 'hover:shadow-lg'
-              }`}
-              style={{animationDelay: `${index * 0.1}s`}}
-            >
-              <ProductCard
-                id={product.id}
-                name={product.name}
-                description={product.description || ""}
-                price={product.price}
-                image_url={product.image_url || ""}
-                category={product.category}
-                is_featured={product.is_featured}
-              />
-            </div>
-          ))}
+          {renderedProducts}
         </div>
       </div>
     </section>
