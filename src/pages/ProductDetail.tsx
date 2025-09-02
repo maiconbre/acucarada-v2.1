@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MessageCircle, Heart, Share2, Eye, Star, Clock, ChefHat, Calendar, Info } from "lucide-react";
+import { ArrowLeft, MessageCircle, Heart, Share2, Eye, Star, ChefHat, Calendar, Info } from "lucide-react";
 import { CommentSection } from "@/components/CommentSection";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSettings } from "@/hooks/useAppSettings";
@@ -38,6 +38,14 @@ const ProductDetail = () => {
   const [selectedFlavor, setSelectedFlavor] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState<string>('');
   const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id || '');
+  const commentSectionRef = useRef<HTMLDivElement>(null);
+
+  const handleCommentClick = () => {
+    commentSectionRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
 
   useEffect(() => {
     if (id) {
@@ -409,6 +417,18 @@ const ProductDetail = () => {
                       </div>
                     </CardContent>
                   </Card>
+
+                  <Card className="border-0 bg-gradient-to-br from-blue-50/80 to-cyan-50/80 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                    onClick={handleCommentClick}
+                  >
+                    <CardContent className="p-3 lg:p-4 text-center">
+                      <MessageCircle className="h-5 w-5 lg:h-6 lg:w-6 mx-auto mb-2 text-blue-600" />
+                      <div className="flex flex-col items-center">
+                        <span className="text-xs lg:text-sm font-semibold text-blue-700">Comentar</span>
+                        <span className="text-xs text-blue-600 font-bold">{analytics.total_comments || 0}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             </div>
@@ -491,7 +511,7 @@ const ProductDetail = () => {
 
 
             
-            <CommentSection productId={product.id} />
+            <CommentSection productId={product.id} ref={commentSectionRef} />
           </div>
         </div>
       </div>

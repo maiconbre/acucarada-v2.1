@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, forwardRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ interface CommentSectionProps {
   productId: string;
 }
 
-export const CommentSection = ({ productId }: CommentSectionProps) => {
+export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({ productId }, ref) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
@@ -137,7 +137,7 @@ export const CommentSection = ({ productId }: CommentSectionProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div ref={ref} className="space-y-6">
       <h3 className="text-xl font-bold font-title">Comentários e Avaliações</h3>
       <Card>
         <CardContent className="p-4">
@@ -260,4 +260,4 @@ export const CommentSection = ({ productId }: CommentSectionProps) => {
       </div>
     </div>
   );
-};
+});

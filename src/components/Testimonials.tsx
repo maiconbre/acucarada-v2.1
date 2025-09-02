@@ -51,12 +51,28 @@ const testimonials: Testimonial[] = [
     userImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face",
     postImage: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhVQLVMCQbCriMECKFs8LZAR-PjHnQRUzhlA&s",
     comment: "Doces artesanais de primeira qualidade! O carinho e dedicação em cada doce é visível. Virei cliente fiel!",
+  },
+  {
+    id: 6,
+    name: "Pedro Almeida",
+    username: "pedroalmeida",
+    userImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face",
+    postImage: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTo-nUpWwTWn0MIIuctIN4JEyt6j5PqWPnSbQ&s",
+    comment: "Os melhores doces que já comi! A variedade é incrível e o sabor é divino. Recomendo a todos!",
+  },
+  {
+    id: 7,
+    name: "Sofia Mendes",
+    username: "sofiamendes",
+    userImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face",
+    postImage: "http://blog.hegapack.com.br/wp-content/uploads/2019/09/descubra-como-faturar-mais-com-doces-artesanais-20190815140307.jpg.jpg",
+    comment: "Perfeitos para qualquer ocasião! Meus convidados amaram e eu também. Com certeza farei novas encomendas.",
   }
 ];
 
 export function Testimonials() {
   const [translateX, setTranslateX] = useState(0);
-  const cardWidth = 340; // Largura de cada card + gap (320 + 20)
+  const cardWidth = 220; // Largura de cada card + gap (200 + 20)
   const totalWidth = testimonials.length * cardWidth;
 
   useEffect(() => {
@@ -90,7 +106,7 @@ export function Testimonials() {
 
       <div className="relative overflow-hidden">
         <div 
-          className="flex gap-5 transition-none"
+          className="flex gap-8 transition-none"
           style={{
             transform: `translateX(${translateX}px)`,
             width: `${totalWidth * 2}px`
@@ -102,45 +118,35 @@ export function Testimonials() {
               className="flex-shrink-0"
               style={{ width: `${cardWidth - 20}px` }}
             >
-              <Card className="overflow-hidden rounded-xl border-border/50 shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
-                <CardContent className="p-0 flex flex-col flex-1">
-                  {/* Post Header */}
-                  <div className="flex items-center p-3">
-                    <img
-                      src={testimonial.userImage}
-                      alt={testimonial.name}
-                      className="w-9 h-9 rounded-full object-cover border-2 border-pink-400/70"
-                    />
-                    <div className="ml-3">
-                      <p className="font-semibold text-sm text-foreground">
-                        {testimonial.username}
-                      </p>
-                    </div>
-                  </div>
+              <Card className="overflow-hidden rounded-xl border-border/50 shadow-sm hover:shadow-lg transition-shadow duration-300 h-96 flex flex-col">
+                <CardContent className="relative h-full w-full p-0">
+                  {/* Post Image - Background */}
+                  <img
+                    src={testimonial.postImage}
+                    alt={`Post by ${testimonial.username}`}
+                    className="absolute inset-0 w-full h-full object-cover rounded-xl"
+                    loading="lazy"
+                  />
 
-                  {/* Post Image */}
-                  <div className="aspect-square bg-gray-100">
-                    <img
-                      src={testimonial.postImage}
-                      alt={`Post by ${testimonial.username}`}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-
-                  {/* Post Actions & Caption */}
-                  <div className="p-3 flex flex-col flex-1">
-                    {/* Action Buttons */}
-                    <div className="flex items-center space-x-4 mb-2">
-                      <Heart className="h-6 w-6 text-foreground/80 hover:text-red-500 cursor-pointer transition-colors" />
+                  {/* Overlay Content */}
+                  <div className="absolute inset-0 flex flex-col justify-between p-4 text-white bg-gradient-to-t from-black/70 via-transparent to-black/30 rounded-xl">
+                    {/* User Info at Top */}
+                    <div className="flex items-center">
+                      <img
+                        src={testimonial.userImage}
+                        alt={testimonial.name}
+                        className="w-8 h-8 rounded-full object-cover border-2 border-white"
+                      />
+                      <div className="ml-2">
+                        <p className="font-semibold text-sm">
+                          {testimonial.username}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Caption */}
-                    <div className="text-sm text-foreground/90 font-text flex-1 min-h-0">
-                      <span className="font-semibold cursor-pointer hover:underline">
-                        {testimonial.username}
-                      </span>
-                      <span className="ml-1.5">{testimonial.comment}</span>
+                    {/* Comment at Bottom */}
+                    <div className="text-sm font-text">
+                      <p className="line-clamp-3">{testimonial.comment}</p>
                     </div>
                   </div>
                 </CardContent>
