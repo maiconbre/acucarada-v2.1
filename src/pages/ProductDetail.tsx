@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, memo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -28,18 +28,98 @@ interface Product {
   is_active: boolean;
 }
 
+interface FlavorButtonProps {
+  sabor: string;
+  isSelected: boolean;
+  onClick: (sabor: string) => void;
+  variant: 'mobile' | 'desktop';
+}
+
+const FlavorButton = memo(({ sabor, isSelected, onClick, variant }: FlavorButtonProps) => {
+  const handleClick = useCallback(() => {
+    onClick(sabor);
+  }, [onClick, sabor]);
+
+  const baseClasses = "font-medium transition-all duration-200";
+  const mobileClasses = `h-6 px-2 text-xs ${baseClasses}`;
+  const desktopClasses = `h-7 px-2.5 text-xs ${baseClasses}`;
+  
+  const selectedClasses = "bg-purple-600 text-white shadow-md scale-105 border-purple-600";
+  const unselectedClasses = "bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-200 hover:border-purple-300";
+
+  return (
+    <Button
+      variant={isSelected ? "default" : "outline"}
+      size="sm"
+      onClick={handleClick}
+      className={`${
+        variant === 'mobile' ? mobileClasses : desktopClasses
+      } ${
+        isSelected ? selectedClasses : unselectedClasses
+      }`}
+    >
+      {sabor}
+    </Button>
+  );
+});
+
+FlavorButton.displayName = 'FlavorButton';
+
+// Componente de skeleton loading
+const ProductDetailSkeleton = () => (
+  <div className="min-h-screen bg-background">
+    <Header />
+    <div className="container mx-auto px-4 py-8 pt-32 md:pt-36">
+      <div className="animate-pulse">
+        {/* Breadcrumb skeleton */}
+        <div className="h-4 bg-gray-200 rounded w-48 mb-8"></div>
+        
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-12">
+          {/* Image skeleton */}
+          <div className="aspect-square bg-gray-200 rounded-lg"></div>
+          
+          {/* Content skeleton */}
+          <div className="space-y-6">
+            <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+            </div>
+            <div className="h-6 bg-gray-200 rounded w-24"></div>
+            <div className="flex gap-2">
+              <div className="h-8 bg-gray-200 rounded w-16"></div>
+              <div className="h-8 bg-gray-200 rounded w-16"></div>
+              <div className="h-8 bg-gray-200 rounded w-16"></div>
+            </div>
+            <div className="h-12 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <Footer />
+  </div>
+);
+
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getWhatsAppLink } = useAppSettings();
-  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState<Product | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
   const [selectedFlavor, setSelectedFlavor] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState<string>('');
+  const [imageTransitioning, setImageTransitioning] = useState(false);
+  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
+  const [imageError, setImageError] = useState(false);
   const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id || '');
   const commentSectionRef = useRef<HTMLDivElement>(null);
+
+  // Scroll automático para o topo ao carregar a página
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [id]); // Executa sempre que o ID do produto mudar
 
   const handleCommentClick = () => {
     commentSectionRef.current?.scrollIntoView({
@@ -86,12 +166,37 @@ const ProductDetail = () => {
     }
   }, [id, fetchProduct]);
 
+  // Memoizar URLs das imagens de sabores para evitar recálculos
+  const saborImageUrls = useMemo(() => {
+    if (!product?.sabor_images) return [];
+    const saborImages = product.sabor_images as Record<string, string> | null;
+    return saborImages ? Object.values(saborImages).filter(Boolean) : [];
+  }, [product?.sabor_images]);
+
   // Inicializar imagem ativa quando produto for carregado
   useEffect(() => {
     if (product) {
       setActiveImage(product.image_url);
     }
   }, [product]);
+
+  // Preload das imagens de sabores para transições mais fluidas
+  useEffect(() => {
+    if (saborImageUrls.length > 0) {
+      saborImageUrls.forEach(imageUrl => {
+        if (!preloadedImages.has(imageUrl)) {
+          const img = new Image();
+          img.src = imageUrl;
+          img.onload = () => {
+            setPreloadedImages(prev => new Set([...prev, imageUrl]));
+          };
+          img.onerror = () => {
+            // Silenciosamente falha se a imagem não carregar
+          };
+        }
+      });
+    }
+  }, [saborImageUrls, preloadedImages]);
 
   const handleWhatsAppOrder = () => {
     if (!product) return;
@@ -107,20 +212,32 @@ const ProductDetail = () => {
     trackClick('like', 'product_detail');
   };
 
-  const handleFlavorClick = (flavor: string) => {
+  const handleFlavorClick = useCallback((flavor: string) => {
+    if (selectedFlavor === flavor) return; // Evita re-render desnecessário
+    
     setSelectedFlavor(flavor);
+    setImageTransitioning(true);
     
     // Verificar se existe imagem específica para este sabor
     const saborImages = product?.sabor_images as Record<string, string> | null;
-    if (saborImages && saborImages[flavor]) {
-      setActiveImage(saborImages[flavor]);
+    
+    const newImage = (saborImages && saborImages[flavor]) 
+      ? saborImages[flavor] 
+      : product?.image_url || '';
+    
+    // Transição suave da imagem apenas se a imagem for diferente
+    if (newImage !== activeImage) {
+      setImageError(false);
+      setTimeout(() => {
+        setActiveImage(newImage);
+        setImageTransitioning(false);
+      }, 150); // Pequeno delay para transição mais suave
     } else {
-      // Voltar para imagem principal se não houver imagem específica
-      setActiveImage(product?.image_url || '');
+      setImageTransitioning(false);
     }
     
     trackClick('flavor_selection', 'product_detail');
-  };
+  }, [selectedFlavor, product?.sabor_images, product?.image_url, activeImage, trackClick]);
 
   const handleShare = async () => {
     if (!product) return;
@@ -157,26 +274,7 @@ const ProductDetail = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8 pt-32 md:pt-36">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="h-96 bg-gray-200 rounded-lg"></div>
-              <div className="space-y-4">
-                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-20 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded w-1/3"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (!product) {
@@ -189,7 +287,7 @@ const ProductDetail = () => {
       
       <div className="container mx-auto px-4 py-8 pt-32 md:pt-36">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 mb-8 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 mb-8 mt-8 text-sm text-muted-foreground">
           <Button
             variant="ghost"
             size="sm"
@@ -221,18 +319,36 @@ const ProductDetail = () => {
                 {imageLoading && (
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse rounded-lg" />
                 )}
+                {imageError && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-gray-500">
+                    <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm">Imagem não disponível</span>
+                  </div>
+                )}
                 <img
                   src={activeImage || product.image_url}
                   alt={`${product.name}${selectedFlavor ? ` - ${selectedFlavor}` : ''}`}
                   className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
-                    imageLoading ? 'opacity-0' : 'opacity-100'
+                    imageLoading || imageError ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
+                  } ${
+                    imageTransitioning ? 'opacity-75 scale-105' : ''
                   }`}
                   width="600"
                   height="600"
                   loading="eager"
                   decoding="async"
-                  onLoad={() => setImageLoading(false)}
-                  onError={() => setImageLoading(false)}
+                  onLoad={() => {
+                  setImageLoading(false);
+                  setImageTransitioning(false);
+                  setImageError(false);
+                }}
+                onError={() => {
+                  setImageLoading(false);
+                  setImageTransitioning(false);
+                  setImageError(true);
+                }}
                 />
                 {/* Overlay gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -293,22 +409,13 @@ const ProductDetail = () => {
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {product.sabores.map((sabor, index) => (
-                        <Button
+                        <FlavorButton
                           key={index}
-                          variant={selectedFlavor === sabor ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => handleFlavorClick(sabor)}
-                          className={`h-6 px-2 text-xs font-medium transition-all duration-200 ${
-                            selectedFlavor === sabor 
-                              ? 'bg-purple-600 text-white shadow-md scale-105 border-purple-600' 
-                              : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-200 hover:border-purple-300'
-                          }`}
-                        >
-                          {sabor}
-                          {(product.sabor_images as Record<string, string> | null)?.[sabor] && (
-                            <span className="ml-1 text-xs opacity-70">📸</span>
-                          )}
-                        </Button>
+                          sabor={sabor}
+                          isSelected={selectedFlavor === sabor}
+                          onClick={handleFlavorClick}
+                          variant="mobile"
+                        />
                       ))}
                     </div>
                   </div>
@@ -351,37 +458,21 @@ const ProductDetail = () => {
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                            {product.sabores.map((sabor, index) => (
-                             <Button
+                             <FlavorButton
                                key={index}
-                               variant={selectedFlavor === sabor ? "default" : "outline"}
-                               size="sm"
-                               onClick={() => handleFlavorClick(sabor)}
-                               className={`h-7 px-2.5 text-xs font-medium transition-all duration-200 ${
-                                 selectedFlavor === sabor 
-                                   ? 'bg-purple-600 text-white shadow-md scale-105 border-purple-600' 
-                                   : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-200 hover:border-purple-300'
-                               }`}
-                             >
-                               {sabor}
-                               {(product.sabor_images as Record<string, string> | null)?.[sabor] && (
-                                 <span className="ml-1 text-xs opacity-70">📸</span>
-                               )}
-                             </Button>
+                               sabor={sabor}
+                               isSelected={selectedFlavor === sabor}
+                               onClick={handleFlavorClick}
+                               variant="desktop"
+                             />
                            ))}
                          </div>
-                         {selectedFlavor && (
-                           <p className="text-xs text-purple-600 font-text mt-1">
-                             Visualizando: {selectedFlavor}
-                             {(product.sabor_images as Record<string, string> | null)?.[selectedFlavor] && " (com imagem específica)"}
-                           </p>
-                         )}
+
                       </div>
                     )}
                   </div>
                   
-                  <p className="text-xs text-muted-foreground font-text">
-                    Ou consulte condições via WhatsApp
-                  </p>
+
                 </div>
               </div>
 

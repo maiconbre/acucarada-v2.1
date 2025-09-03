@@ -48,6 +48,11 @@ const Catalog = () => {
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
+
+  // Scroll automático para o topo ao carregar a página
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []); // Executa apenas uma vez ao montar o componente
   const [page, setPage] = useState(0);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -295,7 +300,7 @@ const Catalog = () => {
     <div className="min-h-screen gradient-soft">
       <Header />
       {/* Header */}
-      <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 pt-24 md:pt-28">
+      <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 pt-24 md:pt-28 md:mt-8">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center mb-6 md:mb-8">
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-title font-bold mb-2 md:mb-4 px-4">

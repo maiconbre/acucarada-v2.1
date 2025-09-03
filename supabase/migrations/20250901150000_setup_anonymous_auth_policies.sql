@@ -22,13 +22,13 @@ FOR SELECT
 USING (auth.uid() = user_id);
 
 -- 4. Política para a tabela `comments`
--- Permite que um usuário leia comentários que já foram aprovados (`is_approved = true`)
--- OU os comentários que ele mesmo criou (mesmo que ainda não aprovados).
+-- Permite que qualquer usuário leia comentários aprovados
+-- Usuários autenticados podem ver seus próprios comentários
 CREATE POLICY "Allow read on approved or own comments"
 ON public.comments
 FOR SELECT
 USING (
-  is_approved = true OR auth.uid() = user_id
+  is_approved = true OR (auth.uid() IS NOT NULL AND auth.uid() = user_id)
 );
 
 -- 5. Concede permissão de SELECT às roles `anon` e `authenticated`.

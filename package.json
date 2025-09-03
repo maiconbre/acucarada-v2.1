@@ -10,7 +10,12 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "tsc && npm run lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "convert:images": "npx tsx scripts/convert-images-to-webp.ts",
+    "convert:setup": "node scripts/setup-image-converter.cjs",
+    "optimize:buckets": "npx tsx scripts/optimize-buckets.ts",
+    "backup:list": "npx tsx -e \"import('./src/lib/backup-manager.ts').then(m => m.backupManager.listBackups('product-images')).then(console.log)\"",
+    "backup:cleanup": "npx tsx -e \"import('./src/lib/backup-manager.ts').then(m => m.cleanupOldBackups('product-images', 30)).then(console.log)\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -71,13 +76,18 @@
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react-swc": "^3.11.0",
     "autoprefixer": "^10.4.21",
+    "dotenv": "^16.4.5",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
     "lovable-tagger": "^1.1.9",
+    "node-fetch": "^3.3.2",
     "postcss": "^8.5.6",
+    "sharp": "^0.33.5",
     "tailwindcss": "^3.4.17",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.5",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vite": "^5.4.19"
