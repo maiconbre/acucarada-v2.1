@@ -24,6 +24,14 @@ import {
   type ProcessedImage,
   type ImageProcessingOptions
 } from '@/lib/image-utils';
+import { 
+  ImageUploadMiddleware,
+  createProductImageUploader,
+  createFlavorImageUploader,
+  createCategoryImageUploader,
+  type UploadResult,
+  type UploadProgress
+} from '@/lib/image-upload-middleware';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -31,6 +39,7 @@ export interface ImageUploadProps {
   value?: string;
   onChange: (url: string) => void;
   onFileChange?: (file: File | null) => void;
+  onUploadComplete?: (result: UploadResult) => void;
   disabled?: boolean;
   className?: string;
   maxFiles?: number;
@@ -39,7 +48,9 @@ export interface ImageUploadProps {
   folder?: string;
   showPreview?: boolean;
   showMetadata?: boolean;
+  showCompressionInfo?: boolean;
   allowMultiple?: boolean;
+  uploadType?: 'product' | 'flavor' | 'category' | 'custom';
 }
 
 interface UploadState {
@@ -54,6 +65,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   value,
   onChange,
   onFileChange,
+  onUploadComplete,
   disabled = false,
   className,
   maxFiles = 1,
@@ -62,7 +74,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   folder = 'products',
   showPreview = true,
   showMetadata = false,
-  allowMultiple = false
+  showCompressionInfo = true,
+  allowMultiple = false,
+  uploadType = 'custom'
 }) => {
   const [uploadState, setUploadState] = useState<UploadState>({
     uploading: false,
@@ -80,6 +94,14 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     type: string;
     name: string;
   } | null>(null);
+  
+  const [compressionInfo, setCompressionInfo] = useState<{
+    originalSize: number;
+    webpSize: number;
+    compressionRatio: number;
+  } | null>(null);
+  
+  const [currentStage, setCurrentStage] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -92,6 +114,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       processedImage: null
     });
     setMetadata(null);
+    setCompressionInfo(null);
+    setCurrentStage('');
   }, []);
 
   const processImage = useCallback(async (file: File): Promise<ProcessedImage> => {
@@ -179,6 +203,36 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   }, [bucketName, folder]);
 
+  // Criar uploader baseado no tipo
+  const createUploader = useCallback(() => {
+    const onProgress = (progress: UploadProgress) => {
+      setCurrentStage(progress.message);
+      setUploadState(prev => ({
+        ...prev,
+        progress: progress.progress,
+        processing: progress.stage !== 'complete',
+        uploading: progress.stage === 'uploading' || progress.stage === 'backup' || progress.stage === 'thumbnail'
+      }));
+    };
+
+    switch (uploadType) {
+      case 'product':
+        return createProductImageUploader(onProgress);
+      case 'flavor':
+        return createFlavorImageUploader(onProgress);
+      case 'category':
+        return createCategoryImageUploader(onProgress);
+      default:
+        return new ImageUploadMiddleware({
+          bucketName,
+          folder,
+          processingOptions,
+          enableBackup: true,
+          generateThumbnail: true
+        }, onProgress);
+    }
+  }, [uploadType, bucketName, folder, processingOptions]);
+
   const handleFileSelect = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     
@@ -186,21 +240,48 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     resetState();
     
     try {
-      const processed = await processImage(file);
-      const url = await uploadToSupabase(processed);
+      const uploader = createUploader();
+      const result = await uploader.uploadImage(file);
       
-      onChange(url);
-      onFileChange?.(processed.file);
+      if (result.success && result.url) {
+        onChange(result.url);
+        onFileChange?.(file);
+        onUploadComplete?.(result);
+        
+        // Atualizar informações de compressão
+        setCompressionInfo({
+          originalSize: result.originalSize,
+          webpSize: result.webpSize,
+          compressionRatio: result.compressionRatio
+        });
+        
+        // Atualizar metadados
+        setMetadata({
+          width: result.metadata.width,
+          height: result.metadata.height,
+          size: result.webpSize,
+          type: 'image/webp',
+          name: result.metadata.fileName
+        });
+        
+        toast({
+          title: "Upload concluído!",
+          description: `Imagem convertida para WebP com ${result.compressionRatio.toFixed(1)}% de economia`
+        });
+      } else {
+        throw new Error(result.error || 'Erro no upload');
+      }
       
     } catch (error) {
       console.error('Erro no upload:', error);
+      setUploadState(prev => ({ ...prev, error: error instanceof Error ? error.message : 'Erro desconhecido' }));
       toast({
         variant: "destructive",
         title: "Erro no upload",
         description: error instanceof Error ? error.message : "Erro desconhecido"
       });
     }
-  }, [processImage, uploadToSupabase, onChange, onFileChange, toast, resetState]);
+  }, [createUploader, onChange, onFileChange, onUploadComplete, toast, resetState]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -272,7 +353,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                 <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
                 <div className="space-y-2">
                   <p className="text-sm font-medium">
-                    {uploadState.processing ? 'Processando imagem...' : 'Enviando...'}
+                    {currentStage || (uploadState.processing ? 'Processando imagem...' : 'Enviando...')}
                   </p>
                   <Progress value={uploadState.progress} className="w-full" />
                   <p className="text-xs text-muted-foreground">
@@ -392,6 +473,42 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                 <span className="text-muted-foreground">Nome:</span>
                 <p className="truncate">{metadata.name}</p>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Informações de Compressão */}
+      {showCompressionInfo && compressionInfo && (
+        <Card>
+          <CardContent className="p-4">
+            <h4 className="text-sm font-medium mb-3">Otimização WebP</h4>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Tamanho original:</span>
+                <span>{(compressionInfo.originalSize / 1024 / 1024).toFixed(2)} MB</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Tamanho WebP:</span>
+                <span className="text-green-600 font-medium">
+                  {(compressionInfo.webpSize / 1024 / 1024).toFixed(2)} MB
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Economia:</span>
+                <span className="text-green-600 font-medium">
+                  {compressionInfo.compressionRatio.toFixed(1)}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${compressionInfo.compressionRatio}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                ✨ Imagem otimizada automaticamente para melhor performance
+              </p>
             </div>
           </CardContent>
         </Card>

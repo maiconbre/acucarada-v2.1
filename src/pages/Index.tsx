@@ -1,7 +1,7 @@
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { Footer } from "@/components/Footer";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { ChefHat } from "lucide-react";
 
 // Lazy load components for better performance
@@ -20,6 +20,11 @@ const SectionLoader = ({ title }: { title: string }) => (
 );
 
 export default function Index() {
+  // Scroll automático para o topo ao carregar a página
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
