@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Instagram, User, Star } from 'lucide-react';
 
@@ -223,35 +223,32 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
       <div className="space-y-4">
         {comments.map((comment) => (
           <Card key={comment.id}>
-            <CardContent className="p-4 flex gap-4">
-              <Avatar>
-                <AvatarFallback>{comment.author_name?.[0].toUpperCase() || 'A'}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <p className="font-semibold">{comment.author_name || 'Anônimo'}</p>
-                        {comment.instagram_handle && (
-                            <a href={`https://instagram.com/${comment.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="text-xs text-pink-500 hover:underline">
-                                @{comment.instagram_handle}
-                            </a>
-                        )}
-                        {/* Exibir Estrelas */}
-                        <div className="flex mt-1">
-                            {[...Array(comment.rating)].map((_, i) => (
-                                <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            ))}
-                            {[...Array(5 - comment.rating)].map((_, i) => (
-                                <Star key={i + comment.rating} className="h-4 w-4 text-gray-300" />
-                            ))}
-                        </div>
-                    </div>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(comment.created_at).toLocaleDateString('pt-BR')}
-                  </p>
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  {comment.instagram_handle && (
+                    <a href={`https://instagram.com/${comment.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-pink-600 hover:text-pink-700 hover:underline">
+                      @{comment.instagram_handle}
+                    </a>
+                  )}
+                  {comment.author_name && !comment.instagram_handle && (
+                    <span className="text-sm font-medium text-gray-700">{comment.author_name}</span>
+                  )}
+                  {/* Exibir Estrelas */}
+                  <div className="flex">
+                    {[...Array(comment.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                    {[...Array(5 - comment.rating)].map((_, i) => (
+                      <Star key={i + comment.rating} className="h-4 w-4 text-gray-300" />
+                    ))}
+                  </div>
                 </div>
-                <p className="text-sm mt-2">{comment.comment}</p>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(comment.created_at).toLocaleDateString('pt-BR')}
+                </p>
               </div>
+              <p className="text-sm text-gray-800">{comment.comment}</p>
             </CardContent>
           </Card>
         ))}

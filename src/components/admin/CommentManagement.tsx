@@ -27,6 +27,12 @@ interface Comment {
   image_url?: string;
   is_approved: boolean;
   created_at: string;
+  product_id: string;
+  product?: {
+    id: string;
+    name: string;
+    image_url?: string;
+  };
 }
 
 const CommentManagement = () => {
@@ -37,7 +43,17 @@ const CommentManagement = () => {
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
-    let query = supabase.from('comments').select('*').order('created_at', { ascending: false });
+    let query = supabase
+      .from('comments')
+      .select(`
+        *,
+        product:products(
+          id,
+          name,
+          image_url
+        )
+      `)
+      .order('created_at', { ascending: false });
 
     if (filter === 'pending') {
       query = query.eq('is_approved', false);
@@ -105,14 +121,37 @@ const CommentManagement = () => {
   const CommentCard = ({ comment }: { comment: Comment }) => (
     <Card>
       <CardContent className="p-4 flex flex-col sm:flex-row gap-4">
+        {/* Informações do Produto */}
+        {comment.product && (
+          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4 sm:mb-0 sm:w-64 flex-shrink-0">
+            {comment.product.image_url && (
+              <img 
+                src={comment.product.image_url} 
+                alt={comment.product.name} 
+                className="w-12 h-12 rounded-lg object-cover"
+                loading="lazy" 
+                decoding="async" 
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {comment.product.name}
+              </p>
+              <p className="text-xs text-gray-500">Produto</p>
+            </div>
+          </div>
+        )}
+        
         <div className="flex-1">
           <div className="flex justify-between items-start mb-2">
-            <div>
-              <p className="font-semibold">{comment.author_name || 'Anônimo'}</p>
+            <div className="flex items-center gap-2">
               {comment.instagram_handle && (
-                <a href={`https://instagram.com/${comment.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="text-xs text-pink-500 hover:underline">
+                <a href={`https://instagram.com/${comment.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-pink-600 hover:text-pink-700 hover:underline">
                   @{comment.instagram_handle}
                 </a>
+              )}
+              {comment.author_name && !comment.instagram_handle && (
+                <span className="text-sm font-medium text-gray-700">{comment.author_name}</span>
               )}
             </div>
             <Badge variant={comment.is_approved ? 'default' : 'destructive'}>
