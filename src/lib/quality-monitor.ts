@@ -504,7 +504,7 @@ class QualityMonitor {
     try {
       const data = localStorage.getItem('webp_quality_metrics');
       if (data) {
-        this.metricsHistory = JSON.parse(data).map((m: any) => ({
+        this.metricsHistory = JSON.parse(data).map((m: QualityMetrics) => ({
           ...m,
           timestamp: new Date(m.timestamp)
         }));

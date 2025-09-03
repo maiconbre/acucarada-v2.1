@@ -91,7 +91,13 @@ class ImageUploadMiddleware {
 
   private async processImage(file: File): Promise<{
     processed: ProcessedImage;
-    metadata: any;
+    metadata: {
+      width: number;
+      height: number;
+      size: number;
+      type: string;
+      name: string;
+    };
     originalSize: number;
   }> {
     this.updateProgress('processing', 20, 'Processando imagem...');
@@ -226,7 +232,7 @@ class ImageUploadMiddleware {
         success: true,
         url,
         thumbnailUrl,
-        backupUrl: backup?.backupUrl,
+        backupUrl: backup?.backupPath,
         originalSize,
         webpSize,
         compressionRatio,

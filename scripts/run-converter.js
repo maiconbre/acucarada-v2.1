@@ -19,11 +19,9 @@ const child = spawn('npx', ['ts-node', scriptPath], {
 
 child.on('close', (code) => {
   if (code === 0) {
-    console.log('
-🎉 Conversão concluída com sucesso!');
+    console.log('\n🎉 Conversão concluída com sucesso!');
   } else {
-    console.log('
-💥 Conversão falhou com código:', code);
+    console.log('\n💥 Conversão falhou com código:', code);
     process.exit(code);
   }
 });
