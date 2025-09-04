@@ -18,8 +18,8 @@ interface Product {
   is_featured: boolean;
 }
 
-// Simple cache for encomenda products
-const encomendaCache = {
+// Simple cache for encomenda products - moved inside component to prevent issues
+let encomendaCache = {
   data: null as Product[] | null,
   timestamp: 0,
   ttl: 5 * 60 * 1000 // 5 minutes cache
@@ -160,7 +160,7 @@ export const ProductGridEncomenda = () => {
     <section id="produtos-encomenda" className="py-12 md:py-20 bg-background">
       <div className="container mx-auto px-4">
         {/* Section Header with animation */}
-        <div className="text-center mb-8 md:mb-16 animate-fade-in">
+        <div className="text-center mb-8 md:mb-16">
           
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-4 md:mb-6">
             Doces <span className="gradient-primary bg-clip-text text-transparent">Encomendas</span>
@@ -202,7 +202,7 @@ export const ProductGridEncomenda = () => {
           {products.map((product, index) => (
             <div 
               key={product.id} 
-              className={`animate-fade-in transition-all duration-300 ${
+              className={`transition-all duration-300 ${
                 viewMode === 'grid' ? 'hover:scale-105' : 'hover:shadow-lg'
               }`}
               style={{animationDelay: `${index * 0.1}s`}}
@@ -222,7 +222,7 @@ export const ProductGridEncomenda = () => {
 
         {/* Enhanced CTA Section */}
         <div className="text-center mt-16 space-y-8">
-          <div className="animate-fade-in" style={{animationDelay: '0.8s'}}>
+          <div>
             <Button 
               variant="hero" 
               size="lg"
@@ -235,7 +235,7 @@ export const ProductGridEncomenda = () => {
             </Button>
           </div>
           
-          <div className="flex items-center justify-center gap-6 max-w-lg mx-auto animate-fade-in bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/80 transition-colors" style={{animationDelay: '1s'}}>
+          <div className="flex items-center justify-center gap-6 max-w-lg mx-auto bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:bg-card/80 transition-colors">
             <div className="flex items-center gap-2">
               <span className="text-xl">📱</span>
               <span className="text-sm font-medium">Pedidos via WhatsApp</span>

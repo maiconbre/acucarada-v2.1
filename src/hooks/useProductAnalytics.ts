@@ -43,68 +43,105 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
   // Use centralized user context
   const { getCurrentUser, getUserIP, getUserAgent } = useUser();
 
-  // Fetch analytics data
+  // Cache para analytics
+  const analyticsCache = useState(() => new Map<string, { data: ProductAnalytics; timestamp: number }>())[0];
+  const CACHE_DURATION = 30000; // 30 segundos
+
+  // Fetch analytics data com cache e timeout reduzido
   const fetchAnalytics = useCallback(async () => {
+    // Verificar cache primeiro
+    const cached = analyticsCache.get(productId);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      setAnalytics(cached.data);
+      setLoading(false);
+      return;
+    }
+
     const timeoutId = setTimeout(() => {
       console.warn('Analytics fetch timeout');
       setLoading(false);
-    }, 10000); // 10 second timeout
+      // Usar dados padrão em caso de timeout
+      setAnalytics({
+        total_likes: 0,
+        total_shares: 0,
+        total_clicks: 0,
+        is_liked: false,
+      });
+    }, 3000); // Reduzido para 3 segundos
 
     try {
       setLoading(true);
       
-      // Get analytics summary
-      const { data: analyticsData, error: analyticsError } = await supabase
-        .from('product_analytics')
-        .select('total_likes, total_shares, total_clicks')
-        .eq('product_id', productId)
-        .limit(1);
+      // Buscar analytics e like status em paralelo para melhor performance
+      const [analyticsResult, currentUser] = await Promise.all([
+        supabase
+          .from('product_analytics')
+          .select('total_likes, total_shares, total_clicks')
+          .eq('product_id', productId)
+          .limit(1),
+        getCurrentUser()
+      ]);
 
+      const { data: analyticsData, error: analyticsError } = analyticsResult;
+      
       if (analyticsError) {
         console.warn('Error fetching analytics:', analyticsError);
-        // Continue with default values instead of throwing
       }
       
       const analytics = analyticsData && analyticsData.length > 0 ? analyticsData[0] : null;
 
-      // Check if user has liked this product
-      const currentUser = await getCurrentUser();
+      // Check if user has liked this product (otimizado)
       let isLiked = false;
-
-      if (currentUser) {
-        const { data: likeData, error: likeError } = await supabase
-          .from('product_likes')
-          .select('id')
-          .eq('product_id', productId)
-          .eq('user_id', currentUser.id)
-          .limit(1);
-        
-        if (likeError) {
-          console.warn('Error checking user like:', likeError);
+      try {
+        if (currentUser) {
+          const { data: likeData } = await supabase
+            .from('product_likes')
+            .select('id')
+            .eq('product_id', productId)
+            .eq('user_id', currentUser.id)
+            .limit(1)
+            .maybeSingle(); // Usar maybeSingle para melhor performance
+          
+          isLiked = !!likeData;
+        } else {
+          const { data: likeData } = await supabase
+            .from('product_likes')
+            .select('id')
+            .eq('product_id', productId)
+            .eq('session_id', sessionId)
+            .limit(1)
+            .maybeSingle();
+          
+          isLiked = !!likeData;
         }
-        isLiked = !!(likeData && likeData.length > 0);
-      } else {
-        const { data: likeData, error: likeError } = await supabase
-          .from('product_likes')
-          .select('id')
-          .eq('product_id', productId)
-          .eq('session_id', sessionId)
-          .limit(1);
-        
-        if (likeError) {
-          console.warn('Error checking session like:', likeError);
-        }
-        isLiked = !!(likeData && likeData.length > 0);
+      } catch (likeError) {
+        console.warn('Error checking like status:', likeError);
+        // Continuar com isLiked = false
       }
 
-      setAnalytics({
+      const finalAnalytics = {
         total_likes: analytics?.total_likes || 0,
         total_shares: analytics?.total_shares || 0,
         total_clicks: analytics?.total_clicks || 0,
         is_liked: isLiked,
+      };
+
+      // Armazenar no cache
+      analyticsCache.set(productId, {
+        data: finalAnalytics,
+        timestamp: Date.now()
       });
+
+      setAnalytics(finalAnalytics);
     } catch (error) {
       console.error('Error fetching analytics:', error);
+      // Fallback para dados padrão
+      setAnalytics({
+        total_likes: 0,
+        total_shares: 0,
+        total_clicks: 0,
+        is_liked: false,
+      });
     } finally {
       clearTimeout(timeoutId);
       setLoading(false);
@@ -221,74 +258,71 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
 
 
   useEffect(() => {
-    if (productId) {
-      fetchAnalytics();
+    if (!productId) return;
+    
+    fetchAnalytics();
 
-      // Set up real-time subscription for analytics updates
-      const analyticsSubscription = supabase
-        .channel(`product_analytics_${productId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'product_analytics',
-            filter: `product_id=eq.${productId}`,
-          },
-          (payload) => {
-            console.log('Analytics updated:', payload);
-            // Refetch analytics when there's a change
-            fetchAnalytics();
-          }
-        )
-        .subscribe();
+    // Set up subscription for analytics
+    const analyticsSubscription = supabase
+      .channel(`product_analytics_${productId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'product_analytics',
+          filter: `product_id=eq.${productId}`,
+        },
+        (payload) => {
+          console.log('Analytics updated:', payload);
+          fetchAnalytics();
+        }
+      )
+      .subscribe();
 
-      // Set up subscription for likes
-      const likesSubscription = supabase
-        .channel(`product_likes_${productId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'product_likes',
-            filter: `product_id=eq.${productId}`,
-          },
-          (payload) => {
-            console.log('Likes updated:', payload);
-            fetchAnalytics();
-          }
-        )
-        .subscribe();
+    // Set up subscription for likes
+    const likesSubscription = supabase
+      .channel(`product_likes_${productId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'product_likes',
+          filter: `product_id=eq.${productId}`,
+        },
+        (payload) => {
+          console.log('Likes updated:', payload);
+          fetchAnalytics();
+        }
+      )
+      .subscribe();
 
-      // Set up subscription for shares
-      const sharesSubscription = supabase
-        .channel(`product_shares_${productId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'product_shares',
-            filter: `product_id=eq.${productId}`,
-          },
-          (payload) => {
-            console.log('Shares updated:', payload);
-            fetchAnalytics();
-          }
-        )
-        .subscribe();
+    // Set up subscription for shares
+    const sharesSubscription = supabase
+      .channel(`product_shares_${productId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'product_shares',
+          filter: `product_id=eq.${productId}`,
+        },
+        (payload) => {
+          console.log('Shares updated:', payload);
+          fetchAnalytics();
+        }
+      )
+      .subscribe();
 
-
-
-      // Cleanup subscriptions on unmount
-      return () => {
-        analyticsSubscription.unsubscribe();
-        likesSubscription.unsubscribe();
-        sharesSubscription.unsubscribe();
-      };
-    }
-  }, [productId, fetchAnalytics]);
+    // Cleanup subscriptions on unmount
+    return () => {
+      analyticsSubscription.unsubscribe();
+      likesSubscription.unsubscribe();
+      sharesSubscription.unsubscribe();
+    };
+  }, [productId]); // Removido fetchAnalytics das dependências para evitar re-renders
 
   return {
     analytics,

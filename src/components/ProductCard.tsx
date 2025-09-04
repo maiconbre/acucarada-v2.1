@@ -25,7 +25,7 @@ interface ProductCardProps {
 const ProductCard = memo(({ id, name, description, price, image_url, category, is_featured }: ProductCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id);
+  const { analytics, toggleLike, trackShare, trackClick, loading: analyticsLoading } = useProductAnalytics(id);
 
   const handleCardClick = useCallback(() => {
     trackClick('view_details', 'catalog');
@@ -67,10 +67,10 @@ const ProductCard = memo(({ id, name, description, price, image_url, category, i
 
   return (
     <Card 
-      className="group overflow-hidden border-0 shadow-soft hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 bg-card/80 backdrop-blur-sm cursor-pointer"
+      className="group overflow-hidden border-0 shadow-soft hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 bg-card/80 backdrop-blur-sm cursor-pointer product-card hover:scale-[1.02] transform-gpu"
       onClick={handleCardClick}
     >
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden transition-all duration-300">
         <OptimizedImage
           src={image_url}
           alt={name}
@@ -104,22 +104,28 @@ const ProductCard = memo(({ id, name, description, price, image_url, category, i
             <Button
               variant="ghost"
               size="sm"
-              className={`p-2 h-8 w-8 md:h-auto md:w-auto md:p-1 transition-colors rounded-full md:rounded-md ${
+              className={`p-2 h-8 w-8 md:h-auto md:w-auto md:p-1 transition-all duration-200 rounded-full md:rounded-md transform hover:scale-110 ${
                 analytics.is_liked ? 'text-red-500 bg-red-50' : 'text-muted-foreground hover:text-red-500 hover:bg-red-50'
               }`}
               onClick={handleLikeClick}
+              disabled={analyticsLoading}
             >
               <Heart className={`h-4 w-4 md:h-4 md:w-4 ${analytics.is_liked ? 'fill-current' : ''}`} />
-              <span className="hidden md:inline ml-1 text-xs">{analytics.total_likes}</span>
+              <span className="hidden md:inline ml-1 text-xs">
+                {analyticsLoading ? '...' : analytics.total_likes || 0}
+              </span>
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="p-2 h-8 w-8 md:h-auto md:w-auto md:p-1 text-muted-foreground hover:text-blue-500 hover:bg-blue-50 transition-colors rounded-full md:rounded-md"
+              className="p-2 h-8 w-8 md:h-auto md:w-auto md:p-1 text-muted-foreground hover:text-blue-500 hover:bg-blue-50 transition-all duration-200 rounded-full md:rounded-md transform hover:scale-110"
               onClick={handleShareClick}
+              disabled={analyticsLoading}
             >
               <Share2 className="h-4 w-4 md:h-4 md:w-4" />
-              <span className="hidden md:inline ml-1 text-xs">{analytics.total_shares}</span>
+              <span className="hidden md:inline ml-1 text-xs">
+                {analyticsLoading ? '...' : analytics.total_shares || 0}
+              </span>
             </Button>
             <span className="text-xs md:text-sm text-muted-foreground font-medium hidden lg:inline">
               Ver detalhes

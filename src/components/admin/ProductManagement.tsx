@@ -184,16 +184,8 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     setLoading(true);
 
     try {
-      // Validação inteligente
-        if (flavors.length === 0) {
-          toast({
-            variant: "destructive",
-            title: "Erro de validação",
-            description: "Adicione pelo menos um sabor para o produto.",
-          });
-          setLoading(false);
-          return;
-        }
+      // Validação inteligente - sabores são opcionais
+        // Removida validação obrigatória de sabores para permitir produtos como bebidas
  
         if (!formData.name.trim()) {
           toast({

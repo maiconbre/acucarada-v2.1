@@ -42,7 +42,7 @@ export const Hero = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center md:text-left md:mx-0 md:max-w-2xl">
           {/* Main Title with improved mobile hierarchy */}
-          <div className="flex flex-col items-center md:items-start animate-slide-up -mt-20 md:-mt-6 py-2">
+          <div className="flex flex-col items-center md:items-start -mt-20 md:-mt-6 py-2">
             <img
           src={logoImage}
           alt="Açucarada"
@@ -55,13 +55,13 @@ export const Hero = () => {
           </div>
 
           {/* Description with better mobile readability */}
-          <p className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto md:mx-0 animate-fade-in font-text" style={{animationDelay: '0.3s'}}>
+          <p className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto md:mx-0 font-text">
             Criamos doces artesanais únicos, feitos com ingredientes selecionados e muito amor. 
             Cada doce é uma pequena obra de arte que desperta os sentidos.
           </p>
 
           {/* CTA Buttons with improved mobile design */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-8 animate-fade-in" style={{animationDelay: '0.6s'}}>
+          <div className="flex flex-col sm:flex-row gap-3 mb-8">
             <Button
               variant="hero"
               size="sm"
@@ -83,7 +83,7 @@ export const Hero = () => {
           </div>
 
           {/* Enhanced trust indicators - Mobile optimized */}
-          <div className="flex justify-center sm:justify-start mt-8 animate-fade-in" style={{animationDelay: '0.9s'}}>
+          <div className="flex justify-center sm:justify-start mt-8">
             <div className="inline-flex items-center justify-center sm:justify-start gap-3 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl px-4 py-2 sm:px-5 sm:py-3 hover:bg-card/80 transition-colors">
               <div className="flex shrink-0">
                 {[...Array(5)].map((_, i) => (

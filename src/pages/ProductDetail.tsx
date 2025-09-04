@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo, memo } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo, memo, lazy, Suspense } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -7,11 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MessageCircle, Heart, Share2, Eye, Star, ChefHat, Calendar, Info } from "lucide-react";
-import { CommentSection } from "@/components/CommentSection";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSettings } from "@/hooks/useAppSettings";
 import { useProductAnalytics } from "@/hooks/useProductAnalytics";
+import { useProductCache } from "@/hooks/useProductCache";
 import { Json } from "@/integrations/supabase/types";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import ErrorBoundary from "@/components/ErrorBoundary";
+
+// Lazy load CommentSection for better performance
+const CommentSection = lazy(() => import("@/components/CommentSection").then(module => ({ default: module.CommentSection })));
 
 interface Product {
   id: string;
@@ -23,7 +28,7 @@ interface Product {
   ingredientes?: string;
   validade_armazenamento_dias?: number;
   sabores?: string[];
-  sabor_images?: Json;
+  sabor_images?: Json | null;
   is_featured: boolean;
   is_active: boolean;
 }
@@ -100,7 +105,7 @@ const ProductDetailSkeleton = () => (
   </div>
 );
 
-const ProductDetail = () => {
+const ProductDetail = memo(() => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -113,7 +118,9 @@ const ProductDetail = () => {
   const [imageTransitioning, setImageTransitioning] = useState(false);
   const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
   const [imageError, setImageError] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id || '');
+  const { getProduct, setProduct: cacheProduct, updateProduct } = useProductCache();
   const commentSectionRef = useRef<HTMLDivElement>(null);
 
   // Scroll automático para o topo ao carregar a página
@@ -129,24 +136,106 @@ const ProductDetail = () => {
   };
 
   const fetchProduct = useCallback(async () => {
+    if (!id) return;
+    
     try {
-      const { data, error } = await supabase
+      // Verificar cache primeiro
+      const cachedProduct = getProduct(id);
+      if (cachedProduct) {
+        setProduct(cachedProduct.data);
+        requestAnimationFrame(() => {
+          setLoading(false);
+          setIsInitialLoad(false);
+        });
+        
+        // Se o cache não está completo, buscar dados adicionais em background
+        if (!cachedProduct.isComplete) {
+          // Remove timeout for immediate background fetch
+          (async () => {
+            try {
+              const { data: fullData, error: fullError } = await supabase
+                .from("products")
+                .select(`
+                  ingredientes,
+                  validade_armazenamento_dias,
+                  sabores,
+                  sabor_images
+                `)
+                .eq("id", id)
+                .single();
+                
+              if (!fullError && fullData) {
+                const completeProduct = { ...cachedProduct.data, ...fullData };
+                setProduct(completeProduct);
+                updateProduct(id, fullData);
+              }
+            } catch (error) {
+              console.error("Erro ao carregar dados adicionais do cache:", error);
+            }
+          })(); // Execute immediately
+        }
+        return;
+      }
+      
+      // Primeira query: apenas campos essenciais para renderização inicial
+      const { data: basicData, error: basicError } = await supabase
         .from("products")
-        .select("*")
+        .select(`
+          id,
+          name,
+          description,
+          price,
+          image_url,
+          category,
+          is_featured,
+          is_active
+        `)
         .eq("id", id)
         .eq("is_active", true)
         .single();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // Produto não encontrado
+      if (basicError) {
+        if (basicError.code === 'PGRST116') {
           navigate("/404");
           return;
         }
-        throw error;
+        throw basicError;
       }
       
-      setProduct(data);
+      // Definir produto com dados básicos primeiro
+      setProduct(basicData);
+      cacheProduct(id, basicData, false); // Salvar no cache
+      
+      // Aguardar um frame para garantir que o produto foi definido antes de remover o loading
+      requestAnimationFrame(() => {
+        setLoading(false);
+        setIsInitialLoad(false);
+      });
+      
+      // Segunda query: campos adicionais (não bloqueante)
+      (async () => {
+        try {
+          const { data: fullData, error: fullError } = await supabase
+            .from("products")
+            .select(`
+              ingredientes,
+              validade_armazenamento_dias,
+              sabores,
+              sabor_images
+            `)
+            .eq("id", id)
+            .single();
+            
+          if (!fullError && fullData) {
+            const completeProduct = { ...basicData, ...fullData };
+            setProduct(completeProduct);
+            cacheProduct(id, completeProduct, true); // Atualizar cache com dados completos
+          }
+        } catch (error) {
+          console.error("Erro ao carregar dados adicionais:", error);
+        }
+      })(); // Execute immediately
+      
     } catch (error) {
       console.error("Erro ao buscar produto:", error);
       toast({
@@ -155,10 +244,9 @@ const ProductDetail = () => {
         description: "Não foi possível carregar o produto.",
       });
       navigate("/catalog");
-    } finally {
       setLoading(false);
     }
-  }, [id, navigate, toast]);
+  }, [id, navigate, toast, getProduct, cacheProduct, updateProduct]);
 
   useEffect(() => {
     if (id) {
@@ -166,11 +254,11 @@ const ProductDetail = () => {
     }
   }, [id, fetchProduct]);
 
-  // Memoizar URLs das imagens de sabores para evitar recálculos
+  // Memoização das URLs de imagens de sabores
   const saborImageUrls = useMemo(() => {
     if (!product?.sabor_images) return [];
     const saborImages = product.sabor_images as Record<string, string> | null;
-    return saborImages ? Object.values(saborImages).filter(Boolean) : [];
+    return saborImages ? Object.values(saborImages) : [];
   }, [product?.sabor_images]);
 
   // Inicializar imagem ativa quando produto for carregado
@@ -180,23 +268,46 @@ const ProductDetail = () => {
     }
   }, [product]);
 
-  // Preload das imagens de sabores para transições mais fluidas
+  // Preload inteligente das imagens de sabores
   useEffect(() => {
     if (saborImageUrls.length > 0) {
-      saborImageUrls.forEach(imageUrl => {
-        if (!preloadedImages.has(imageUrl)) {
-          const img = new Image();
-          img.src = imageUrl;
-          img.onload = () => {
-            setPreloadedImages(prev => new Set([...prev, imageUrl]));
-          };
-          img.onerror = () => {
-            // Silenciosamente falha se a imagem não carregar
-          };
-        }
-      });
+      // Preload apenas a primeira imagem imediatamente
+      const firstImage = saborImageUrls[0];
+      if (firstImage) {
+        const img = new Image();
+        img.onload = () => {
+          setPreloadedImages(prev => new Set(prev).add(firstImage));
+        };
+        img.src = firstImage;
+      }
+      
+      // Preload das outras imagens com delay para não bloquear a renderização
+      const remainingImages = saborImageUrls.slice(1);
+      
+      if (remainingImages.length > 0) {
+        const timeoutId = setTimeout(() => {
+          remainingImages.forEach((url, index) => {
+            setTimeout(() => {
+              const img = new Image();
+              img.onload = () => {
+                setPreloadedImages(prev => {
+                  const newSet = new Set(prev);
+                  newSet.add(url);
+                  return newSet;
+                });
+              };
+              img.onerror = () => {
+                console.warn(`Falha ao carregar imagem de sabor: ${url}`);
+              };
+              img.src = url;
+            }, index * 100); // Reduced delay to 100ms between images
+          });
+        }, 200); // Reduced initial delay to 200ms
+        
+        return () => clearTimeout(timeoutId);
+      }
     }
-  }, [saborImageUrls, preloadedImages]);
+  }, [saborImageUrls]);
 
   const handleWhatsAppOrder = () => {
     if (!product) return;
@@ -228,16 +339,38 @@ const ProductDetail = () => {
     // Transição suave da imagem apenas se a imagem for diferente
     if (newImage !== activeImage) {
       setImageError(false);
-      setTimeout(() => {
-        setActiveImage(newImage);
-        setImageTransitioning(false);
-      }, 150); // Pequeno delay para transição mais suave
+      
+      // Se a imagem já foi precarregada, usar imediatamente
+      if (preloadedImages.has(newImage)) {
+        setTimeout(() => {
+          setActiveImage(newImage);
+          setImageTransitioning(false);
+        }, 50); // Reduced from 150ms to 50ms for faster transitions
+      } else {
+        // Carregar imagem sob demanda com feedback visual
+        setImageLoading(true);
+        const img = new Image();
+        img.onload = () => {
+          setPreloadedImages(prev => new Set(prev).add(newImage));
+          setActiveImage(newImage);
+          setImageLoading(false);
+          setImageTransitioning(false);
+        };
+        img.onerror = () => {
+          setImageTransitioning(false);
+          setImageLoading(false);
+          console.error('Erro ao carregar imagem do sabor:', flavor);
+          // Fallback para imagem principal
+          setActiveImage(product?.image_url || '');
+        };
+        img.src = newImage;
+      }
     } else {
       setImageTransitioning(false);
     }
     
     trackClick('flavor_selection', 'product_detail');
-  }, [selectedFlavor, product?.sabor_images, product?.image_url, activeImage, trackClick]);
+  }, [selectedFlavor, product?.sabor_images, product?.image_url, activeImage, preloadedImages, trackClick]);
 
   const handleShare = async () => {
     if (!product) return;
@@ -282,12 +415,12 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background animate-fade-in">
       <Header />
       
       <div className="container mx-auto px-4 py-8 pt-32 md:pt-36">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 mb-8 mt-8 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 mb-8 mt-8 text-sm text-muted-foreground animate-slide-up" style={{animationDelay: '0.1s'}}>
           <Button
             variant="ghost"
             size="sm"
@@ -311,10 +444,10 @@ const ProductDetail = () => {
         </div>
 
         {/* Conteúdo Principal */}
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 mb-8 lg:mb-12">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 mb-8 lg:mb-12 animate-slide-up" style={{animationDelay: '0.2s'}}>
           {/* Imagem do Produto */}
-          <div className="relative order-1 lg:order-1">
-            <Card className="overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50">
+          <div className="relative order-1 lg:order-1 animate-slide-up" style={{animationDelay: '0.3s'}}>
+            <Card className="overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 hover:shadow-3xl transition-all duration-300">
               <div className="relative aspect-square group">
                 {imageLoading && (
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse rounded-lg" />
@@ -331,9 +464,9 @@ const ProductDetail = () => {
                   src={activeImage || product.image_url}
                   alt={`${product.name}${selectedFlavor ? ` - ${selectedFlavor}` : ''}`}
                   className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
-                    imageLoading || imageError ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
+                    (imageLoading && isInitialLoad) || imageError ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
                   } ${
-                    imageTransitioning ? 'opacity-75 scale-105' : ''
+                    imageTransitioning ? 'opacity-90 scale-105' : ''
                   }`}
                   width="600"
                   height="600"
@@ -343,6 +476,9 @@ const ProductDetail = () => {
                   setImageLoading(false);
                   setImageTransitioning(false);
                   setImageError(false);
+                  if (isInitialLoad) {
+                    setIsInitialLoad(false);
+                  }
                 }}
                 onError={() => {
                   setImageLoading(false);
@@ -368,7 +504,7 @@ const ProductDetail = () => {
                 <div className="absolute top-3 right-3 lg:top-4 lg:right-4">
                   <div className="bg-white/95 backdrop-blur-md rounded-xl px-3 py-2 flex items-center gap-2 shadow-lg border border-white/20">
                     <Star className="h-3 w-3 lg:h-4 lg:w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-xs lg:text-sm font-bold text-gray-800">4.8</span>
+                    <span className="text-xs lg:text-sm font-bold text-gray-800">5</span>
                   </div>
                 </div>
                 
@@ -383,7 +519,7 @@ const ProductDetail = () => {
           </div>
 
           {/* Informações do Produto */}
-          <div className="space-y-4 lg:space-y-6 order-2 lg:order-2">
+          <div className="space-y-4 lg:space-y-6 order-2 lg:order-2 animate-slide-up" style={{animationDelay: '0.4s'}}>
             <div className="space-y-4">
               {/* Badges e Sabores - Layout Responsivo */}
               <div className="space-y-3">
@@ -457,16 +593,16 @@ const ProductDetail = () => {
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
-                           {product.sabores.map((sabor, index) => (
-                             <FlavorButton
-                               key={index}
-                               sabor={sabor}
-                               isSelected={selectedFlavor === sabor}
-                               onClick={handleFlavorClick}
-                               variant="desktop"
-                             />
-                           ))}
-                         </div>
+                          {product.sabores.map((sabor, index) => (
+                            <FlavorButton
+                              key={index}
+                              sabor={sabor}
+                              isSelected={selectedFlavor === sabor}
+                              onClick={handleFlavorClick}
+                              variant="desktop"
+                            />
+                          ))}
+                        </div>
 
                       </div>
                     )}
@@ -480,7 +616,7 @@ const ProductDetail = () => {
                 <Button
                   onClick={handleWhatsAppOrder}
                   size="lg"
-                  className="w-full h-14 lg:h-16 text-base lg:text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] border-0"
+                  className="w-full h-14 lg:h-16 text-base lg:text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] border-0 hover:scale-105"
                 >
                   <MessageCircle className="h-5 w-5 lg:h-6 lg:w-6 mr-3" />
                   <span className="flex flex-col items-start">
@@ -538,7 +674,7 @@ const ProductDetail = () => {
 
 
             {/* Informações do Produto */}
-            <Card className="border-0 bg-gradient-to-br from-muted/30 to-muted/60 shadow-sm">
+            <Card className="border-0 bg-gradient-to-br from-muted/30 to-muted/60 shadow-sm hover:shadow-md transition-all duration-300 animate-slide-up" style={{animationDelay: '0.5s'}}>
               <CardContent className="p-4 lg:p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Info className="h-4 w-4 lg:h-5 lg:w-5 text-rose-primary" />
@@ -576,7 +712,7 @@ const ProductDetail = () => {
 
             {/* Ingredientes - Seção Opcional */}
             {product.ingredientes && (
-              <Card className="border-0 bg-gradient-to-br from-orange-50/50 to-amber-50/50 shadow-sm">
+              <Card className="border-0 bg-gradient-to-br from-orange-50/50 to-amber-50/50 shadow-sm hover:shadow-md transition-all duration-300 animate-slide-up" style={{animationDelay: '0.6s'}}>
                 <CardContent className="p-4 lg:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <ChefHat className="h-4 w-4 lg:h-5 lg:w-5 text-orange-600" />
@@ -591,7 +727,7 @@ const ProductDetail = () => {
 
             {/* Validade - Seção Opcional */}
             {product.validade_armazenamento_dias && (
-              <Card className="border-0 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 shadow-sm">
+              <Card className="border-0 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 shadow-sm hover:shadow-md transition-all duration-300 animate-slide-up" style={{animationDelay: '0.7s'}}>
                 <CardContent className="p-4 lg:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Calendar className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600" />
@@ -614,7 +750,17 @@ const ProductDetail = () => {
 
 
             
-            <CommentSection productId={product.id} ref={commentSectionRef} />
+            <div className="animate-slide-up" style={{animationDelay: '0.8s'}}>
+              <ErrorBoundary>
+                <Suspense fallback={
+                  <div className="py-8">
+                    <LoadingSpinner size="md" text="Carregando comentários..." />
+                  </div>
+                }>
+                  <CommentSection productId={product.id} ref={commentSectionRef} />
+                </Suspense>
+              </ErrorBoundary>
+            </div>
           </div>
         </div>
       </div>
@@ -622,6 +768,8 @@ const ProductDetail = () => {
       <Footer />
     </div>
   );
-};
+});
+
+ProductDetail.displayName = 'ProductDetail';
 
 export default ProductDetail;

@@ -219,7 +219,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     } else {
       clearCache();
     }
-  }, [user, fetchProfile, clearCache]);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value: UserContextType = {
     user,

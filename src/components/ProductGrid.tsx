@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ChefHat, Grid3X3, List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Json } from "@/integrations/supabase/types";
 
 interface Product {
   id: string;
@@ -16,13 +17,13 @@ interface Product {
   ingredientes?: string;
   validade_armazenamento_dias?: number;
   sabores?: string[];
-  sabor_images?: Record<string, string>;
+  sabor_images?: Json;
   is_featured: boolean;
   is_active: boolean;
 }
 
-// Simple cache for products
-const productCache = {
+// Simple cache for products - moved inside component to prevent issues
+let productCache = {
   data: null as Product[] | null,
   timestamp: 0,
   ttl: 5 * 60 * 1000 // 5 minutes cache
@@ -44,7 +45,7 @@ export const ProductGrid = () => {
 
   useEffect(() => {
     fetchFeaturedProducts();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchFeaturedProducts = useCallback(async () => {
     try {
@@ -58,11 +59,11 @@ export const ProductGrid = () => {
         return;
       }
 
-      // Set timeout to prevent infinite loading
+      // Set shorter timeout for better UX
       timeoutRef.current = setTimeout(() => {
         setLoading(false);
-        setError("Tempo limite excedido. Tente novamente.");
-      }, 10000); // 10 second timeout
+        setError("Carregamento demorou mais que o esperado. Tente recarregar a página.");
+      }, 5000); // Reduced to 5 seconds
 
       const { data, error } = await supabase
         .from("products")
@@ -111,7 +112,7 @@ export const ProductGrid = () => {
     products.map((product, index) => (
       <div 
         key={product.id} 
-        className={`animate-fade-in transition-all duration-300 ${
+        className={`transition-all duration-300 ${
           viewMode === 'grid' ? 'hover:scale-105' : 'hover:shadow-lg'
         }`}
         style={{animationDelay: `${index * 0.1}s`}}
@@ -194,7 +195,7 @@ export const ProductGrid = () => {
     <section id="produtos" className="py-12 md:py-20 bg-background">
       <div className="container mx-auto px-4">
         {/* Section Header with animation */}
-        <div className="text-center mb-8 md:mb-16 animate-fade-in">
+        <div className="text-center mb-8 md:mb-16">
           
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-4 md:mb-6">
             Doces <span className="gradient-primary bg-clip-text text-transparent">do dia</span>

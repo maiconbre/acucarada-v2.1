@@ -58,15 +58,17 @@ export const Header = memo(() => {
   }, [isSearchOpen]);
 
   useEffect(() => {
+    let lastScrollYRef = lastScrollY;
+    
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       const isMobile = window.innerWidth < 768; // md breakpoint
       
       if (isMobile) {
-        if (currentScrollY < lastScrollY || currentScrollY < 10) {
+        if (currentScrollY < lastScrollYRef || currentScrollY < 10) {
           // Scrolling up or near top
           setIsHeaderVisible(true);
-        } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        } else if (currentScrollY > lastScrollYRef && currentScrollY > 100) {
           // Scrolling down and past threshold
           setIsHeaderVisible(false);
           setIsMobileMenuOpen(false); // Close mobile menu when hiding
@@ -76,6 +78,7 @@ export const Header = memo(() => {
         setIsHeaderVisible(true);
       }
       
+      lastScrollYRef = currentScrollY;
       setLastScrollY(currentScrollY);
     };
 
@@ -93,7 +96,8 @@ export const Header = memo(() => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
     };
-  }, [lastScrollY]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <header className={`border-b border-brown-primary/30 fixed top-0 left-0 right-0 z-50 backdrop-blur-sm transition-transform duration-300 ease-in-out ${
