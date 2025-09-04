@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Filter, Grid3X3, List, Star, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Json } from "@/integrations/supabase/types";
 
 interface Product {
   id: string;
@@ -19,7 +20,7 @@ interface Product {
   ingredientes?: string;
   validade_armazenamento_dias?: number;
   sabores?: string[];
-  sabor_images?: Record<string, string>;
+  sabor_images?: Json;
   is_featured: boolean;
   is_active: boolean;
 }
@@ -31,7 +32,7 @@ interface Category {
   is_active: boolean;
 }
 
-// Cache for products and categories
+// Cache for products and categories - moved inside component to prevent issues
 const catalogCache = {
   products: { data: null as Product[] | null, timestamp: 0, ttl: 3 * 60 * 1000 }, // 3 minutes
   categories: { data: null as Category[] | null, timestamp: 0, ttl: 10 * 60 * 1000 } // 10 minutes
@@ -94,7 +95,7 @@ const Catalog = () => {
         clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [searchTerm, selectedCategory, priceRange, showReadyDelivery]);
+  }, [searchTerm, selectedCategory, priceRange, showReadyDelivery]); // Mantido as dependências necessárias
 
 
 

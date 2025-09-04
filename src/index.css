@@ -36,8 +36,52 @@
   font-display: swap;
 }
 
+/* Performance Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* Mobile Admin Optimizations */
 @layer utilities {
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.8s ease-out;
+  }
+  
+  .animate-slide-in-right {
+    animation: slide-in-right 0.6s ease-out;
+  }
+  
   .h-safe-area-inset-bottom {
     height: env(safe-area-inset-bottom);
   }
@@ -294,16 +338,23 @@
     transition: var(--transition-bounce);
   }
 
-  /* Hero Animations */
+  /* Hero Animations with fallback visibility */
   .animate-fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
+    animation: fadeIn 0.6s ease-out forwards, fallbackVisible 0s 2s forwards;
     opacity: 0;
   }
 
   .animate-slide-up {
-    animation: slideUp 0.8s ease-out forwards;
+    animation: slideUp 0.8s ease-out forwards, fallbackVisible 0s 2s forwards;
     opacity: 0;
     transform: translateY(30px);
+  }
+
+  @keyframes fallbackVisible {
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .animate-float {
@@ -389,6 +440,39 @@
     transform: translateZ(0);
   }
 
+  /* Smooth transitions for all interactive elements */
+  button, .btn, [role="button"] {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Smooth transitions for cards and interactive elements */
+  .card, .product-card, [data-card] {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Loading state transitions */
+  .loading-enter {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .loading-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  }
+
+  .loading-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .loading-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+  }
+
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
@@ -415,6 +499,8 @@
       .animate-pulse,
       .animate-bounce {
         animation: none;
+        opacity: 1 !important;
+        transform: none !important;
       }
       
       .hover\:scale-105:hover,

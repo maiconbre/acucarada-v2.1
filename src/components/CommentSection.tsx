@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, forwardRef } from 'react';
+import { useState, useEffect, useCallback, forwardRef, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -31,19 +31,50 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
   const [instagramHandle, setInstagramHandle] = useState('');
 
   const [loading, setLoading] = useState(false);
-  const [selectedRating, setSelectedRating] = useState(5); // Inicializado com 5 estrelas
-  const [hoverRating, setHoverRating] = useState(0); // Novo estado para o efeito de hover
+  const [selectedRating, setSelectedRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   
   // Paginação para otimizar performance
   const [currentPage, setCurrentPage] = useState(1);
   const [totalComments, setTotalComments] = useState(0);
-  const commentsPerPage = 5; // Limitar a 5 comentários por página
+  const commentsPerPage = 5;
+  
+  const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user?.user_metadata.username) {
       setAuthorName(user.user_metadata.username);
     }
   }, [user]);
+
+  // Intersection Observer para lazy loading
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasLoadedOnce) {
+          setIsVisible(true);
+          setHasLoadedOnce(true);
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '100px'
+      }
+    );
+
+    const currentRef = sectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasLoadedOnce]);
 
   const fetchComments = useCallback(async (page = 1) => {
     setLoading(true);
@@ -88,11 +119,13 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
       }
     }
     setLoading(false);
-  }, [productId, toast, commentsPerPage]);
+  }, [productId, toast]);
 
   useEffect(() => {
-    fetchComments();
-  }, [fetchComments]);
+    if (isVisible) {
+      fetchComments();
+    }
+  }, [isVisible]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
@@ -146,8 +179,20 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
 
   return (
     <div ref={ref} className="space-y-6">
-      <h3 className="text-xl font-bold font-title">Comentários e Avaliações</h3>
-      <Card>
+      <div ref={sectionRef}>
+        <h3 className="text-xl font-bold font-title">Comentários e Avaliações</h3>
+      </div>
+      
+      {!isVisible ? (
+        <div className="text-center py-8">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-48 mx-auto mb-4"></div>
+            <div className="h-3 bg-gray-200 rounded w-32 mx-auto"></div>
+          </div>
+        </div>
+      ) : (
+        <>
+        <Card>
         <CardContent className="p-4">
           <div className="space-y-4">
             <Textarea
@@ -270,6 +315,8 @@ export const CommentSection = forwardRef<HTMLDivElement, CommentSectionProps>(({
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 });

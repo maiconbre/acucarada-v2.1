@@ -1,23 +1,13 @@
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { Footer } from "@/components/Footer";
-import { lazy, Suspense, useEffect } from "react";
-import { ChefHat } from "lucide-react";
+import { useEffect } from "react";
+import { ProductGrid } from "@/components/ProductGrid";
+import { ProductGridEncomenda } from "@/components/ProductGridEncomenda";
+import { Testimonials } from "@/components/Testimonials";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
-// Lazy load components for better performance
-const ProductGrid = lazy(() => import("@/components/ProductGrid").then(module => ({ default: module.ProductGrid })));
-const ProductGridEncomenda = lazy(() => import("@/components/ProductGridEncomenda").then(module => ({ default: module.ProductGridEncomenda })));
-const Testimonials = lazy(() => import("@/components/Testimonials").then(module => ({ default: module.Testimonials })));
 
-// Loading component for lazy-loaded sections
-const SectionLoader = ({ title }: { title: string }) => (
-  <div className="py-20 flex items-center justify-center">
-    <div className="text-center">
-      <ChefHat className="h-12 w-12 text-rose-primary mx-auto mb-4 animate-pulse" />
-      <p className="text-muted-foreground">Carregando {title}...</p>
-    </div>
-  </div>
-);
 
 export default function Index() {
   // Scroll automático para o topo ao carregar a página
@@ -32,17 +22,17 @@ export default function Index() {
         <Hero />
       </div>
       
-      <Suspense fallback={<SectionLoader title="produtos" />}>
+      <ErrorBoundary>
         <ProductGrid />
-      </Suspense>
+      </ErrorBoundary>
       
-      <Suspense fallback={<SectionLoader title="encomendas" />}>
+      <ErrorBoundary>
         <ProductGridEncomenda />
-      </Suspense>
+      </ErrorBoundary>
       
-      <Suspense fallback={<SectionLoader title="depoimentos" />}>
+      <ErrorBoundary>
         <Testimonials />
-      </Suspense>
+      </ErrorBoundary>
       
       
       <Footer />
