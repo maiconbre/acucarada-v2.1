@@ -23,7 +23,7 @@ interface Product {
 }
 
 // Simple cache for products - moved inside component to prevent issues
-let productCache = {
+const productCache = {
   data: null as Product[] | null,
   timestamp: 0,
   ttl: 5 * 60 * 1000 // 5 minutes cache

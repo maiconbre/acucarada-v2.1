@@ -19,7 +19,7 @@ interface Product {
 }
 
 // Simple cache for encomenda products - moved inside component to prevent issues
-let encomendaCache = {
+const encomendaCache = {
   data: null as Product[] | null,
   timestamp: 0,
   ttl: 5 * 60 * 1000 // 5 minutes cache

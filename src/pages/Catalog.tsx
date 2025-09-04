@@ -33,7 +33,7 @@ interface Category {
 }
 
 // Cache for products and categories - moved inside component to prevent issues
-let catalogCache = {
+const catalogCache = {
   products: { data: null as Product[] | null, timestamp: 0, ttl: 3 * 60 * 1000 }, // 3 minutes
   categories: { data: null as Category[] | null, timestamp: 0, ttl: 10 * 60 * 1000 } // 10 minutes
 };
