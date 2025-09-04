@@ -67,7 +67,7 @@ const Catalog = () => {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const searchQuery = searchParams.get('search');

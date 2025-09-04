@@ -146,7 +146,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
       clearTimeout(timeoutId);
       setLoading(false);
     }
-  }, [productId, sessionId, getCurrentUser]);
+  }, [productId, sessionId, getCurrentUser, analyticsCache]);
 
   // Toggle like
   const toggleLike = async () => {
@@ -322,7 +322,7 @@ export const useProductAnalytics = (productId: string): UseProductAnalyticsRetur
       likesSubscription.unsubscribe();
       sharesSubscription.unsubscribe();
     };
-  }, [productId]); // Removido fetchAnalytics das dependências para evitar re-renders
+  }, [productId, fetchAnalytics]);
 
   return {
     analytics,

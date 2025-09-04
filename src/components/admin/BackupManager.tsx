@@ -3,13 +3,11 @@
  * Permite visualizar, restaurar e limpar backups
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 import { 
   backupManager, 
   BackupInfo, 
@@ -51,12 +49,7 @@ const BackupManager: React.FC<BackupManagerProps> = ({
   const [cleaning, setCleaning] = useState(false);
   const [selectedBackups, setSelectedBackups] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    loadBackups();
-    loadStats();
-  }, [bucket]);
-
-  const loadBackups = async () => {
+  const loadBackups = useCallback(async () => {
     try {
       setLoading(true);
       const backupList = await backupManager.listBackups(bucket);
@@ -67,16 +60,21 @@ const BackupManager: React.FC<BackupManagerProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [bucket]);
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       const backupStats = await getBackupStatistics(bucket);
       setStats(backupStats);
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error);
     }
-  };
+  }, [bucket]);
+
+  useEffect(() => {
+    loadBackups();
+    loadStats();
+  }, [bucket, loadBackups, loadStats]);
 
   const handleRestore = async (backup: BackupInfo) => {
     try {
