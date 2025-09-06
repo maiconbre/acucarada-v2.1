@@ -11,7 +11,7 @@ export const Hero = () => {
   const { getWhatsAppLink } = useAppSettings();
   
   const handleOrderClick = () => {
-    const customMessage = "Olá! Gostaria de fazer um pedido dos doces da Açucarada 🍫✨";
+    const customMessage = "Olá! Gostaria de fazer um pedido dos doces da Açucarada :)";
     const link = getWhatsAppLink(customMessage);
     window.open(link, '_blank');
   };
