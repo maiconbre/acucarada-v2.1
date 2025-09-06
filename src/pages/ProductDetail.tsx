@@ -6,10 +6,11 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MessageCircle, Heart, Share2, Star, ChefHat, Calendar, Info, Clock, Utensils, Sparkles, ShoppingBag } from "lucide-react";
+import { ArrowLeft, MessageCircle, Heart, Share2, Star, ChefHat, Calendar, Info, Clock, Utensils, Sparkles, ShoppingBag, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSettings } from "@/hooks/useAppSettings";
 import { useProductAnalytics } from "@/hooks/useProductAnalytics";
+import { useCart } from "@/contexts/cart-context";
 import { Json } from "@/integrations/supabase/types";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -111,6 +112,7 @@ const ProductDetail = () => {
 
   const { getWhatsAppLink } = useAppSettings();
   const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id || '');
+  const { addItem } = useCart();
   const commentSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -197,6 +199,29 @@ const ProductDetail = () => {
     const customMessage = `Olá! Gostaria de encomendar:\n\n🍫 *${product.name}*\n💰 ${formatPrice(product.price)}\n\nPoderia me dar mais informações sobre disponibilidade e entrega?`;
     const link = getWhatsAppLink(customMessage);
     window.open(link, '_blank');
+  };
+
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    // Se o produto tem sabores e nenhum foi selecionado, mostrar aviso
+    if (product.sabores && product.sabores.length > 0 && !selectedFlavor) {
+      toast({
+        variant: "destructive",
+        title: "Selecione um sabor",
+        description: "Por favor, selecione um sabor antes de adicionar ao carrinho.",
+      });
+      return;
+    }
+
+    trackClick('add_to_cart', 'product_detail');
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      flavor: selectedFlavor || undefined,
+      image_url: product.image_url,
+    });
   };
 
   const handleLikeClick = async () => {
@@ -306,10 +331,33 @@ const ProductDetail = () => {
       <Header />
 
       <div className="container mx-auto px-4 py-8 pt-32">
+        {/* Header mobile com botão voltar, nome e preço */}
+        <div className="flex items-start justify-between mb-6 lg:hidden">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/catalog')}
+            className="text-muted-foreground hover:text-foreground p-2 -ml-2 flex items-center"
+          >
+            <ArrowLeft className="h-5 w-5 mr-1" />
+            <span className="text-sm">Voltar</span>
+          </Button>
+          
+          <div className="flex-1 px-2">
+            <h1 className="text-xl font-bold text-brown-primary font-title leading-tight">{product.name}</h1>
+            <div className="flex items-center mt-1">
+              <Star className="h-4 w-4 text-yellow-500 mr-1" />
+              <p className="text-lg font-bold text-rose-primary">
+                {formatPrice(product.price)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Botão voltar para desktop */}
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="mb-6 text-muted-foreground hover:text-foreground"
+          className="mb-6 text-muted-foreground hover:text-foreground hidden lg:flex"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
@@ -317,7 +365,7 @@ const ProductDetail = () => {
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           <div className="space-y-4">
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden lg:w-[100%] lg:mx-auto">
               <div className="relative aspect-square overflow-hidden">
                 {/* Imagem principal */}
                 <img
@@ -367,89 +415,9 @@ const ProductDetail = () => {
               </div>
             </Card>
 
-            {product.sabores && product.sabores.length > 0 && (
-              <Card className="border-rose-300 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-cream-500/20 to-rose-50">
-                <CardContent className="p-4">
-                  <div className="flex items-center mb-4">
-                    <ChefHat className="h-5 w-5 text-rose-primary mr-4" />
-                    <h3 className="font-bold text-lg text-brown-primary">Sabores Disponíveis</h3>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
-                    {product.sabores.map((sabor, index) => (
-                      <FlavorButton
-                        key={index}
-                        sabor={sabor}
-                        isSelected={selectedFlavor === sabor}
-                        onClick={handleFlavorClick}
-                        variant="mobile"
-                        disabled={imageLoading}
-                      />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-cream-500/20 to-rose-50 rounded-xl p-6 border border-rose-200">
-              <h1 className="text-3xl md:text-4xl font-bold mb-3 text-brown-primary font-title">{product.name}</h1>
-              <div className="flex items-center mb-4">
-                <Star className="h-5 w-5 text-yellow-500 mr-2" />
-                <p className="text-2xl md:text-3xl font-bold text-rose-primary">
-                  {formatPrice(product.price)}
-                </p>
-              </div>
-              <p className="text-brown-600 leading-relaxed text-lg">{product.description}</p>
-            </div>
-
-            <div className="space-y-6">
-              <Button
-                onClick={handleWhatsAppOrder}
-                size="lg"
-                className="w-full h-14 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 rounded-xl border-2 border-green-400 hover:border-green-500"
-              >
-                <ShoppingBag className="h-6 w-6 mr-3" />
-                Pedir pelo WhatsApp
-                <span className="ml-2 text-sm opacity-90">🍫</span>
-              </Button>
-
-              <div className="grid grid-cols-3 gap-4">
-                <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105 border-rose-200 bg-gradient-to-br from-cream-500/10 to-rose-50" onClick={handleShare}>
-                  <CardContent className="p-4 text-center">
-                    <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-full p-3 mx-auto mb-2 w-fit">
-                      <Share2 className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <span className="text-sm font-medium text-brown-primary">Compartilhar</span>
-                  </CardContent>
-                </Card>
-
-                <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105 border-rose-200 bg-gradient-to-br from-cream-500/10 to-rose-50" onClick={handleLikeClick}>
-                  <CardContent className="p-4 text-center">
-                    <div className={`rounded-full p-3 mx-auto mb-2 w-fit transition-all duration-300 ${analytics.is_liked
-                      ? 'bg-gradient-to-br from-rose-100 to-rose-200'
-                      : 'bg-gradient-to-br from-gray-100 to-gray-200'
-                      }`}>
-                      <Heart className={`h-5 w-5 transition-all duration-300 ${analytics.is_liked ? 'fill-current text-rose-primary' : 'text-gray-600'
-                        }`} />
-                    </div>
-                    <span className="text-sm font-medium text-brown-primary">Curtir</span>
-                  </CardContent>
-                </Card>
-
-                <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105 border-rose-200 bg-gradient-to-br from-cream-500/10 to-rose-50" onClick={handleCommentClick}>
-                  <CardContent className="p-4 text-center">
-                    <div className="bg-gradient-to-br from-rose-100 to-rose-200 rounded-full p-3 mx-auto mb-2 w-fit">
-                      <MessageCircle className="h-5 w-5 text-rose-primary" />
-                    </div>
-                    <span className="text-sm font-medium text-brown-primary">Comentar</span>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
+            {/* Informações do Produto - aparecem abaixo da imagem apenas em desktops */}
             {(product.ingredientes || product.validade_armazenamento_dias) && (
-              <Card className="border-brown-300 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-cream-500/30 to-brown-100">
+              <Card className="bg-gradient-to-br from-cream-500/20 to-rose-50 border-rose-200 hidden lg:block">
                 <CardContent className="p-6">
                   <div className="flex items-center mb-5">
                     <Info className="h-6 w-6 text-brown-primary mr-3" />
@@ -485,8 +453,111 @@ const ProductDetail = () => {
                 </CardContent>
               </Card>
             )}
+          </div>
 
-            <div ref={commentSectionRef}>
+          <div className="flex flex-col space-y-6 lg:block lg:space-y-6">
+            {/* Header desktop com nome, preço e descrição */}
+            <div className="bg-gradient-to-br from-cream-500/20 to-rose-50 rounded-xl p-6 border border-rose-200 hidden lg:block order-1">
+              <h1 className="text-3xl md:text-4xl font-bold mb-3 text-brown-primary font-title">{product.name}</h1>
+              <div className="flex items-center mb-4">
+                <p className="text-2xl md:text-3xl font-bold text-rose-primary">
+                  {formatPrice(product.price)}
+                </p>
+              </div>
+              <p className="text-brown-600 leading-relaxed text-lg">{product.description}</p>
+            </div>
+
+            {/* Sabores - aparecem antes dos botões */}
+            {product.sabores && product.sabores.length > 0 && (
+              <Card className="border-rose-300 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-cream-500/20 to-rose-50 order-2 lg:order-2">
+                <CardContent className="p-4">
+                  <div className="flex items-center mb-4">
+                    <ChefHat className="h-5 w-5 text-rose-primary mr-4" />
+                    <h3 className="font-bold text-lg text-brown-primary">Sabores Disponíveis</h3>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 gap-2 sm:gap-3">
+                    {product.sabores.map((sabor, index) => (
+                      <FlavorButton
+                        key={index}
+                        sabor={sabor}
+                        isSelected={selectedFlavor === sabor}
+                        onClick={handleFlavorClick}
+                        variant="desktop"
+                        disabled={imageLoading}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Botões de Ação - aparecem após os sabores */}
+            <div className="space-y-6 order-3 lg:order-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Button
+                  onClick={handleAddToCart}
+                  size="lg"
+                  className="w-full h-14 sm:h-12 md:h-16 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-base sm:text-sm md:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 rounded-xl border-2 border-rose-400 hover:border-rose-500"
+                >
+                  <ShoppingCart className="h-5 w-5 sm:h-4 sm:w-4 md:h-6 md:w-6 mr-2 sm:mr-1 md:mr-3" />
+                  <span className="hidden sm:inline">Adicionar ao Carrinho</span>
+                  <span className="sm:hidden">Adicionar ao Carrinho</span>
+                </Button>
+                
+                <Button
+                  onClick={handleWhatsAppOrder}
+                  size="lg"
+                  className="w-full h-14 sm:h-12 md:h-16 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-base sm:text-sm md:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 rounded-xl border-2 border-green-400 hover:border-green-500"
+                >
+                  <ShoppingBag className="h-5 w-5 sm:h-4 sm:w-4 md:h-6 md:w-6 mr-2 sm:mr-1 md:mr-3" />
+                  <span className="hidden sm:inline">Pedir pelo WhatsApp</span>
+                  <span className="sm:hidden">Pedir pelo WhatsApp</span>
+                </Button>
+              </div>
+
+
+
+            {/* Botões secundários - aparecem após os botões de ação */}
+            <div className="order-4 lg:order-4">
+              <div className="grid grid-cols-3 gap-4">
+                <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105 border-rose-200 bg-gradient-to-br from-cream-500/10 to-rose-50" onClick={handleShare}>
+                  <CardContent className="p-4 text-center">
+                    <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-full p-3 mx-auto mb-2 w-fit">
+                      <Share2 className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <span className="text-sm font-medium text-brown-primary">Compartilhar</span>
+                  </CardContent>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105 border-rose-200 bg-gradient-to-br from-cream-500/10 to-rose-50" onClick={handleCommentClick}>
+                  <CardContent className="p-4 text-center">
+                    <div className="bg-gradient-to-br from-rose-100 to-rose-200 rounded-full p-3 mx-auto mb-2 w-fit">
+                      <MessageCircle className="h-5 w-5 text-rose-primary" />
+                    </div>
+                    <span className="text-sm font-medium text-brown-primary">Comentar</span>
+                  </CardContent>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105 border-rose-200 bg-gradient-to-br from-cream-500/10 to-rose-50" onClick={handleLikeClick}>
+                  <CardContent className="p-4 text-center">
+                    <div className={`rounded-full p-3 mx-auto mb-2 w-fit transition-all duration-300 ${
+                      analytics.is_liked
+                        ? 'bg-gradient-to-br from-rose-100 to-rose-200'
+                        : 'bg-gradient-to-br from-gray-100 to-gray-200'
+                      }`}>
+                      <Heart className={`h-5 w-5 transition-all duration-300 ${
+                        analytics.is_liked ? 'fill-current text-rose-primary' : 'text-gray-600'
+                        }`} />
+                    </div>
+                    <span className="text-sm font-medium text-brown-primary">Curtir</span>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+
+
+            <div ref={commentSectionRef} className="order-5 lg:order-5">
               <ErrorBoundary>
                 <Suspense fallback={<LoadingSpinner size="md" />}>
                   <CommentSection productId={product.id} />
@@ -495,6 +566,7 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
       <Footer />
     </div>
