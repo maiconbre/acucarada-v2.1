@@ -133,26 +133,33 @@ export const CartProvider = ({ children }: CartProviderProps) => {
       }).format(price);
     };
 
-    let message = "🛒 *PEDIDO - AÇUCARADA DOCES* 🍫\n\n";
-    message += "📋 *ITENS DO PEDIDO:*\n";
-    message += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+    let message = "Olá! :) Segue o meu pedido com a Açucarada:\n\n";
+    message += "═══════════════════════════════════════\n";
+    message += "ITENS DO PEDIDO:\n";
+    message += "═══════════════════════════════════════\n\n";
 
     items.forEach((item, index) => {
-      message += `${index + 1}. 🍫 *${item.name}*\n`;
       if (item.flavor) {
-        message += `   🎯 Sabor: ${item.flavor}\n`;
+        message += `${item.name} – Sabor ${item.flavor}\n`;
+      } else {
+        message += `${item.name}\n`;
       }
-      message += `   📦 Quantidade: ${item.quantity}\n`;
-      message += `   💰 Preço unitário: ${formatPrice(item.price)}\n`;
-      message += `   💵 Subtotal: ${formatPrice(item.price * item.quantity)}\n\n`;
+      message += `» Qtd: ${item.quantity} unidade${item.quantity > 1 ? 's' : ''}\n`;
+      message += `» Valor unitário: ${formatPrice(item.price)}\n`;
+      message += `» Subtotal: ${formatPrice(item.price * item.quantity)}\n`;
+      message += "───────────────────────────────────────\n\n";
     });
 
-    message += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-    message += `🧮 *TOTAL DE ITENS:* ${totalItems}\n`;
-    message += `💰 *VALOR TOTAL:* ${formatPrice(totalPrice)}\n`;
-    message += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
-    message += "📞 Poderia me dar mais informações sobre disponibilidade e entrega?\n\n";
-    message += "Obrigado! 😊";
+    message += "═══════════════════════════════════════\n";
+    message += "RESUMO DO PEDIDO:\n\n";
+    message += `» Total de itens: ${totalItems}\n`;
+    message += `» VALOR TOTAL: ${formatPrice(totalPrice)}\n`;
+    message += "═══════════════════════════════════════\n\n";
+    message += "Poderia, por favor:\n\n";
+    message += "Confirmar a disponibilidade dos itens?\n\n";
+    message += "Me informar sobre as opções de entrega ou retirada?\n\n";
+    message += "E também enviar os dados para que eu possa finalizar o pedido?\n\n";
+    message += "Fico no aguardo do retorno. Obrigado! :)";
 
     return message;
   }, [items, totalItems, totalPrice]);

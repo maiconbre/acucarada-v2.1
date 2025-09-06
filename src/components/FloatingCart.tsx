@@ -169,7 +169,7 @@ export const FloatingCart = ({ className }: FloatingCartProps) => {
               >
                 <MessageCircle className="h-6 w-6 sm:h-7 sm:w-7 mr-2 sm:mr-3" />
                 <span className="flex-1 text-center">Pedir pelo WhatsApp</span>
-                <span className="ml-2 text-lg sm:text-xl">🍫</span>
+                <span className="ml-2 text-lg sm:text-xl">♥</span>
               </Button>
             </div>
           </CardContent>

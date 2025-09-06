@@ -22,7 +22,7 @@ export const Header = memo(() => {
   const { getWhatsAppLink } = useAppSettings();
 
   const handleWhatsAppClick = useCallback(() => {
-    const customMessage = "Olá! Gostaria de saber mais sobre os doces da Açucarada 🍫";
+    const customMessage = "Olá! Gostaria de saber mais sobre os doces da Açucarada :)";
     const link = getWhatsAppLink(customMessage);
     window.open(link, '_blank');
     setIsMobileMenuOpen(false);

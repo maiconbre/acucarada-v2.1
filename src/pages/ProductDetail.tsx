@@ -196,7 +196,7 @@ const ProductDetail = () => {
     if (!product) return;
 
     trackClick('whatsapp_order', 'product_detail');
-    const customMessage = `Olá! Gostaria de encomendar:\n\n🍫 *${product.name}*\n💰 ${formatPrice(product.price)}\n\nPoderia me dar mais informações sobre disponibilidade e entrega?`;
+    const customMessage = `Olá! Gostaria de encomendar:\n\n*${product.name}*\n» Preço: ${formatPrice(product.price)}\n\nPoderia me dar mais informações sobre disponibilidade e entrega?`;
     const link = getWhatsAppLink(customMessage);
     window.open(link, '_blank');
   };
