@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, lazy, Suspense, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MessageCircle, Heart, Share2, Eye, Star, ChefHat, Calendar, Info, Clock, Utensils, Sparkles, ShoppingBag } from "lucide-react";
+import { ArrowLeft, MessageCircle, Heart, Share2, Star, ChefHat, Calendar, Info, Clock, Utensils, Sparkles, ShoppingBag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSettings } from "@/hooks/useAppSettings";
 import { useProductAnalytics } from "@/hooks/useProductAnalytics";
@@ -36,19 +36,21 @@ interface FlavorButtonProps {
   isSelected: boolean;
   onClick: (sabor: string) => void;
   variant: 'mobile' | 'desktop';
+  disabled?: boolean;
 }
 
-const FlavorButton = ({ sabor, isSelected, onClick, variant }: FlavorButtonProps) => {
+const FlavorButton = ({ sabor, isSelected, onClick, variant, disabled = false }: FlavorButtonProps) => {
   return (
     <Button
       variant={isSelected ? "default" : "outline"}
       size="sm"
       onClick={() => onClick(sabor)}
+      disabled={disabled}
       className={`font-medium transition-all duration-300 transform hover:scale-105 ${variant === 'mobile' ? 'h-8 px-3 text-xs' : 'h-9 px-4 text-sm'
         } ${isSelected
           ? 'bg-gradient-to-r from-rose-primary to-rose-600 text-white shadow-lg scale-105 border-rose-primary hover:from-rose-600 hover:to-rose-700'
           : 'bg-gradient-to-r from-cream-500/30 to-rose-100 text-rose-primary hover:from-cream-500/50 hover:to-rose-200 border-rose-300 hover:border-rose-primary shadow-sm'
-        }`}
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       <Sparkles className="h-3 w-3 mr-1" />
       {sabor}
@@ -101,6 +103,11 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedFlavor, setSelectedFlavor] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState<string>('');
+  const [imageTransitioning, setImageTransitioning] = useState(false);
+  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [nextImage, setNextImage] = useState<string>('');
 
   const { getWhatsAppLink } = useAppSettings();
   const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id || '');
@@ -165,6 +172,18 @@ const ProductDetail = () => {
     }
   };
 
+  // Precarrega imagens dos sabores quando o produto é carregado
+  useEffect(() => {
+    if (product?.sabor_images) {
+      const saborImages = product.sabor_images as Record<string, string>;
+      Object.values(saborImages).forEach(imageUrl => {
+        if (imageUrl && typeof imageUrl === 'string') {
+          preloadImage(imageUrl).catch(console.error);
+        }
+      });
+    }
+  }, [product]);
+
   useEffect(() => {
     if (id) {
       fetchProduct();
@@ -185,20 +204,59 @@ const ProductDetail = () => {
     trackClick('like', 'product_detail');
   };
 
-  const handleFlavorClick = (flavor: string) => {
-    if (selectedFlavor === flavor) return;
+  // Função para precarregar imagem
+  const preloadImage = useCallback((src: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (preloadedImages.has(src)) {
+        resolve();
+        return;
+      }
+      
+      const img = new Image();
+      img.onload = () => {
+        setPreloadedImages(prev => new Set([...prev, src]));
+        resolve();
+      };
+      img.onerror = reject;
+      img.src = src;
+    });
+  }, [preloadedImages]);
 
+  const handleFlavorClick = async (flavor: string) => {
+    if (selectedFlavor === flavor || imageLoading) return;
+    
     setSelectedFlavor(flavor);
-
+    
     const saborImages = product?.sabor_images as Record<string, string> | null;
-    const newImage = (saborImages && saborImages[flavor])
-      ? saborImages[flavor]
+    const newImage = (saborImages && saborImages[flavor]) 
+      ? saborImages[flavor] 
       : product?.image_url || '';
-
+    
     if (newImage && newImage !== activeImage) {
-      setActiveImage(newImage);
+      setImageLoading(true);
+      setImageTransitioning(true);
+      
+      try {
+        // Precarrega a nova imagem
+        await preloadImage(newImage);
+        
+        // Define a próxima imagem e inicia a transição
+        setNextImage(newImage);
+        
+        // Aguarda um pouco para a transição de fade out
+        setTimeout(() => {
+          setActiveImage(newImage);
+          setNextImage('');
+          setImageTransitioning(false);
+          setImageLoading(false);
+        }, 150);
+      } catch (error) {
+        console.error('Erro ao carregar imagem:', error);
+        setImageTransitioning(false);
+        setImageLoading(false);
+      }
     }
-
+    
     trackClick('flavor_selection', 'product_detail');
   };
 
@@ -260,13 +318,38 @@ const ProductDetail = () => {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           <div className="space-y-4">
             <Card className="overflow-hidden">
-              <div className="relative aspect-square">
+              <div className="relative aspect-square overflow-hidden">
+                {/* Imagem principal */}
                 <img
                   src={activeImage || product.image_url}
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className={`w-full h-full object-cover transition-all duration-300 ease-in-out ${
+                    imageTransitioning ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
+                  }`}
                   onError={() => setActiveImage(product.image_url)}
+                  loading="lazy"
                 />
+                
+                {/* Imagem de transição */}
+                {nextImage && (
+                  <img
+                    src={nextImage}
+                    alt={product.name}
+                    className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 ease-in-out ${
+                      imageTransitioning ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+                    }`}
+                    loading="lazy"
+                  />
+                )}
+                
+                {/* Loading overlay */}
+                {imageLoading && (
+                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                    <div className="bg-white/90 rounded-full p-3">
+                      <div className="animate-spin h-6 w-6 border-2 border-rose-primary border-t-transparent rounded-full"></div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="absolute top-4 left-4">
                   <Badge className={`${product.is_featured ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700'} text-white font-semibold px-3 py-1 shadow-lg`}>
@@ -291,14 +374,15 @@ const ProductDetail = () => {
                     <ChefHat className="h-5 w-5 text-rose-primary mr-4" />
                     <h3 className="font-bold text-lg text-brown-primary">Sabores Disponíveis</h3>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
                     {product.sabores.map((sabor, index) => (
                       <FlavorButton
                         key={index}
                         sabor={sabor}
                         isSelected={selectedFlavor === sabor}
                         onClick={handleFlavorClick}
-                        variant="desktop"
+                        variant="mobile"
+                        disabled={imageLoading}
                       />
                     ))}
                   </div>
