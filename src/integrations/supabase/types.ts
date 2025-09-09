@@ -331,6 +331,7 @@ export type Database = {
           is_featured: boolean | null
           name: string
           price: number
+          sabor_descriptions: Json | null
           sabor_images: Json | null
           sabores: string[] | null
           updated_at: string
@@ -348,6 +349,7 @@ export type Database = {
           is_featured?: boolean | null
           name: string
           price: number
+          sabor_descriptions?: Json | null
           sabor_images?: Json | null
           sabores?: string[] | null
           updated_at?: string
@@ -365,6 +367,7 @@ export type Database = {
           is_featured?: boolean | null
           name?: string
           price?: number
+          sabor_descriptions?: Json | null
           sabor_images?: Json | null
           sabores?: string[] | null
           updated_at?: string
@@ -455,6 +458,7 @@ export type Database = {
           is_featured: boolean | null
           name: string | null
           price: number | null
+          sabor_descriptions: Json | null
           sabor_images: Json | null
           sabores: string[] | null
           total_clicks: number | null

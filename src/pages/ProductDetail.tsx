@@ -28,6 +28,7 @@ interface Product {
   validade_armazenamento_dias?: number;
   sabores?: string[];
   sabor_images?: Json | null;
+  sabor_descriptions?: Json | null; // Novo campo para descrições por sabor
   is_featured: boolean;
   is_active: boolean;
 }
@@ -109,6 +110,7 @@ const ProductDetail = () => {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [nextImage, setNextImage] = useState<string>('');
+  const [currentDescription, setCurrentDescription] = useState<string>(''); // Nova state para descrição dinâmica
 
   const { getWhatsAppLink } = useAppSettings();
   const { analytics, toggleLike, trackShare, trackClick } = useProductAnalytics(id || '');
@@ -144,7 +146,8 @@ const ProductDetail = () => {
           ingredientes,
           validade_armazenamento_dias,
           sabores,
-          sabor_images
+          sabor_images,
+          sabor_descriptions
         `)
         .eq("id", id)
         .eq("is_active", true)
@@ -160,6 +163,16 @@ const ProductDetail = () => {
 
       setProduct(data);
       setActiveImage(data.image_url);
+      
+      // Definir descrição inicial
+      if (data.sabores && data.sabores.length > 0) {
+        // Para produtos com sabores, não definir descrição até que um sabor seja selecionado
+        setCurrentDescription('');
+      } else {
+        // Para produtos sem sabores, usar descrição padrão
+        setCurrentDescription(data.description);
+      }
+      
       setLoading(false);
 
     } catch (error) {
@@ -251,6 +264,15 @@ const ProductDetail = () => {
     if (selectedFlavor === flavor || imageLoading) return;
     
     setSelectedFlavor(flavor);
+    
+    // Atualizar descrição dinâmica
+    const saborDescriptions = product?.sabor_descriptions as Record<string, string> | null;
+    if (saborDescriptions && saborDescriptions[flavor]) {
+      setCurrentDescription(saborDescriptions[flavor]);
+    } else {
+      // Se não há descrição específica para o sabor, usar descrição padrão
+      setCurrentDescription(product?.description || '');
+    }
     
     const saborImages = product?.sabor_images as Record<string, string> | null;
     const newImage = (saborImages && saborImages[flavor]) 
@@ -363,7 +385,7 @@ const ProductDetail = () => {
           Voltar
         </Button>
 
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid lg:grid-cols-2 gap-4 lg:gap-12">
           <div className="space-y-4">
             <Card className="overflow-hidden lg:w-[100%] lg:mx-auto">
               <div className="relative aspect-square overflow-hidden">
@@ -455,7 +477,7 @@ const ProductDetail = () => {
             )}
           </div>
 
-          <div className="flex flex-col space-y-6 lg:block lg:space-y-6">
+          <div className="flex flex-col space-y-3 lg:block lg:space-y-6">
             {/* Header desktop com nome, preço e descrição */}
             <div className="bg-gradient-to-br from-cream-500/20 to-rose-50 rounded-xl p-6 border border-rose-200 hidden lg:block order-1">
               <h1 className="text-3xl md:text-4xl font-bold mb-3 text-brown-primary font-title">{product.name}</h1>
@@ -464,8 +486,32 @@ const ProductDetail = () => {
                   {formatPrice(product.price)}
                 </p>
               </div>
-              <p className="text-brown-600 leading-relaxed text-lg">{product.description}</p>
+              <p className="text-brown-600 leading-relaxed text-lg">{currentDescription || product.description}</p>
             </div>
+
+            {/* Descrição dinâmica para mobile - aparece acima dos sabores quando um sabor é selecionado */}
+            {selectedFlavor && currentDescription && (
+              <Card className="lg:hidden border-rose-300 shadow-lg bg-gradient-to-br from-cream-500/20 to-rose-50 order-1">
+                <CardContent className="p-4">
+                  <div className="flex items-center mb-3">
+                    <h3 className="font-bold text-lg text-brown-primary"> {selectedFlavor}</h3>
+                  </div>
+                  <p className="text-brown-600 leading-relaxed">{currentDescription}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Descrição padrão para mobile quando nenhum sabor está selecionado */}
+            {!selectedFlavor && product.description && (
+              <Card className="lg:hidden border-rose-300 shadow-lg bg-gradient-to-br from-cream-500/20 to-rose-50 order-1">
+                <CardContent className="p-4">
+                  <div className="flex items-center mb-3">
+                    <h3 className="font-bold text-lg text-brown-primary">Descrição</h3>
+                  </div>
+                  <p className="text-brown-600 leading-relaxed">{product.description}</p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Sabores - aparecem antes dos botões */}
             {product.sabores && product.sabores.length > 0 && (
