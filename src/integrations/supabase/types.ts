@@ -132,6 +132,42 @@ export type Database = {
           },
         ]
       }
+      feedbacks: {
+        Row: {
+          created_at: string
+          customer_name: string
+          customer_username: string | null
+          display_order: number | null
+          feedback_text: string
+          id: string
+          image_url: string
+          is_active: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name: string
+          customer_username?: string | null
+          display_order?: number | null
+          feedback_text: string
+          id?: string
+          image_url: string
+          is_active?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          customer_username?: string | null
+          display_order?: number | null
+          feedback_text?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_analytics: {
         Row: {
           id: string
