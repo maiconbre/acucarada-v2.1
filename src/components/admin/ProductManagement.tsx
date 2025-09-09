@@ -42,6 +42,7 @@ interface Product {
   validade_armazenamento_dias?: number;
   sabores?: string[];
   sabor_images?: Json;
+  sabor_descriptions?: Json; // Novo campo para descrições por sabor
   is_featured: boolean;
   is_active: boolean;
 }
@@ -79,12 +80,13 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     validade_armazenamento_dias: "",
     sabores: "" as string,
     sabor_images: {} as Json,
+    sabor_descriptions: {} as Json,
     is_featured: false,
     is_active: true,
   });
   
   // Estado para gerenciar sabores dinamicamente
-  const [flavors, setFlavors] = useState<Array<{id: string, name: string, image: string}>>([]);
+  const [flavors, setFlavors] = useState<Array<{id: string, name: string, image: string, description: string}>>([]);
   const [newFlavorName, setNewFlavorName] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -119,6 +121,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       validade_armazenamento_dias: "",
       sabores: "" as string,
       sabor_images: {} as Json,
+      sabor_descriptions: {} as Json,
       is_featured: false,
       is_active: true,
     });
@@ -139,6 +142,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       validade_armazenamento_dias: product.validade_armazenamento_dias?.toString() || "",
       sabores: product.sabores?.join(", ") || "",
       sabor_images: product.sabor_images || {},
+      sabor_descriptions: product.sabor_descriptions || {},
       is_featured: product.is_featured,
       is_active: product.is_active,
     });
@@ -148,7 +152,8 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       const existingFlavors = product.sabores.map((flavor, index) => ({
         id: `flavor-${index}`,
         name: flavor,
-        image: (product.sabor_images as Record<string, string> | null)?.[flavor] || ""
+        image: (product.sabor_images as Record<string, string> | null)?.[flavor] || "",
+        description: (product.sabor_descriptions as Record<string, string> | null)?.[flavor] || ""
       }));
       setFlavors(existingFlavors);
     } else {
@@ -164,7 +169,8 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       const newFlavor = {
         id: `flavor-${Date.now()}`,
         name: newFlavorName.trim(),
-        image: ""
+        image: "",
+        description: ""
       };
       setFlavors([...flavors, newFlavor]);
       setNewFlavorName("");
@@ -177,6 +183,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
 
   const updateFlavorImage = (id: string, imageUrl: string) => {
     setFlavors(flavors.map(f => f.id === id ? { ...f, image: imageUrl } : f));
+  };
+
+  const updateFlavorDescription = (id: string, description: string) => {
+    setFlavors(flavors.map(f => f.id === id ? { ...f, description: description } : f));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -225,6 +235,13 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
         }
         return acc;
       }, {} as Record<string, string>);
+      
+      const saborDescriptions = flavors.reduce((acc, flavor) => {
+        if (flavor.description) {
+          acc[flavor.name] = flavor.description;
+        }
+        return acc;
+      }, {} as Record<string, string>);
 
       const productData = {
         name: formData.name,
@@ -236,6 +253,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
         validade_armazenamento_dias: formData.validade_armazenamento_dias ? parseInt(formData.validade_armazenamento_dias) : null,
         sabores: saboresArray.length > 0 ? saboresArray : null,
         sabor_images: Object.keys(saborImages).length > 0 ? saborImages : null,
+        sabor_descriptions: Object.keys(saborDescriptions).length > 0 ? saborDescriptions : null,
         is_featured: formData.is_featured,
         is_active: formData.is_active,
       };
@@ -609,96 +627,75 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                     </Button>
                   </div>
                   
-                  {/* Preview compacto dos sabores */}
-                       {flavors.length > 0 && (
-                         <div className="space-y-4">
-                           {/* Galeria de preview */}
-                           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
-                             {flavors.map((flavor) => (
-                               <div key={`preview-${flavor.id}`} className="relative group">
-                                 <div className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/20 overflow-hidden bg-muted/30">
-                                   {flavor.image ? (
-                                     <img 
-                                       src={flavor.image} 
-                                       alt={flavor.name}
-                                       className="w-full h-full object-cover"
-                                       width="200"
-                                       height="200"
-                                       loading="lazy"
-                                       decoding="async"
-                                     />
-                                   ) : (
-                                     <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                       <div className="text-center">
-                                         <Plus className="h-4 w-4 sm:h-6 sm:w-6 mx-auto mb-1" />
-                                         <p className="text-xs hidden sm:block">Sem imagem</p>
-                                       </div>
-                                     </div>
-                                   )}
-                                 </div>
-                                 <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-1 rounded-b-lg">
-                                   <p className="text-xs font-medium truncate text-center">{flavor.name}</p>
-                                 </div>
-                               </div>
-                             ))}
-                           </div>
-                       
-                       {/* Lista detalhada para edição */}
-                           <div className="space-y-3 max-h-80 overflow-y-auto">
-                             {flavors.map((flavor) => (
-                               <Card key={flavor.id} className="p-3">
-                                 <div className="space-y-3">
-                                   <div className="flex items-center justify-between">
-                                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                                       <Badge variant="outline" className="font-medium text-xs">
-                                         {flavor.name}
-                                       </Badge>
-                                       {flavor.image && (
-                                         <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
-                                           📷 Com imagem
-                                         </Badge>
-                                       )}
-                                     </div>
-                                     <Button
-                                       type="button"
-                                       variant="ghost"
-                                       size="sm"
-                                       onClick={() => removeFlavor(flavor.id)}
-                                       className="h-8 w-8 p-0 text-destructive hover:text-destructive flex-shrink-0 mobile-touch-target"
-                                     >
-                                       <Trash2 className="h-4 w-4" />
-                                     </Button>
-                                   </div>
-                               
-                               {/* Upload de imagem para o sabor */}
-                                   <div className="space-y-2">
-                                     <Label className="text-sm text-muted-foreground">
-                                       Imagem do sabor {flavor.name}
-                                     </Label>
-                                     <div className="w-full">
-                                       <ImageUpload
-                                         value={flavor.image}
-                                         onChange={(url) => updateFlavorImage(flavor.id, url)}
-                                         bucketName="product-flavor-images"
-                                         folder={`flavors`}
-                                         showPreview={true}
-                                         showMetadata={false}
-                                         processingOptions={{
-                                           maxWidth: 800,
-                                           maxHeight: 800,
-                                           quality: 0.85,
-                                           generateThumbnail: true,
-                                           thumbnailSize: 200
-                                         }}
-                                       />
-                                     </div>
-                                   </div>
-                             </div>
-                           </Card>
-                         ))}
-                       </div>
-                     </div>
-                   )}
+                  {/* Lista de sabores com descrições */}
+                  {flavors.length > 0 && (
+                    <div className="space-y-3 max-h-80 overflow-y-auto">
+                      {flavors.map((flavor) => (
+                        <Card key={`flavor-${flavor.id}`} className="p-4">
+                          <div className="space-y-4">
+                            {/* Header do sabor */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="font-medium">
+                                  {flavor.name}
+                                </Badge>
+                                {flavor.image && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    📷
+                                  </Badge>
+                                )}
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeFlavor(flavor.id)}
+                                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            
+                            {/* Descrição do sabor */}
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">
+                                Descrição do sabor {flavor.name}
+                              </Label>
+                              <Textarea
+                                placeholder={`Descreva as características do sabor ${flavor.name}...`}
+                                value={flavor.description}
+                                onChange={(e) => updateFlavorDescription(flavor.id, e.target.value)}
+                                rows={2}
+                                className="text-sm"
+                              />
+                            </div>
+                            
+                            {/* Upload de imagem */}
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">
+                                Imagem do sabor {flavor.name} (opcional)
+                              </Label>
+                              <ImageUpload
+                                value={flavor.image}
+                                onChange={(url) => updateFlavorImage(flavor.id, url)}
+                                bucketName="product-flavor-images"
+                                folder={`flavors`}
+                                showPreview={true}
+                                showMetadata={false}
+                                processingOptions={{
+                                  maxWidth: 800,
+                                  maxHeight: 800,
+                                  quality: 0.85,
+                                  generateThumbnail: true,
+                                  thumbnailSize: 200
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
                   
                   {flavors.length === 0 && (
                     <div className="text-center py-6 sm:py-8 text-muted-foreground border-2 border-dashed rounded-lg">
