@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAppSettings } from "@/hooks/useAppSettings";
 import CommentManagement from './CommentManagement'; // Import the new component
+import FeedbackManagement from './FeedbackManagement'; // Import the feedback component
 import { 
   User, 
   Lock, 
@@ -29,7 +30,8 @@ import {
   MessageCircle,
   Phone,
   BarChart,
-  ThumbsUp // Import the icon
+  ThumbsUp, // Import the icon
+  Star
 } from "lucide-react";
 
 interface AppSettings {
@@ -310,7 +312,7 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 p-1 h-auto">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 gap-1 p-1 h-auto">
           <TabsTrigger value="profile" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Perfil</span>
@@ -326,6 +328,10 @@ const Settings = () => {
           <TabsTrigger value="comments" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
             <ThumbsUp className="h-4 w-4" />
             <span className="hidden sm:inline">Comentários</span>
+          </TabsTrigger>
+          <TabsTrigger value="feedbacks" className="flex items-center gap-2 h-12 lg:h-10 text-xs lg:text-sm px-2 lg:px-4">
+            <Star className="h-4 w-4" />
+            <span className="hidden sm:inline">Feedbacks</span>
           </TabsTrigger>
         </TabsList>
 
@@ -590,6 +596,11 @@ const Settings = () => {
         {/* Aba Comentários */}
         <TabsContent value="comments" className="space-y-6">
           <CommentManagement />
+        </TabsContent>
+
+        {/* Aba Feedbacks */}
+        <TabsContent value="feedbacks" className="space-y-6">
+          <FeedbackManagement />
         </TabsContent>
         
       </Tabs>

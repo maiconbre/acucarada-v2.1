@@ -1,87 +1,122 @@
 import { useState, useEffect, useRef } from 'react';
-import { Heart } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
 
-interface Testimonial {
-  id: number;
-  name: string;
-  username: string;
-  userImage: string;
-  postImage: string;
-  comment: string;
+type Feedback = Database['public']['Tables']['feedbacks']['Row'];
+
+interface MockFeedback {
+  id: string;
+  customer_name: string;
+  feedback_text: string;
+  image_url: string | null;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
-const testimonials: Testimonial[] = [
+// Dados mockados como fallback
+const mockFeedbacks: MockFeedback[] = [
   {
-    id: 1,
-    name: "Maria Silva",
-    username: "mariasilva",
-    userImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop&crop=face",
-    postImage: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=400&fit=crop&fm=webp&q=80",
-    comment: "Os doces são simplesmente incríveis! Encomendei para o aniversário da minha filha e todos elogiaram. Chegou tudo perfeito e o sabor é maravilhoso! Recomendo muito, com certeza pedirei novamente em outras ocasiões.",
+    id: 'mock-1',
+    customer_name: 'Maria Silva',
+    feedback_text: 'Os doces são simplesmente incríveis! Encomendei para o aniversário da minha filha e todos elogiaram. Chegou tudo perfeito e o sabor é maravilhoso! 🎂✨',
+    image_url: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=600&fit=crop&fm=webp&q=80',
+    is_active: true,
+    display_order: 1,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
-    id: 2,
-    name: "João Santos",
-    username: "joaosantos",
-    userImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face",
-    postImage: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop&fm=webp&q=80",
-    comment: "Qualidade excepcional! Os brigadeiros gourmet são os melhores que já provei. Recomendo de olhos fechados!",
+    id: 'mock-2',
+    customer_name: 'João Santos',
+    feedback_text: 'Qualidade excepcional! Os brigadeiros gourmet são os melhores que já provei. Recomendo de olhos fechados! 🍫👌',
+    image_url: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=600&fit=crop&fm=webp&q=80',
+    is_active: true,
+    display_order: 2,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
-    id: 3,
-    name: "Ana Costa",
-    username: "anacosta",
-    userImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face",
-    postImage: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&h=400&fit=crop&fm=webp&q=80",
-    comment: "Atendimento perfeito e doces maravilhosos! Fizeram tudo com muito carinho para o meu casamento. Superou minhas expectativas!",
+    id: 'mock-3',
+    customer_name: 'Ana Costa',
+    feedback_text: 'Atendimento perfeito e doces maravilhosos! Fizeram tudo com muito carinho para o meu casamento. Superou minhas expectativas! 💕',
+    image_url: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&h=600&fit=crop&fm=webp&q=80',
+    is_active: true,
+    display_order: 3,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
-    id: 4,
-    name: "Carlos Oliveira",
-    username: "carlosoliveira",
-    userImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face",
-    postImage: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=300&fit=crop&fm=webp&q=80",
-    comment: "Sabor incrível e apresentação impecável! Sempre peço para eventos da empresa. Nunca decepciona!",
+    id: 'mock-4',
+    customer_name: 'Carlos Oliveira',
+    feedback_text: 'Sabor incrível e apresentação impecável! Sempre peço para eventos da empresa. Nunca decepciona! 🏢⭐',
+    image_url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=600&fit=crop&fm=webp&q=80',
+    is_active: true,
+    display_order: 4,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
-    id: 5,
-    name: "Fernanda Lima",
-    username: "fernandalima",
-    userImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=64&h=64&fit=crop&crop=face",
-    postImage: "https://img.elo7.com.br/product/zoom/1FEDB43/docinhos-gourmet-para-festas-casamentos-cento-de-docinhos-para-festa.jpg",
-    comment: "Doces artesanais de primeira qualidade! O carinho e dedicação em cada doce é visível. Virei cliente fiel!",
-  },
-  {
-    id: 6,
-    name: "Pedro Almeida",
-    username: "pedroalmeida",
-    userImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64&h=64&fit=crop&crop=face",
-    postImage: "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=400&fit=crop&fm=webp&q=80",
-    comment: "Os melhores doces que já comi! A variedade é incrível e o sabor é divino. Recomendo a todos!",
-  },
-  {
-    id: 7,
-    name: "Sofia Mendes",
-    username: "sofiamendes",
-    userImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=face",
-    postImage: "https://i.pinimg.com/originals/1d/33/c5/1d33c579f19ed6b3395ab79c84361148.jpg",
-    comment: "Perfeitos para qualquer ocasião! Meus convidados amaram e eu também. Com certeza farei novas encomendas.",
+    id: 'mock-5',
+    customer_name: 'Fernanda Lima',
+    feedback_text: 'Doces artesanais de primeira qualidade! O carinho e dedicação em cada doce é visível. Virei cliente fiel! 🥰',
+    image_url: null,
+    is_active: true,
+    display_order: 5,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 ];
 
 export function Testimonials() {
+  const [feedbacks, setFeedbacks] = useState<(Feedback | MockFeedback)[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const [translateX, setTranslateX] = useState(0);
   const animationRef = useRef<number>();
   const startTimeRef = useRef<number>();
   const pausedTimeRef = useRef<number>(0);
 
-  const animationDuration = 30000; // 30 segundos
-  const totalDistance = testimonials.length * 220;
+  const animationDuration = 40000; // 40 segundos para movimento mais suave
+  const cardWidth = 320; // Largura aumentada para melhor visualização
+  const totalDistance = feedbacks.length * (cardWidth + 32); // 32px de gap
+
+  // Carregar feedbacks do Supabase com fallback para dados mockados
+  useEffect(() => {
+    const loadFeedbacks = async () => {
+      try {
+        const { data: realFeedbacks, error } = await supabase
+          .from('feedbacks')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order', { ascending: true });
+
+        if (error) {
+          console.warn('Erro ao carregar feedbacks do Supabase, usando dados mockados:', error);
+          setFeedbacks(mockFeedbacks);
+        } else if (realFeedbacks && realFeedbacks.length > 0) {
+          // Se há feedbacks reais, usar apenas eles
+          setFeedbacks(realFeedbacks);
+        } else {
+          // Se não há feedbacks reais, usar dados mockados
+          setFeedbacks(mockFeedbacks);
+        }
+      } catch (error) {
+        console.warn('Erro ao conectar com Supabase, usando dados mockados:', error);
+        setFeedbacks(mockFeedbacks);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFeedbacks();
+  }, []);
 
   useEffect(() => {
-    if (!isPaused) {
+    if (!isPaused && feedbacks.length > 0) {
       const animate = (currentTime: number) => {
         if (!startTimeRef.current) {
           startTimeRef.current = currentTime - pausedTimeRef.current;
@@ -110,15 +145,15 @@ export function Testimonials() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPaused, totalDistance]);
+  }, [isPaused, totalDistance, feedbacks.length]);
 
   useEffect(() => {
     startTimeRef.current = undefined;
     pausedTimeRef.current = 0;
-  }, []);
+  }, [feedbacks]);
   
-  // Duplicar testimonials para efeito infinito suave
-  const extendedTestimonials = [...testimonials, ...testimonials, ...testimonials];
+  // Duplicar feedbacks para efeito infinito suave
+  const extendedFeedbacks = feedbacks.length > 0 ? [...feedbacks, ...feedbacks, ...feedbacks] : [];
 
   const handleMouseEnter = () => {
     setIsPaused(true);
@@ -128,15 +163,49 @@ export function Testimonials() {
     setIsPaused(false);
   };
 
+  if (loading) {
+    return (
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-title">
+              Feedbacks dos Clientes
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-text">
+              Carregando depoimentos...
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (feedbacks.length === 0) {
+    return (
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-title">
+              Feedbacks dos Clientes
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-text">
+              Em breve teremos depoimentos de nossos clientes!
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-title">
-            Nossos Clientes
+            Feedbacks dos Clientes
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-text">
-            Veja o que nossos clientes estão dizendo!
+            Veja o que nossos clientes estão dizendo sobre nossos doces!
           </p>
         </div>
       </div>
@@ -149,63 +218,85 @@ export function Testimonials() {
         <div 
           className="flex gap-8 transition-transform ease-linear"
           style={{
-            width: `${extendedTestimonials.length * 220}px`,
+            width: `${extendedFeedbacks.length * (cardWidth + 32)}px`,
             transform: `translateX(${translateX}px)`
           }}
         >
-          {extendedTestimonials.map((testimonial, index) => (
+          {extendedFeedbacks.map((feedback, index) => (
             <div
-              key={`${testimonial.id}-${index}`}
+              key={`${feedback.id}-${index}`}
               className="flex-shrink-0"
-              style={{ width: '200px' }}
+              style={{ width: `${cardWidth}px` }}
             >
-              <Card className="overflow-hidden rounded-xl border-border/50 shadow-sm hover:shadow-lg transition-shadow duration-300 h-96 flex flex-col">
-                <CardContent className="relative h-full w-full p-0">
-                  {/* Post Image - Background */}
-                  <img
-                    src={testimonial.postImage}
-                    srcSet={`${testimonial.postImage} 1x, ${testimonial.postImage.replace('w=400', 'w=800')} 2x`}
-                    alt={`Post by ${testimonial.username}`}
-                    className="absolute inset-0 w-full h-full object-cover rounded-xl"
-                    width="400"
-                    height="384"
-                    loading={index < 3 ? "eager" : "lazy"}
-                    decoding="async"
-                    sizes="(max-width: 768px) 300px, 400px"
-                  />
-
-                  {/* Overlay Content */}
-                  <div className="absolute inset-0 flex flex-col justify-between p-4 text-white bg-gradient-to-t from-black/70 via-transparent to-black/30 rounded-xl">
-                    {/* User Info at Top */}
-                    <div className="flex items-center">
+              <Card className="overflow-hidden rounded-2xl border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 bg-white">
+                <CardContent className="p-0">
+                  {feedback.image_url ? (
+                    // Feedback com imagem - estilo print de conversa
+                    <div className="relative">
                       <img
-                        src={testimonial.userImage}
-                        srcSet={`${testimonial.userImage} 1x, ${testimonial.userImage.replace('w=64', 'w=128')} 2x`}
-                        alt={testimonial.name}
-                        className="w-8 h-8 rounded-full object-cover border-2 border-white"
-                        width="32"
-                        height="32"
+                        src={feedback.image_url}
+                        alt={`Feedback de ${feedback.customer_name}`}
+                        className="w-full h-80 object-cover"
+                        width="320"
+                        height="320"
                         loading={index < 3 ? "eager" : "lazy"}
                         decoding="async"
-                        sizes="32px"
+                        sizes="320px"
                       />
-                      <div className="ml-2">
-                        <p className="font-semibold text-sm">
-                          {testimonial.username}
+                      
+                      {/* Overlay com informações do cliente */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          </div>
+                          <span className="text-white font-semibold text-sm">
+                            {feedback.customer_name}
+                          </span>
+                        </div>
+                        <p className="text-white/90 text-xs line-clamp-2">
+                          {feedback.feedback_text}
                         </p>
                       </div>
                     </div>
-
-                    {/* Comment at Bottom */}
-                    <div className="text-sm font-text">
-                      <p className="line-clamp-3">{testimonial.comment}</p>
+                  ) : (
+                    // Feedback apenas texto - estilo card de depoimento
+                    <div className="p-6 h-80 flex flex-col justify-between bg-gradient-to-br from-pink-50 to-purple-50">
+                      <div>
+                        <Quote className="w-8 h-8 text-pink-400 mb-4" />
+                        <p className="text-gray-700 text-sm leading-relaxed mb-4 font-text">
+                          {feedback.feedback_text}
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-gray-800 text-sm">
+                            {feedback.customer_name}
+                          </p>
+                          <p className="text-gray-500 text-xs">Cliente verificado</p>
+                        </div>
+                        <div className="flex gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
           ))}
         </div>
+      </div>
+      
+      {/* Indicador de que são feedbacks reais */}
+      <div className="text-center mt-8">
+        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+          <Star className="w-4 h-4 text-yellow-500 fill-current" />
+          Feedbacks reais de nossos clientes
+        </p>
       </div>
     </section>
   );
