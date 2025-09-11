@@ -227,12 +227,15 @@ const FeedbackManagement = () => {
       
       let errorMessage = 'Erro ao salvar feedback';
       
-      if (error.message?.includes('403') || error.code === '42501') {
-        errorMessage = 'Erro de permissão: Execute o script fix_feedback_policies.sql no Supabase';
-      } else if (error.message?.includes('Sessão expirada')) {
-        errorMessage = error.message;
-      } else if (error.message) {
-        errorMessage = error.message;
+      if (error && typeof error === 'object' && 'message' in error) {
+        const errorObj = error as { message?: string; code?: string };
+        if (errorObj.message?.includes('403') || errorObj.code === '42501') {
+          errorMessage = 'Erro de permissão: Execute o script fix_feedback_policies.sql no Supabase';
+        } else if (errorObj.message?.includes('Sessão expirada')) {
+          errorMessage = errorObj.message;
+        } else if (errorObj.message) {
+          errorMessage = errorObj.message;
+        }
       }
       
       toast({
