@@ -8,17 +8,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Upload, 
   Save, 
   RefreshCw, 
   Trash2, 
-  Eye, 
-  EyeOff,
   Star,
   MessageSquare,
   Image as ImageIcon
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Database } from "@/integrations/supabase/types";
+import { convertToWebP } from "@/lib/image-utils";
+import { useAuth } from "@/hooks/useAuth";
 
 type Feedback = Database['public']['Tables']['feedbacks']['Row'];
 type FeedbackInsert = Database['public']['Tables']['feedbacks']['Insert'];
@@ -28,6 +38,7 @@ const FeedbackManagement = () => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+  const { user, session } = useAuth();
   
   const [newFeedback, setNewFeedback] = useState<{
     customer_name: string;
@@ -67,44 +78,20 @@ const FeedbackManagement = () => {
     }
   };
 
-  const convertToWebP = async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      
-      img.onload = () => {
-        // Redimensionar para otimizar
-        const maxWidth = 800;
-        const maxHeight = 600;
-        let { width, height } = img;
-        
-        if (width > maxWidth || height > maxHeight) {
-          const ratio = Math.min(maxWidth / width, maxHeight / height);
-          width *= ratio;
-          height *= ratio;
-        }
-        
-        canvas.width = width;
-        canvas.height = height;
-        
-        ctx?.drawImage(img, 0, 0, width, height);
-        
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          } else {
-            reject(new Error('Erro ao converter imagem'));
-          }
-        }, 'image/webp', 0.8);
-      };
-      
-      img.onerror = reject;
-      img.src = URL.createObjectURL(file);
-    });
+  // Função de conversão WebP otimizada usando a biblioteca centralizada
+  const handleWebPConversion = async (file: File): Promise<File> => {
+    try {
+      const processed = await convertToWebP(file, {
+        maxWidth: 800,
+        maxHeight: 600,
+        quality: 0.85,
+        generateThumbnail: false
+      });
+      return processed.file;
+    } catch (error) {
+      console.error('Erro na conversão WebP:', error);
+      throw new Error('Falha na conversão da imagem para WebP');
+    }
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,19 +109,16 @@ const FeedbackManagement = () => {
     
     setUploading(true);
     try {
-      // Converter para WebP
-      const webpDataUrl = await convertToWebP(file);
-      
-      // Converter data URL para blob
-      const response = await fetch(webpDataUrl);
-      const blob = await response.blob();
+      // Converter para WebP usando a função centralizada
+      const webpFile = await handleWebPConversion(file);
       
       // Upload para Supabase Storage
       const fileName = `feedback-${Date.now()}.webp`;
       const { data, error } = await supabase.storage
         .from('feedback-images')
-        .upload(fileName, blob, {
-          contentType: 'image/webp'
+        .upload(fileName, webpFile, {
+          contentType: 'image/webp',
+          cacheControl: '3600'
         });
       
       if (error) throw error;
@@ -163,6 +147,16 @@ const FeedbackManagement = () => {
   };
 
   const handleSaveFeedback = async () => {
+    // Verificar autenticação
+    if (!user || !session) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro de Autenticação',
+        description: 'Você precisa estar logado para adicionar feedbacks'
+      });
+      return;
+    }
+
     if (!newFeedback.customer_name.trim() || !newFeedback.feedback_text.trim()) {
       toast({
         variant: 'destructive',
@@ -174,6 +168,13 @@ const FeedbackManagement = () => {
     
     setLoading(true);
     try {
+      // Verificar sessão atual
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
+      if (!currentSession) {
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
       // Determinar próxima ordem de exibição
       const maxOrder = Math.max(...feedbacks.map(f => f.display_order || 0), 0);
       
@@ -185,11 +186,26 @@ const FeedbackManagement = () => {
         display_order: maxOrder + 1
       };
       
-      const { error } = await supabase
-        .from('feedbacks')
-        .insert([feedbackData]);
+      console.log('Tentando inserir feedback:', feedbackData);
+      console.log('Usuário atual:', currentSession.user.email);
+      console.log('Role atual:', currentSession.user.role);
       
-      if (error) throw error;
+      const { data, error } = await supabase
+        .from('feedbacks')
+        .insert([feedbackData])
+        .select();
+      
+      if (error) {
+        console.error('Erro detalhado do Supabase:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+      
+      console.log('Feedback inserido com sucesso:', data);
       
       // Resetar formulário
       setNewFeedback({
@@ -206,46 +222,32 @@ const FeedbackManagement = () => {
         title: 'Sucesso',
         description: 'Feedback adicionado com sucesso'
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar feedback:', error);
+      
+      let errorMessage = 'Erro ao salvar feedback';
+      
+      if (error.message?.includes('403') || error.code === '42501') {
+        errorMessage = 'Erro de permissão: Execute o script fix_feedback_policies.sql no Supabase';
+      } else if (error.message?.includes('Sessão expirada')) {
+        errorMessage = error.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         variant: 'destructive',
         title: 'Erro',
-        description: 'Erro ao salvar feedback'
+        description: errorMessage
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleFeedbackStatus = async (id: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('feedbacks')
-        .update({ is_active: !currentStatus })
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      await loadFeedbacks();
-      
-      toast({
-        title: 'Sucesso',
-        description: `Feedback ${!currentStatus ? 'ativado' : 'desativado'} com sucesso`
-      });
-    } catch (error) {
-      console.error('Erro ao alterar status:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: 'Erro ao alterar status do feedback'
-      });
-    }
-  };
+
 
   const deleteFeedback = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este feedback?')) return;
-    
     try {
       const { error } = await supabase
         .from('feedbacks')
@@ -410,24 +412,33 @@ const FeedbackManagement = () => {
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleFeedbackStatus(feedback.id, feedback.is_active)}
-                      >
-                        {feedback.is_active ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deleteFeedback(feedback.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir Feedback</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir este feedback de "{feedback.customer_name}"? Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => deleteFeedback(feedback.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                   
