@@ -239,20 +239,32 @@ const Catalog = () => {
       filtered = filtered.filter((product) => product.is_featured);
     }
 
-    // Sort products
+    // Sort products - SEMPRE priorizar produtos de pronta entrega (is_featured) primeiro
     const sorted = [...filtered];
+    
+    // Função auxiliar para ordenação que sempre prioriza is_featured
+    const sortWithFeaturedFirst = (a: Product, b: Product, secondarySort: (a: Product, b: Product) => number) => {
+      // Se um é featured e outro não, o featured vem primeiro
+      if (a.is_featured && !b.is_featured) return -1;
+      if (!a.is_featured && b.is_featured) return 1;
+      
+      // Se ambos têm o mesmo status de featured, usar ordenação secundária
+      return secondarySort(a, b);
+    };
+    
     switch (sortBy) {
       case "newest":
-        // Already sorted by created_at desc from database
+        // Manter ordenação por created_at desc, mas com featured primeiro
+        sorted.sort((a, b) => sortWithFeaturedFirst(a, b, () => 0)); // Já vem ordenado do banco
         break;
       case "price-low":
-        sorted.sort((a, b) => a.price - b.price);
+        sorted.sort((a, b) => sortWithFeaturedFirst(a, b, (a, b) => a.price - b.price));
         break;
       case "price-high":
-        sorted.sort((a, b) => b.price - a.price);
+        sorted.sort((a, b) => sortWithFeaturedFirst(a, b, (a, b) => b.price - a.price));
         break;
       case "name":
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        sorted.sort((a, b) => sortWithFeaturedFirst(a, b, (a, b) => a.name.localeCompare(b.name)));
         break;
     }
 
@@ -377,10 +389,10 @@ const Catalog = () => {
                       <SelectValue placeholder="Ordenar" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="newest">Mais recentes</SelectItem>
-                      <SelectItem value="name">Nome A-Z</SelectItem>
-                      <SelectItem value="price-low">Menor preço</SelectItem>
-                      <SelectItem value="price-high">Maior preço</SelectItem>
+                      <SelectItem value="newest">Pronta entrega primeiro</SelectItem>
+                      <SelectItem value="name">Por nome (A-Z)</SelectItem>
+                      <SelectItem value="price-low">Por preço (menor)</SelectItem>
+                      <SelectItem value="price-high">Por preço (maior)</SelectItem>
                     </SelectContent>
                   </Select>
                   
@@ -431,10 +443,10 @@ const Catalog = () => {
                     <SelectValue placeholder="Ordenar" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="newest">Mais recentes</SelectItem>
-                    <SelectItem value="name">Nome A-Z</SelectItem>
-                    <SelectItem value="price-low">Menor preço</SelectItem>
-                    <SelectItem value="price-high">Maior preço</SelectItem>
+                    <SelectItem value="newest">Pronta entrega primeiro</SelectItem>
+                    <SelectItem value="name">Por nome (A-Z)</SelectItem>
+                    <SelectItem value="price-low">Por preço (menor)</SelectItem>
+                    <SelectItem value="price-high">Por preço (maior)</SelectItem>
                   </SelectContent>
                 </Select>
 
