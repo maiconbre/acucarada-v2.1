@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect, useCallback, memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAppSettings } from "@/hooks/useAppSettings";
 import logoImage from "@/assets/morigote.png";
 import {
   NavigationMenu,
@@ -19,14 +18,15 @@ export const Header = memo(() => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
-  const { getWhatsAppLink } = useAppSettings();
 
   const handleWhatsAppClick = useCallback(() => {
+    const whatsappNumber = "5511999999999";
     const customMessage = "Olá! Gostaria de saber mais sobre os doces da Açucarada :)";
-    const link = getWhatsAppLink(customMessage);
+    const encodedMessage = encodeURIComponent(customMessage);
+    const link = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
     window.open(link, '_blank');
     setIsMobileMenuOpen(false);
-  }, [getWhatsAppLink]);
+  }, []);
 
   const handleMenuItemClick = useCallback(() => {
     setIsMobileMenuOpen(false);

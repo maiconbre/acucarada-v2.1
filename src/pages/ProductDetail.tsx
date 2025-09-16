@@ -317,10 +317,11 @@ const ProductDetail = () => {
   const handleShare = async () => {
     if (!product) return;
 
+    const homeUrl = `${window.location.origin}/`;
     const shareData = {
-      title: product.name,
-      text: `Confira este delicioso ${product.name} por ${formatPrice(product.price)}!`,
-      url: window.location.href
+      title: "Açucarada - Doces Artesanais",
+      text: `Confira nossos deliciosos doces artesanais!`,
+      url: homeUrl
     };
 
     try {
@@ -328,11 +329,11 @@ const ProductDetail = () => {
         await navigator.share(shareData);
         trackShare('native_share', 'product_detail');
       } else {
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(homeUrl);
         trackShare('copy_link', 'product_detail');
         toast({
           title: "Link copiado!",
-          description: "O link do produto foi copiado para a área de transferência."
+          description: "O link foi copiado para a área de transferência."
         });
       }
     } catch (error) {
@@ -379,7 +380,7 @@ const ProductDetail = () => {
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="mb-6 text-muted-foreground hover:text-foreground hidden lg:flex"
+          className="mt-4 mb-6 text-muted-foreground hover:text-foreground hidden lg:flex"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
@@ -571,7 +572,7 @@ const ProductDetail = () => {
                     <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-full p-3 mx-auto mb-2 w-fit">
                       <Share2 className="h-5 w-5 text-blue-600" />
                     </div>
-                    <span className="text-sm font-medium text-brown-primary">Compartilhar</span>
+                    <span className="text-xs font-medium text-brown-primary">Compartilhar</span>
                   </CardContent>
                 </Card>
 

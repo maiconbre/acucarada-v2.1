@@ -9,13 +9,13 @@ export function About() {
       <div className="absolute bottom-20 right-10 w-40 h-40 bg-secondary/10 rounded-full blur-3xl" />
       
       <div className="container mx-auto px-4 relative">
-        <div className="text-center mb-8 md:mb-16 animate-fade-in">
+        <div className="text-center mb-8 md:mb-16">
           <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm text-primary px-4 py-2 rounded-full mb-6 border border-primary/20">
             <Sparkles className="h-4 w-4" />
             <span className="text-sm font-medium font-text">Nossa História</span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-title font-bold mb-4 md:mb-6">
-            Por que escolher a <span className="gradient-primary bg-clip-text text-transparent">Doce Conecta</span>?
+            Por que escolher a <span className="gradient-primary bg-clip-text text-transparent">Açucarada</span>?
           </h2>
           <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-text px-4">
             Somos apaixonados por criar momentos especiais através dos nossos doces artesanais. 
@@ -24,7 +24,7 @@ export function About() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-8 md:mb-16 px-4 md:px-0">
-          <div className="text-center group animate-fade-in hover:scale-105 transition-all duration-300 p-4 md:p-0" style={{animationDelay: '0.2s'}}>
+          <div className="text-center group hover:scale-105 transition-all duration-300 p-4 md:p-0">
             <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 group-hover:bg-primary/30 transition-all duration-300 shadow-lg group-hover:shadow-xl">
               <Heart className="h-8 w-8 md:h-10 md:w-10 text-primary group-hover:scale-110 transition-transform" />
             </div>
@@ -35,7 +35,7 @@ export function About() {
             </p>
           </div>
 
-          <div className="text-center group animate-fade-in hover:scale-105 transition-all duration-300 p-4 md:p-0" style={{animationDelay: '0.4s'}}>
+          <div className="text-center group hover:scale-105 transition-all duration-300 p-4 md:p-0">
             <div className="w-16 h-16 md:w-20 md:h-20 bg-secondary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 group-hover:bg-secondary/30 transition-all duration-300 shadow-lg group-hover:shadow-xl">
               <Award className="h-8 w-8 md:h-10 md:w-10 text-secondary group-hover:scale-110 transition-transform" />
             </div>
@@ -46,7 +46,7 @@ export function About() {
             </p>
           </div>
 
-          <div className="text-center group animate-fade-in hover:scale-105 transition-all duration-300 p-4 md:p-0" style={{animationDelay: '0.6s'}}>
+          <div className="text-center group hover:scale-105 transition-all duration-300 p-4 md:p-0">
             <div className="w-16 h-16 md:w-20 md:h-20 bg-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 group-hover:bg-accent/30 transition-all duration-300 shadow-lg group-hover:shadow-xl">
               <Clock className="h-8 w-8 md:h-10 md:w-10 text-accent group-hover:scale-110 transition-transform" />
             </div>
@@ -62,7 +62,7 @@ export function About() {
         <div className="mb-12 md:mb-20">
           <div className="grid lg:grid-cols-2 gap-6 md:gap-12 items-center px-4 md:px-0">
             {/* Story Content - Left */}
-            <div className="space-y-4 md:space-y-6 animate-fade-in" style={{animationDelay: '1s'}}>
+            <div className="space-y-4 md:space-y-6">
               <div className="inline-flex items-center gap-2 bg-accent/10 backdrop-blur-sm text-accent px-4 py-2 rounded-full border border-accent/20">
                 <ChefHat className="h-4 w-4" />
                 <span className="text-sm font-medium font-text">Nossa Jornada</span>
@@ -74,7 +74,7 @@ export function About() {
               
               <div className="space-y-3 md:space-y-4 text-muted-foreground leading-relaxed font-text">
                 <p className="text-base md:text-lg">
-                  Em 2020, durante um período desafiador para todos, <strong className="text-foreground">Maria Clara</strong> descobriu sua paixão pela confeitaria em sua própria cozinha. O que começou como uma forma de trazer alegria para a família rapidamente se transformou em algo muito maior.
+                  Em 2020, durante um período desafiador para todos, <strong className="text-foreground">Evelyn Martins</strong> descobriu sua paixão pela confeitaria em sua própria cozinha. O que começou como uma forma de trazer alegria para a família rapidamente se transformou em algo muito maior.
                 </p>
                 
                 <p>
@@ -103,7 +103,7 @@ export function About() {
             </div>
             
             {/* Story Image - Right */}
-            <div className="relative animate-fade-in" style={{animationDelay: '1.2s'}}>
+            <div className="relative">
               <div className="relative overflow-hidden rounded-2xl shadow-elegant">
                 {/* Story image */}
                 <div className="aspect-[4/5] relative">
@@ -121,7 +121,7 @@ export function About() {
                   <div className="absolute inset-0 bg-black/60" />
                   <div className="absolute bottom-4 left-4 right-4 text-white">
                     <div className="text-center space-y-2">
-                      <p className="text-lg font-title font-semibold">Maria Clara</p>
+                      <p className="text-lg font-title font-semibold">Evelyn Martins</p>
                       <p className="text-sm opacity-90 font-text">Fundadora & Chef Confeiteira</p>
                     </div>
                   </div>
@@ -137,14 +137,14 @@ export function About() {
                 <p className="text-sm italic text-muted-foreground text-center font-text">
                   "Cada doce que faço carrega um pedacinho do meu coração e a tradição da minha família."
                 </p>
-                <p className="text-xs text-primary text-center mt-2 font-medium font-text">- Maria Clara, Fundadora</p>
+                <p className="text-xs text-primary text-center mt-2 font-medium font-text">- Evelyn Martins, Fundadora</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 max-w-4xl mx-auto animate-fade-in px-4 md:px-0" style={{animationDelay: '0.8s'}}>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 max-w-4xl mx-auto px-4 md:px-0">
           <div className="text-center bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-4 md:p-6 hover:bg-card/70 transition-all duration-300">
             <div className="flex items-center justify-center mb-1 md:mb-2">
               <Users className="h-5 w-5 md:h-6 md:w-6 text-primary mr-1 md:mr-2" />
