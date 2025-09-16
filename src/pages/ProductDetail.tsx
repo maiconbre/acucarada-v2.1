@@ -380,7 +380,7 @@ const ProductDetail = () => {
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="mb-6 text-muted-foreground hover:text-foreground hidden lg:flex"
+          className="mt-4 mb-6 text-muted-foreground hover:text-foreground hidden lg:flex"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar

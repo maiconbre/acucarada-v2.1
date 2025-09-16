@@ -1,10 +1,8 @@
 import { Heart, MessageCircle, Settings, Sparkles, Star, ChefHat } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAppSettings } from "@/hooks/useAppSettings";
 import footerLogoImage from "@/assets/Fundo Transparente PNGPrancheta 3.png";
 
 export const Footer = () => {
-  const { getWhatsAppLink } = useAppSettings();
   const currentYear = new Date().getFullYear();
 
   const handleSectionClick = (sectionId: string) => {
@@ -156,7 +154,7 @@ export const Footer = () => {
                 
                 
                 <a 
-                  href="https://wa.me/" 
+                  href="https://wa.me/5511999999999?text=Olá! Gostaria de saber mais sobre os doces da Açucarada :)" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-muted-foreground hover:text-green-500 transition-all duration-300 p-1 rounded-full hover:bg-green-50"
