@@ -1,7 +1,7 @@
 import React, { memo, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Share2 } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProductAnalytics } from "@/hooks/useProductAnalytics";
 import { useToast } from "@/hooks/use-toast";
@@ -38,32 +38,7 @@ const ProductCard = memo(({ id, name, description, price, image_url, category, i
     trackClick('like', 'catalog');
   }, [toggleLike, trackClick]);
 
-  const handleShareClick = useCallback(async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    const shareData = {
-      title: name,
-      text: `Confira este delicioso ${name} - R$ ${price.toFixed(2)}`,
-      url: `${window.location.origin}/produto/${id}`,
-    };
 
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        trackShare('native_share', 'catalog');
-      } else {
-        // Fallback para copiar URL
-        await navigator.clipboard.writeText(`${window.location.origin}/produto/${id}`);
-        trackShare('copy_link', 'catalog');
-        toast({
-          title: "Link copiado!",
-          description: "O link do produto foi copiado para a área de transferência.",
-        });
-      }
-    } catch (error) {
-      console.error("Erro ao compartilhar:", error);
-    }
-  }, [id, name, price, trackShare, toast]);
 
   return (
     <Card 
@@ -115,18 +90,7 @@ const ProductCard = memo(({ id, name, description, price, image_url, category, i
                 {analyticsLoading ? '...' : analytics.total_likes || 0}
               </span>
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-2 h-8 w-8 md:h-auto md:w-auto md:p-1 text-muted-foreground hover:text-blue-500 hover:bg-blue-50 transition-all duration-200 rounded-full md:rounded-md transform hover:scale-110"
-              onClick={handleShareClick}
-              disabled={analyticsLoading}
-            >
-              <Share2 className="h-4 w-4 md:h-4 md:w-4" />
-              <span className="hidden md:inline ml-1 text-xs">
-                {analyticsLoading ? '...' : analytics.total_shares || 0}
-              </span>
-            </Button>
+
             <span className="text-xs md:text-sm text-muted-foreground font-medium hidden lg:inline">
               Ver detalhes
             </span>
