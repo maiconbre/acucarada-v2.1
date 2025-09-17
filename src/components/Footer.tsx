@@ -109,7 +109,7 @@ export const Footer = () => {
               {/* Mobile: 1 column for schedule */}
               <div className="bg-card/50 backdrop-blur-sm border border-border/30 rounded-xl p-3 md:p-4 hover:bg-card/80 transition-all duration-300">
                 <div className="flex flex-col items-center md:items-end gap-1 mb-1 md:mb-2">
-                  <span className="text-xs md:text-sm font-medium text-foreground font-text">🕒 Qua à Sex: 15h às 22h</span>
+                  <span className="text-xs md:text-sm font-medium text-foreground font-text">🕒 Qui à Sex: 15h às 22h</span>
                   <span className="text-xs md:text-sm font-medium text-foreground font-text">🕒 Sab e Dom: 13h às 23h</span>
                 </div>
                 <p className="text-xs text-muted-foreground font-text">Horário de atendimento</p>
