@@ -11,6 +11,8 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  promotional_price?: number;
+  is_promotion: boolean;
   image_url: string;
   category: string;
   ingredientes?: string;
@@ -63,9 +65,11 @@ export const ProductGridEncomenda = () => {
 
       const { data, error } = await supabase
         .from("products")
-        .select("id, name, description, price, image_url, category, is_featured")
+        .select("id, name, description, price, promotional_price, is_promotion, image_url, category, is_featured")
         .eq("is_active", true)
         .eq("is_featured", false)
+        .order("is_promotion", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(6);
 
       if (timeoutRef.current) {
@@ -75,7 +79,7 @@ export const ProductGridEncomenda = () => {
 
       if (error) throw error;
       
-      const productsData = data || [];
+      const productsData = (data || []) as Product[];
       setProducts(productsData);
       
       // Update cache
@@ -212,6 +216,8 @@ export const ProductGridEncomenda = () => {
                 name={product.name}
                 description={product.description || ""}
                 price={product.price}
+                promotional_price={product.promotional_price}
+                is_promotion={product.is_promotion}
                 image_url={product.image_url || ""}
                 category={product.category}
                 is_featured={product.is_featured}

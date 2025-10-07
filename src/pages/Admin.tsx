@@ -60,7 +60,7 @@ const Admin = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setProducts(data || []);
+      setProducts((data || []) as Product[]);
     } catch (error) {
       console.error("Erro ao buscar produtos:", error);
       toast({
@@ -82,7 +82,7 @@ const Admin = () => {
         .order("name", { ascending: true });
 
       if (error) throw error;
-      setCategories(data || []);
+      setCategories((data || []) as Category[]);
     } catch (error) {
       console.error("Erro ao buscar categorias:", error);
       toast({
