@@ -106,7 +106,7 @@ export function Contact() {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-title font-semibold text-base md:text-lg mb-1 md:mb-2">Horário</h3>
                     <div className="text-muted-foreground text-xs md:text-sm leading-relaxed space-y-1">
-                      <p>🕒 Qui e Sex: 15h às 22h</p>
+                      <p>🕒 Qui à Sex: 15h às 22h</p>
                       <p>🕒 Sab e Dom: 13h às 23h</p>
                       <p>Horário de atendimento</p>
                     </div>

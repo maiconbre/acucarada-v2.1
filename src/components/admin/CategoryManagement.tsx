@@ -55,7 +55,7 @@ export const CategoryManagement = ({ onCategoriesChange }: CategoryManagementPro
         .order("name", { ascending: true });
 
       if (error) throw error;
-      setCategories((data || []) as Category[]);
+      setCategories(data || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
       toast({

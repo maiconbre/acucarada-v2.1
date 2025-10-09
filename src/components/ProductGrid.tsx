@@ -12,8 +12,6 @@ interface Product {
   name: string;
   description: string;
   price: number;
-  promotional_price?: number;
-  is_promotion: boolean;
   image_url: string;
   category: string;
   ingredientes?: string;
@@ -69,11 +67,9 @@ export const ProductGrid = () => {
 
       const { data, error } = await supabase
         .from("products")
-        .select("id, name, description, price, promotional_price, is_promotion, image_url, category, is_featured")
+        .select("id, name, description, price, image_url, category, is_featured")
         .eq("is_active", true)
         .eq("is_featured", true)
-        .order("is_promotion", { ascending: false })
-        .order("created_at", { ascending: false })
         .limit(6);
 
       if (timeoutRef.current) {
@@ -83,7 +79,7 @@ export const ProductGrid = () => {
 
       if (error) throw error;
       
-      const productsData = (data || []) as Product[];
+      const productsData = data || [];
       setProducts(productsData.map(product => ({
         ...product,
         is_active: true // Since we filtered for is_active: true in the query
@@ -126,8 +122,6 @@ export const ProductGrid = () => {
           name={product.name}
           description={product.description || ""}
           price={product.price}
-          promotional_price={product.promotional_price}
-          is_promotion={product.is_promotion}
           image_url={product.image_url || ""}
           category={product.category}
           is_featured={product.is_featured}

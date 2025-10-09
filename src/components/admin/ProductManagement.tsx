@@ -36,8 +36,6 @@ interface Product {
   name: string;
   description: string;
   price: number;
-  promotional_price?: number;
-  is_promotion: boolean;
   image_url: string;
   category: string;
   ingredientes?: string;
@@ -76,8 +74,6 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     name: "",
     description: "",
     price: "",
-    promotional_price: "",
-    is_promotion: false,
     image_url: "",
     category: "Outros",
     ingredientes: "",
@@ -108,7 +104,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
         .order("name", { ascending: true });
 
       if (error) throw error;
-      setCategories((data || []) as Category[]);
+      setCategories(data || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -119,8 +115,6 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       name: "",
       description: "",
       price: "",
-      promotional_price: "",
-      is_promotion: false,
       image_url: "",
       category: "Outros",
       ingredientes: "",
@@ -142,8 +136,6 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       name: product.name,
       description: product.description || "",
       price: product.price.toString(),
-      promotional_price: product.promotional_price?.toString() || "",
-      is_promotion: product.is_promotion || false,
       image_url: product.image_url || "",
       category: product.category,
       ingredientes: product.ingredientes || "",
@@ -235,29 +227,6 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
           return;
         }
 
-        // Validação para promoção
-        if (formData.is_promotion) {
-          if (!formData.promotional_price || parseFloat(formData.promotional_price) <= 0) {
-            toast({
-              variant: "destructive",
-              title: "Erro de validação",
-              description: "Preço promocional é obrigatório quando produto está em promoção.",
-            });
-            setLoading(false);
-            return;
-          }
-          
-          if (parseFloat(formData.promotional_price) >= parseFloat(formData.price)) {
-            toast({
-              variant: "destructive",
-              title: "Erro de validação",
-              description: "Preço promocional deve ser menor que o preço normal.",
-            });
-            setLoading(false);
-            return;
-          }
-        }
-
       // Preparar dados dos sabores
       const saboresArray = flavors.map(f => f.name);
       const saborImages = flavors.reduce((acc, flavor) => {
@@ -278,8 +247,6 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
-        promotional_price: formData.is_promotion && formData.promotional_price ? parseFloat(formData.promotional_price) : null,
-        is_promotion: formData.is_promotion,
         image_url: formData.image_url,
         category: formData.category,
         ingredientes: formData.ingredientes || null,
@@ -555,48 +522,6 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                     required
                   />
                 </div>
-              </div>
-
-              {/* Seção de Promoção */}
-              <div className="space-y-4 p-4 border rounded-lg bg-orange-50/50">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_promotion"
-                    checked={formData.is_promotion}
-                    onCheckedChange={(checked) => {
-                      setFormData({
-                        ...formData, 
-                        is_promotion: checked,
-                        promotional_price: checked ? formData.promotional_price : ""
-                      });
-                    }}
-                  />
-                  <Label htmlFor="is_promotion" className="font-medium text-orange-700">
-                    🏷️ Produto em promoção
-                  </Label>
-                </div>
-                
-                {formData.is_promotion && (
-                  <div className="space-y-2">
-                    <Label htmlFor="promotional_price">Preço promocional (R$) *</Label>
-                    <Input
-                      id="promotional_price"
-                      type="number"
-                      step="0.01"
-                      value={formData.promotional_price}
-                      onChange={(e) => setFormData({...formData, promotional_price: e.target.value})}
-                      required={formData.is_promotion}
-                      placeholder="Digite o preço promocional"
-                      className="border-orange-200 focus:border-orange-400"
-                    />
-                    {formData.price && formData.promotional_price && 
-                     parseFloat(formData.promotional_price) >= parseFloat(formData.price) && (
-                      <p className="text-sm text-red-600">
-                        ⚠️ O preço promocional deve ser menor que o preço normal
-                      </p>
-                    )}
-                  </div>
-                )}
               </div>
 
               <div className="space-y-2">
@@ -1044,36 +969,16 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                         )}
                         <div>
                           <div className="font-medium">{product.name}</div>
-                          <div className="flex gap-1 flex-wrap">
-                            {product.is_featured && (
-                              <Badge variant="secondary" className="text-xs">
-                                Pronta entrega
-                              </Badge>
-                            )}
-                            {product.is_promotion && (
-                              <Badge variant="destructive" className="text-xs">
-                                🏷️ Promoção
-                              </Badge>
-                            )}
-                          </div>
+                          {product.is_featured && (
+                            <Badge variant="secondary" className="text-xs">
+                              Pronta entrega
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>{product.category}</TableCell>
-                    <TableCell>
-                      {product.is_promotion && product.promotional_price ? (
-                        <div className="flex flex-col">
-                          <span className="text-sm text-gray-500 line-through">
-                            R$ {product.price.toFixed(2).replace(".", ",")}
-                          </span>
-                          <span className="font-semibold text-red-600">
-                            R$ {product.promotional_price.toFixed(2).replace(".", ",")}
-                          </span>
-                        </div>
-                      ) : (
-                        <span>R$ {product.price.toFixed(2).replace(".", ",")}</span>
-                      )}
-                    </TableCell>
+                    <TableCell>R$ {product.price.toFixed(2).replace(".", ",")}</TableCell>
                     <TableCell>
                       <Badge variant={product.is_active ? "default" : "secondary"}>
                         {product.is_active ? "Ativo" : "Inativo"}

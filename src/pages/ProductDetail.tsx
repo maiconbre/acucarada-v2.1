@@ -22,8 +22,6 @@ interface Product {
   name: string;
   description: string;
   price: number;
-  promotional_price?: number;
-  is_promotion: boolean;
   image_url: string;
   category: string;
   ingredientes?: string;
@@ -141,8 +139,6 @@ const ProductDetail = () => {
           name,
           description,
           price,
-          promotional_price,
-          is_promotion,
           image_url,
           category,
           is_featured,
@@ -213,11 +209,7 @@ const ProductDetail = () => {
     if (!product) return;
 
     trackClick('whatsapp_order', 'product_detail');
-    const currentPrice = product.is_promotion && product.promotional_price ? product.promotional_price : product.price;
-    const priceText = product.is_promotion && product.promotional_price 
-      ? `${formatPrice(currentPrice)} (promoção - de ${formatPrice(product.price)})`
-      : formatPrice(currentPrice);
-    const customMessage = `Olá! Gostaria de encomendar:\n\n*${product.name}*\n» Preço: ${priceText}\n\nPoderia me dar mais informações sobre disponibilidade e entrega?`;
+    const customMessage = `Olá! Gostaria de encomendar:\n\n*${product.name}*\n» Preço: ${formatPrice(product.price)}\n\nPoderia me dar mais informações sobre disponibilidade e entrega?`;
     const link = getWhatsAppLink(customMessage);
     window.open(link, '_blank');
   };
@@ -236,11 +228,10 @@ const ProductDetail = () => {
     }
 
     trackClick('add_to_cart', 'product_detail');
-    const currentPrice = product.is_promotion && product.promotional_price ? product.promotional_price : product.price;
     addItem({
       id: product.id,
       name: product.name,
-      price: currentPrice,
+      price: product.price,
       flavor: selectedFlavor || undefined,
       image_url: product.image_url,
     });
@@ -378,20 +369,9 @@ const ProductDetail = () => {
             <h1 className="text-xl font-bold text-brown-primary font-title leading-tight">{product.name}</h1>
             <div className="flex items-center mt-1">
               <Star className="h-4 w-4 text-yellow-500 mr-1" />
-              {product.is_promotion && product.promotional_price ? (
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-gray-500 line-through">
-                    {formatPrice(product.price)}
-                  </p>
-                  <p className="text-lg font-bold text-red-600">
-                    {formatPrice(product.promotional_price)}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-lg font-bold text-rose-primary">
-                  {formatPrice(product.price)}
-                </p>
-              )}
+              <p className="text-lg font-bold text-rose-primary">
+                {formatPrice(product.price)}
+              </p>
             </div>
           </div>
         </div>
@@ -442,15 +422,10 @@ const ProductDetail = () => {
                   </div>
                 )}
 
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                <div className="absolute top-4 left-4">
                   <Badge className={`${product.is_featured ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700'} text-white font-semibold px-3 py-1 shadow-lg`}>
                     {product.is_featured ? '✨ Em estoque' : '📋 Sob encomenda'}
                   </Badge>
-                  {product.is_promotion && (
-                    <Badge className="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 shadow-lg">
-                      🏷️ Promoção
-                    </Badge>
-                  )}
                 </div>
 
                 {selectedFlavor && (
@@ -508,20 +483,9 @@ const ProductDetail = () => {
             <div className="bg-gradient-to-br from-cream-500/20 to-rose-50 rounded-xl p-6 border border-rose-200 hidden lg:block order-1">
               <h1 className="text-3xl md:text-4xl font-bold mb-3 text-brown-primary font-title">{product.name}</h1>
               <div className="flex items-center mb-4">
-                {product.is_promotion && product.promotional_price ? (
-                  <div className="flex items-center gap-3">
-                    <p className="text-xl text-gray-500 line-through">
-                      {formatPrice(product.price)}
-                    </p>
-                    <p className="text-2xl md:text-3xl font-bold text-red-600">
-                      {formatPrice(product.promotional_price)}
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-2xl md:text-3xl font-bold text-rose-primary">
-                    {formatPrice(product.price)}
-                  </p>
-                )}
+                <p className="text-2xl md:text-3xl font-bold text-rose-primary">
+                  {formatPrice(product.price)}
+                </p>
               </div>
               <p className="text-brown-600 leading-relaxed text-lg">{currentDescription || product.description}</p>
             </div>
