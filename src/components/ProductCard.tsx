@@ -31,6 +31,8 @@ const ProductCard = memo(({ id, name, description, price, image_url, category, i
   const { toast } = useToast();
   const { analytics, toggleLike, trackShare, trackClick, loading: analyticsLoading } = useProductAnalytics(id);
 
+
+
   const handleCardClick = useCallback(() => {
     trackClick('view_details', 'catalog');
     navigate(`/produto/${id}`);
@@ -61,17 +63,15 @@ const ProductCard = memo(({ id, name, description, price, image_url, category, i
         />
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {is_on_promotion && (
-            <span className="bg-red-500/90 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full font-medium">
-              Promoção
+            <span className="bg-red-500/90 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1">
+              🔥 Promoção
             </span>
           )}
           <span className="bg-primary-soft/90 backdrop-blur-sm text-primary text-xs px-3 py-1 rounded-full font-medium">
             {is_featured ? 'Pronta entrega' : 'Encomenda'}
           </span>
         </div>
-
       </div>
-      
       <CardContent className="p-3 md:p-6">
         <h3 className="font-display font-semibold text-sm md:text-xl mb-1 md:mb-2 text-foreground group-hover:text-primary transition-colors line-clamp-2">
           {name}
@@ -79,20 +79,19 @@ const ProductCard = memo(({ id, name, description, price, image_url, category, i
         <p className="text-muted-foreground text-xs md:text-sm mb-2 md:mb-4 leading-relaxed line-clamp-2 md:line-clamp-3">
           {description}
         </p>
-        
         <div className="flex items-center justify-between">
-          {is_on_promotion && promotional_price ? (
+          {is_on_promotion && promotional_price && Number(promotional_price) > 0 ? (
             <div className="flex flex-col">
-              <span className="text-sm md:text-lg text-gray-500 line-through">
-                R$ {price.toFixed(2).replace('.', ',')}
+              <span className="text-xs md:text-sm text-gray-500 line-through">
+                De: R$ {Number(price).toFixed(2).replace('.', ',')}
               </span>
-              <span className="text-lg md:text-2xl font-bold text-green-600">
-                R$ {promotional_price.toFixed(2).replace('.', ',')}
+              <span className="text-lg md:text-2xl font-bold text-red-600">
+                Por: R$ {Number(promotional_price).toFixed(2).replace('.', ',')}
               </span>
             </div>
           ) : (
             <span className="text-lg md:text-2xl font-bold text-primary">
-              R$ {price.toFixed(2).replace('.', ',')}
+              R$ {Number(price).toFixed(2).replace('.', ',')}
             </span>
           )}
           <div className="flex items-center gap-2">

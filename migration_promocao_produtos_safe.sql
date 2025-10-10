@@ -1,21 +1,50 @@
--- Migration para adicionar funcionalidade de promoção aos produtos
+-- Migration SEGURA para adicionar funcionalidade de promoção aos produtos
+-- Esta versão pode ser executada múltiplas vezes sem erros
 -- Execute este código no painel do Supabase em SQL Editor
 
--- Adicionar colunas de promoção na tabela products
-ALTER TABLE products 
-ADD COLUMN IF NOT EXISTS is_on_promotion BOOLEAN DEFAULT FALSE,
-ADD COLUMN IF NOT EXISTS promotional_price DECIMAL(10,2) DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS promotion_start_date TIMESTAMP WITH TIME ZONE DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS promotion_end_date TIMESTAMP WITH TIME ZONE DEFAULT NULL;
+-- Verificar e adicionar colunas de promoção na tabela products
+DO $$
+BEGIN
+  -- Adicionar is_on_promotion se não existir
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'products' AND column_name = 'is_on_promotion'
+  ) THEN
+    ALTER TABLE products ADD COLUMN is_on_promotion BOOLEAN DEFAULT FALSE;
+  END IF;
 
--- Adicionar comentários para documentação
+  -- Adicionar promotional_price se não existir
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'products' AND column_name = 'promotional_price'
+  ) THEN
+    ALTER TABLE products ADD COLUMN promotional_price DECIMAL(10,2) DEFAULT NULL;
+  END IF;
+
+  -- Adicionar promotion_start_date se não existir
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'products' AND column_name = 'promotion_start_date'
+  ) THEN
+    ALTER TABLE products ADD COLUMN promotion_start_date TIMESTAMP WITH TIME ZONE DEFAULT NULL;
+  END IF;
+
+  -- Adicionar promotion_end_date se não existir
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'products' AND column_name = 'promotion_end_date'
+  ) THEN
+    ALTER TABLE products ADD COLUMN promotion_end_date TIMESTAMP WITH TIME ZONE DEFAULT NULL;
+  END IF;
+END $$;
+
+-- Adicionar comentários para documentação (sempre seguro executar)
 COMMENT ON COLUMN products.is_on_promotion IS 'Indica se o produto está em promoção';
 COMMENT ON COLUMN products.promotional_price IS 'Preço promocional do produto (quando em promoção)';
 COMMENT ON COLUMN products.promotion_start_date IS 'Data de início da promoção';
 COMMENT ON COLUMN products.promotion_end_date IS 'Data de fim da promoção';
 
--- Criar índice para melhorar performance de consultas de produtos em promoção
--- Verificar se o índice já existe antes de criar
+-- Criar índice para melhorar performance (verificar se já existe)
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -28,8 +57,7 @@ BEGIN
   END IF;
 END $$;
 
--- Adicionar constraint para garantir que promotional_price seja menor que price quando em promoção
--- Verificar se a constraint já existe antes de criar
+-- Adicionar constraint (verificar se já existe)
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -67,17 +95,6 @@ SELECT
 FROM products
 WHERE is_active = TRUE;
 
--- Atualizar RLS policies se necessário (manter as existentes e adicionar para novos campos)
--- As policies existentes já cobrem a tabela products, então não precisamos criar novas
-
--- Exemplo de como atualizar alguns produtos para teste (opcional - remover em produção)
--- UPDATE products 
--- SET is_on_promotion = TRUE, 
---     promotional_price = price * 0.8,
---     promotion_start_date = NOW(),
---     promotion_end_date = NOW() + INTERVAL '30 days'
--- WHERE id IN (SELECT id FROM products LIMIT 2);
-
 -- Verificar se a migration foi aplicada corretamente
 SELECT 
   column_name, 
@@ -88,3 +105,16 @@ FROM information_schema.columns
 WHERE table_name = 'products' 
   AND column_name IN ('is_on_promotion', 'promotional_price', 'promotion_start_date', 'promotion_end_date')
 ORDER BY column_name;
+
+-- Exemplo de como criar um produto em promoção para teste
+-- DESCOMENTE as linhas abaixo para testar:
+/*
+UPDATE products 
+SET 
+  is_on_promotion = TRUE,
+  promotional_price = 12.00,
+  promotion_start_date = NOW(),
+  promotion_end_date = NOW() + INTERVAL '30 days'
+WHERE name ILIKE '%COXINHA DE MORANGO FERRERO%'
+LIMIT 1;
+*/
