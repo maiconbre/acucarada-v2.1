@@ -23,6 +23,10 @@ interface Product {
   sabor_images?: Json;
   is_featured: boolean;
   is_active: boolean;
+  is_on_promotion?: boolean;
+  promotional_price?: number;
+  promotion_start_date?: string;
+  promotion_end_date?: string;
 }
 
 interface Category {
@@ -243,28 +247,40 @@ const Catalog = () => {
     const sorted = [...filtered];
     
     // Função auxiliar para ordenação que sempre prioriza is_featured
-    const sortWithFeaturedFirst = (a: Product, b: Product, secondarySort: (a: Product, b: Product) => number) => {
-      // Se um é featured e outro não, o featured vem primeiro
+    const sortWithPromotionAndFeaturedFirst = (a: Product, b: Product, secondarySort: (a: Product, b: Product) => number) => {
+      // Primeiro: produtos em promoção
+      if (a.is_on_promotion && !b.is_on_promotion) return -1;
+      if (!a.is_on_promotion && b.is_on_promotion) return 1;
+      
+      // Segundo: se ambos têm o mesmo status de promoção, featured vem primeiro
       if (a.is_featured && !b.is_featured) return -1;
       if (!a.is_featured && b.is_featured) return 1;
       
-      // Se ambos têm o mesmo status de featured, usar ordenação secundária
+      // Se ambos têm o mesmo status de promoção e featured, usar ordenação secundária
       return secondarySort(a, b);
     };
     
     switch (sortBy) {
       case "newest":
-        // Manter ordenação por created_at desc, mas com featured primeiro
-        sorted.sort((a, b) => sortWithFeaturedFirst(a, b, () => 0)); // Já vem ordenado do banco
+        // Manter ordenação por created_at desc, mas com promoção e featured primeiro
+        sorted.sort((a, b) => sortWithPromotionAndFeaturedFirst(a, b, () => 0)); // Já vem ordenado do banco
         break;
       case "price-low":
-        sorted.sort((a, b) => sortWithFeaturedFirst(a, b, (a, b) => a.price - b.price));
+        sorted.sort((a, b) => sortWithPromotionAndFeaturedFirst(a, b, (a, b) => {
+          const priceA = a.is_on_promotion && a.promotional_price ? a.promotional_price : a.price;
+          const priceB = b.is_on_promotion && b.promotional_price ? b.promotional_price : b.price;
+          return priceA - priceB;
+        }));
         break;
       case "price-high":
-        sorted.sort((a, b) => sortWithFeaturedFirst(a, b, (a, b) => b.price - a.price));
+        sorted.sort((a, b) => sortWithPromotionAndFeaturedFirst(a, b, (a, b) => {
+          const priceA = a.is_on_promotion && a.promotional_price ? a.promotional_price : a.price;
+          const priceB = b.is_on_promotion && b.promotional_price ? b.promotional_price : b.price;
+          return priceB - priceA;
+        }));
         break;
       case "name":
-        sorted.sort((a, b) => sortWithFeaturedFirst(a, b, (a, b) => a.name.localeCompare(b.name)));
+        sorted.sort((a, b) => sortWithPromotionAndFeaturedFirst(a, b, (a, b) => a.name.localeCompare(b.name)));
         break;
     }
 
@@ -509,6 +525,10 @@ const Catalog = () => {
                   image_url={product.image_url || ""}
                   category={product.category}
                   is_featured={product.is_featured}
+                  is_on_promotion={product.is_on_promotion}
+                  promotional_price={product.promotional_price}
+                  promotion_start_date={product.promotion_start_date}
+                  promotion_end_date={product.promotion_end_date}
                 />
               </div>
             ))}

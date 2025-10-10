@@ -45,6 +45,10 @@ interface Product {
   sabor_descriptions?: Json; // Novo campo para descrições por sabor
   is_featured: boolean;
   is_active: boolean;
+  is_on_promotion?: boolean;
+  promotional_price?: number;
+  promotion_start_date?: string;
+  promotion_end_date?: string;
 }
 
 interface ProductManagementProps {
@@ -83,6 +87,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
     sabor_descriptions: {} as Json,
     is_featured: false,
     is_active: true,
+    is_on_promotion: false,
+    promotional_price: "",
+    promotion_start_date: "",
+    promotion_end_date: "",
   });
   
   // Estado para gerenciar sabores dinamicamente
@@ -124,6 +132,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       sabor_descriptions: {} as Json,
       is_featured: false,
       is_active: true,
+      is_on_promotion: false,
+      promotional_price: "",
+      promotion_start_date: "",
+      promotion_end_date: "",
     });
     setFlavors([]);
     setNewFlavorName("");
@@ -145,6 +157,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
       sabor_descriptions: product.sabor_descriptions || {},
       is_featured: product.is_featured,
       is_active: product.is_active,
+      is_on_promotion: product.is_on_promotion || false,
+      promotional_price: product.promotional_price?.toString() || "",
+      promotion_start_date: product.promotion_start_date ? product.promotion_start_date.split('T')[0] : "",
+      promotion_end_date: product.promotion_end_date ? product.promotion_end_date.split('T')[0] : "",
     });
     
     // Carregar sabores existentes
@@ -227,6 +243,29 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
           return;
         }
 
+        // Validação de promoção
+        if (formData.is_on_promotion) {
+          if (!formData.promotional_price || parseFloat(formData.promotional_price) <= 0) {
+            toast({
+              variant: "destructive",
+              title: "Erro de validação",
+              description: "Preço promocional deve ser maior que zero quando em promoção.",
+            });
+            setLoading(false);
+            return;
+          }
+          
+          if (parseFloat(formData.promotional_price) >= parseFloat(formData.price)) {
+            toast({
+              variant: "destructive",
+              title: "Erro de validação",
+              description: "Preço promocional deve ser menor que o preço normal.",
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
       // Preparar dados dos sabores
       const saboresArray = flavors.map(f => f.name);
       const saborImages = flavors.reduce((acc, flavor) => {
@@ -256,6 +295,10 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
         sabor_descriptions: Object.keys(saborDescriptions).length > 0 ? saborDescriptions : null,
         is_featured: formData.is_featured,
         is_active: formData.is_active,
+        is_on_promotion: formData.is_on_promotion,
+        promotional_price: formData.is_on_promotion && formData.promotional_price ? parseFloat(formData.promotional_price) : null,
+        promotion_start_date: formData.is_on_promotion && formData.promotion_start_date ? formData.promotion_start_date : null,
+        promotion_end_date: formData.is_on_promotion && formData.promotion_end_date ? formData.promotion_end_date : null,
       };
 
       if (editingProduct) {
@@ -522,6 +565,98 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                     required
                   />
                 </div>
+              </div>
+
+              {/* Seção de Promoção */}
+              <div className="space-y-4 p-4 border rounded-lg bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label htmlFor="promotion-toggle" className="text-base font-medium flex items-center gap-2">
+                      🏷️ Produto em Promoção
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Ative para definir um preço promocional
+                    </p>
+                  </div>
+                  <Switch
+                    id="promotion-toggle"
+                    checked={formData.is_on_promotion}
+                    onCheckedChange={(checked) => {
+                      setFormData({
+                        ...formData, 
+                        is_on_promotion: checked,
+                        promotional_price: checked ? formData.promotional_price : "",
+                        promotion_start_date: checked ? formData.promotion_start_date : "",
+                        promotion_end_date: checked ? formData.promotion_end_date : "",
+                      });
+                    }}
+                  />
+                </div>
+
+                {formData.is_on_promotion && (
+                  <div className="space-y-4 animate-in slide-in-from-top-2 duration-200">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="promotional_price">Preço Promocional (R$) *</Label>
+                        <Input
+                          id="promotional_price"
+                          type="number"
+                          step="0.01"
+                          value={formData.promotional_price}
+                          onChange={(e) => setFormData({...formData, promotional_price: e.target.value})}
+                          placeholder="Ex: 15.90"
+                          required={formData.is_on_promotion}
+                        />
+                        {formData.price && formData.promotional_price && (
+                          <p className="text-xs text-muted-foreground">
+                            Desconto: {Math.round(((parseFloat(formData.price) - parseFloat(formData.promotional_price)) / parseFloat(formData.price)) * 100)}%
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Visualização do Preço</Label>
+                        <div className="p-3 border rounded-md bg-background">
+                          {formData.price && formData.promotional_price ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground line-through">
+                                R$ {parseFloat(formData.price).toFixed(2)}
+                              </span>
+                              <span className="text-lg font-bold text-red-600">
+                                R$ {parseFloat(formData.promotional_price).toFixed(2)}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">
+                              Preencha os preços para ver a visualização
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="promotion_start_date">Data de Início (opcional)</Label>
+                        <Input
+                          id="promotion_start_date"
+                          type="date"
+                          value={formData.promotion_start_date}
+                          onChange={(e) => setFormData({...formData, promotion_start_date: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="promotion_end_date">Data de Fim (opcional)</Label>
+                        <Input
+                          id="promotion_end_date"
+                          type="date"
+                          value={formData.promotion_end_date}
+                          onChange={(e) => setFormData({...formData, promotion_end_date: e.target.value})}
+                          min={formData.promotion_start_date || undefined}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -878,11 +1013,23 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                       <div className="space-y-1">
                         <h3 className="font-medium text-xs leading-tight line-clamp-2">{product.name}</h3>
                         <p className="text-xs text-muted-foreground truncate">{product.category}</p>
-                        <p className="text-sm font-semibold text-primary">R$ {product.price.toFixed(2).replace(".", ",")}</p>
+                        {product.is_on_promotion && product.promotional_price ? (
+                          <div className="space-y-0.5">
+                            <p className="text-xs text-gray-500 line-through">R$ {product.price.toFixed(2).replace(".", ",")}</p>
+                            <p className="text-sm font-semibold text-green-600">R$ {product.promotional_price.toFixed(2).replace(".", ",")}</p>
+                          </div>
+                        ) : (
+                          <p className="text-sm font-semibold text-primary">R$ {product.price.toFixed(2).replace(".", ",")}</p>
+                        )}
                       </div>
                       
                       {/* Badges */}
                       <div className="flex flex-wrap gap-1">
+                        {product.is_on_promotion && (
+                          <Badge variant="destructive" className="text-xs px-1.5 py-0.5 bg-red-500">
+                            Promoção
+                          </Badge>
+                        )}
                         {product.is_featured && (
                           <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
                             Pronta entrega
@@ -947,6 +1094,7 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                   <TableHead>Produto</TableHead>
                   <TableHead>Categoria</TableHead>
                   <TableHead>Preço</TableHead>
+                  <TableHead>Promoção</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
@@ -978,7 +1126,29 @@ export const ProductManagement = ({ products, onProductsChange }: ProductManagem
                       </div>
                     </TableCell>
                     <TableCell>{product.category}</TableCell>
-                    <TableCell>R$ {product.price.toFixed(2).replace(".", ",")}</TableCell>
+                    <TableCell>
+                      {product.is_on_promotion && product.promotional_price ? (
+                        <div className="space-y-1">
+                          <div className="text-sm text-gray-500 line-through">
+                            R$ {product.price.toFixed(2).replace(".", ",")}
+                          </div>
+                          <div className="font-semibold text-green-600">
+                            R$ {product.promotional_price.toFixed(2).replace(".", ",")}
+                          </div>
+                        </div>
+                      ) : (
+                        <div>R$ {product.price.toFixed(2).replace(".", ",")}</div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {product.is_on_promotion ? (
+                        <Badge variant="destructive" className="bg-red-500">
+                          Promoção
+                        </Badge>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={product.is_active ? "default" : "secondary"}>
                         {product.is_active ? "Ativo" : "Inativo"}

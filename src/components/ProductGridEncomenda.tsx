@@ -16,6 +16,10 @@ interface Product {
   ingredientes?: string;
   validade_armazenamento_dias?: number;
   is_featured: boolean;
+  is_on_promotion?: boolean;
+  promotional_price?: number;
+  promotion_start_date?: string;
+  promotion_end_date?: string;
 }
 
 // Simple cache for encomenda products - moved inside component to prevent issues
@@ -215,6 +219,10 @@ export const ProductGridEncomenda = () => {
                 image_url={product.image_url || ""}
                 category={product.category}
                 is_featured={product.is_featured}
+                is_on_promotion={product.is_on_promotion}
+                promotional_price={product.promotional_price}
+                promotion_start_date={product.promotion_start_date}
+                promotion_end_date={product.promotion_end_date}
               />
             </div>
           ))}

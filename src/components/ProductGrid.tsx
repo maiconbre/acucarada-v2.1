@@ -20,6 +20,10 @@ interface Product {
   sabor_images?: Json;
   is_featured: boolean;
   is_active: boolean;
+  is_on_promotion?: boolean;
+  promotional_price?: number;
+  promotion_start_date?: string;
+  promotion_end_date?: string;
 }
 
 // Simple cache for products - moved inside component to prevent issues
@@ -125,6 +129,10 @@ export const ProductGrid = () => {
           image_url={product.image_url || ""}
           category={product.category}
           is_featured={product.is_featured}
+          is_on_promotion={product.is_on_promotion}
+          promotional_price={product.promotional_price}
+          promotion_start_date={product.promotion_start_date}
+          promotion_end_date={product.promotion_end_date}
         />
       </div>
     )), [products, viewMode]);
