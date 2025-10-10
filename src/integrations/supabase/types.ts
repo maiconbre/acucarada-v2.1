@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -12,6 +11,31 @@ export type Database = {
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -130,6 +154,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "comments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_with_active_promotion"
+            referencedColumns: ["id"]
+          },
         ]
       }
       feedbacks: {
@@ -208,6 +239,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "product_analytics_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products_with_active_promotion"
+            referencedColumns: ["id"]
+          },
         ]
       }
       product_clicks: {
@@ -259,6 +297,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "product_clicks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_with_active_promotion"
+            referencedColumns: ["id"]
+          },
         ]
       }
       product_likes: {
@@ -299,6 +344,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_likes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_with_active_promotion"
             referencedColumns: ["id"]
           },
         ]
@@ -352,6 +404,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "product_shares_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_with_active_promotion"
+            referencedColumns: ["id"]
+          },
         ]
       }
       products: {
@@ -365,8 +424,12 @@ export type Database = {
           ingredientes: string | null
           is_active: boolean | null
           is_featured: boolean | null
+          is_on_promotion: boolean | null
           name: string
           price: number
+          promotion_end_date: string | null
+          promotion_start_date: string | null
+          promotional_price: number | null
           sabor_descriptions: Json | null
           sabor_images: Json | null
           sabores: string[] | null
@@ -383,8 +446,12 @@ export type Database = {
           ingredientes?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_on_promotion?: boolean | null
           name: string
           price: number
+          promotion_end_date?: string | null
+          promotion_start_date?: string | null
+          promotional_price?: number | null
           sabor_descriptions?: Json | null
           sabor_images?: Json | null
           sabores?: string[] | null
@@ -401,8 +468,12 @@ export type Database = {
           ingredientes?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_on_promotion?: boolean | null
           name?: string
           price?: number
+          promotion_end_date?: string | null
+          promotion_start_date?: string | null
+          promotional_price?: number | null
           sabor_descriptions?: Json | null
           sabor_images?: Json | null
           sabores?: string[] | null
@@ -506,6 +577,78 @@ export type Database = {
         }
         Relationships: []
       }
+      products_with_active_promotion: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          deleted_at: string | null
+          description: string | null
+          id: string | null
+          image_url: string | null
+          ingredientes: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_on_promotion: boolean | null
+          name: string | null
+          price: number | null
+          promotion_active: boolean | null
+          promotion_end_date: string | null
+          promotion_start_date: string | null
+          promotional_price: number | null
+          sabor_descriptions: Json | null
+          sabor_images: Json | null
+          sabores: string[] | null
+          updated_at: string | null
+          validade_armazenamento_dias: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string | null
+          image_url?: string | null
+          ingredientes?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_on_promotion?: boolean | null
+          name?: string | null
+          price?: number | null
+          promotion_active?: never
+          promotion_end_date?: string | null
+          promotion_start_date?: string | null
+          promotional_price?: number | null
+          sabor_descriptions?: Json | null
+          sabor_images?: Json | null
+          sabores?: string[] | null
+          updated_at?: string | null
+          validade_armazenamento_dias?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string | null
+          image_url?: string | null
+          ingredientes?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_on_promotion?: boolean | null
+          name?: string | null
+          price?: number | null
+          promotion_active?: never
+          promotion_end_date?: string | null
+          promotion_start_date?: string | null
+          promotional_price?: number | null
+          sabor_descriptions?: Json | null
+          sabor_images?: Json | null
+          sabores?: string[] | null
+          updated_at?: string | null
+          validade_armazenamento_dias?: number | null
+        }
+        Relationships: []
+      }
       storage_statistics: {
         Row: {
           avg_file_size_kb: number | null
@@ -520,6 +663,13 @@ export type Database = {
       }
     }
     Functions: {
+      cleanup_orphaned_feedback_images: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          deleted_count: number
+          deleted_files: string[]
+        }[]
+      }
       cleanup_orphaned_images: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -544,6 +694,7 @@ export type Database = {
           is_featured: boolean
           name: string
           price: number
+          sabor_descriptions: Json
           sabor_images: Json
           sabores: string[]
           total_clicks: number
@@ -561,6 +712,14 @@ export type Database = {
           key: string
           value: string
         }[]
+      }
+      is_promotion_active: {
+        Args: {
+          p_end_date: string
+          p_is_on_promotion: boolean
+          p_start_date: string
+        }
+        Returns: boolean
       }
       optimize_storage_usage: {
         Args: Record<PropertyKey, never>
@@ -739,6 +898,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

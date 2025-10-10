@@ -71,10 +71,9 @@ export const ProductGrid = () => {
 
       const { data, error } = await supabase
         .from("products")
-        .select("id, name, description, price, image_url, category, is_featured")
+        .select("id, name, description, price, image_url, category, is_featured, is_on_promotion, promotional_price, promotion_start_date, promotion_end_date")
         .eq("is_active", true)
-        .eq("is_featured", true)
-        .limit(6);
+        .limit(12); // Aumentando para ter mais produtos para ordenar
 
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -84,13 +83,33 @@ export const ProductGrid = () => {
       if (error) throw error;
       
       const productsData = data || [];
-      setProducts(productsData.map(product => ({
+      
+
+      
+      // Ordenar produtos: primeiro promoção, depois featured, depois demais
+      const sortedProducts = productsData.sort((a, b) => {
+        // Primeiro: produtos em promoção
+        if (a.is_on_promotion && !b.is_on_promotion) return -1;
+        if (!a.is_on_promotion && b.is_on_promotion) return 1;
+        
+        // Se ambos têm o mesmo status de promoção, priorizar featured
+        if (a.is_on_promotion === b.is_on_promotion) {
+          if (a.is_featured && !b.is_featured) return -1;
+          if (!a.is_featured && b.is_featured) return 1;
+        }
+        
+        return 0;
+      }).slice(0, 6); // Limitar a 6 produtos após ordenação
+      
+
+      
+      setProducts(sortedProducts.map(product => ({
         ...product,
         is_active: true // Since we filtered for is_active: true in the query
       })));
       
       // Update cache
-      productCache.data = productsData.map(product => ({
+      productCache.data = sortedProducts.map(product => ({
         ...product,
         is_active: true // Since we filtered for is_active: true in the query
       }));

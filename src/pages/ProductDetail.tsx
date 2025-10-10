@@ -31,6 +31,10 @@ interface Product {
   sabor_descriptions?: Json | null; // Novo campo para descrições por sabor
   is_featured: boolean;
   is_active: boolean;
+  is_on_promotion?: boolean;
+  promotional_price?: number;
+  promotion_start_date?: string;
+  promotion_end_date?: string;
 }
 
 interface FlavorButtonProps {
@@ -147,7 +151,11 @@ const ProductDetail = () => {
           validade_armazenamento_dias,
           sabores,
           sabor_images,
-          sabor_descriptions
+          sabor_descriptions,
+          is_on_promotion,
+          promotional_price,
+          promotion_start_date,
+          promotion_end_date
         `)
         .eq("id", id)
         .eq("is_active", true)
@@ -369,9 +377,20 @@ const ProductDetail = () => {
             <h1 className="text-xl font-bold text-brown-primary font-title leading-tight">{product.name}</h1>
             <div className="flex items-center mt-1">
               <Star className="h-4 w-4 text-yellow-500 mr-1" />
-              <p className="text-lg font-bold text-rose-primary">
-                {formatPrice(product.price)}
-              </p>
+              {product.is_on_promotion && product.promotional_price ? (
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-gray-500 line-through">
+                    {formatPrice(product.price)}
+                  </p>
+                  <p className="text-lg font-bold text-red-600">
+                    {formatPrice(product.promotional_price)}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-lg font-bold text-rose-primary">
+                  {formatPrice(product.price)}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -422,7 +441,12 @@ const ProductDetail = () => {
                   </div>
                 )}
 
-                <div className="absolute top-4 left-4">
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  {product.is_on_promotion && (
+                    <Badge className="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 shadow-lg">
+                      🔥 Promoção
+                    </Badge>
+                  )}
                   <Badge className={`${product.is_featured ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700'} text-white font-semibold px-3 py-1 shadow-lg`}>
                     {product.is_featured ? '✨ Em estoque' : '📋 Sob encomenda'}
                   </Badge>
@@ -483,9 +507,20 @@ const ProductDetail = () => {
             <div className="bg-gradient-to-br from-cream-500/20 to-rose-50 rounded-xl p-6 border border-rose-200 hidden lg:block order-1">
               <h1 className="text-3xl md:text-4xl font-bold mb-3 text-brown-primary font-title">{product.name}</h1>
               <div className="flex items-center mb-4">
-                <p className="text-2xl md:text-3xl font-bold text-rose-primary">
-                  {formatPrice(product.price)}
-                </p>
+                {product.is_on_promotion && product.promotional_price ? (
+                  <div className="flex items-center gap-3">
+                    <p className="text-lg md:text-xl text-gray-500 line-through">
+                      {formatPrice(product.price)}
+                    </p>
+                    <p className="text-2xl md:text-3xl font-bold text-red-600">
+                      {formatPrice(product.promotional_price)}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-2xl md:text-3xl font-bold text-rose-primary">
+                    {formatPrice(product.price)}
+                  </p>
+                )}
               </div>
               <p className="text-brown-600 leading-relaxed text-lg">{currentDescription || product.description}</p>
             </div>
