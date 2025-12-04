@@ -7,7 +7,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-Backend-green.svg)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.17-blue.svg)](https://tailwindcss.com/)
 
-## 📋 Sobre o Projeto
+## 📋 Sobre o Projetoo
 
 Solução web moderna que digitaliza confeitarias artesanais com **vitrine digital**, **painel administrativo** e **sistema de analytics** integrados. Oferece experiência completa desde a navegação do cliente até a gestão empresarial.
 
